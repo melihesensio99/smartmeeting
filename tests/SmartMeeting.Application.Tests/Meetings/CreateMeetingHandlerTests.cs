@@ -10,7 +10,7 @@ public sealed class CreateMeetingHandlerTests
     public async Task Handle_persists_meeting_and_returns_dto()
     {
         var context = new FakeApplicationDbContext();
-        var handler = new CreateMeetingHandler(context);
+        var handler = new CreateMeetingHandler(context, new FakeCurrentUserService());
         var command = new CreateMeetingCommand("Sprint planlama", "user-1", DateTimeOffset.UtcNow.AddDays(1), null);
 
         var result = await handler.Handle(command, CancellationToken.None);
@@ -34,6 +34,18 @@ public sealed class CreateMeetingHandlerTests
         Assert.True(result.IsSuccess);
         Assert.Single(result.Value!);
         Assert.Equal("Birinci", result.Value!.Single().Title);
+    }
+
+    [Fact]
+    public async Task Handle_uses_authenticated_user_as_organizer()
+    {
+        var context = new FakeApplicationDbContext();
+        var handler = new CreateMeetingHandler(context, new FakeCurrentUserService("identity-user"));
+
+        var result = await handler.Handle(new CreateMeetingCommand("Güvenli toplantı", "spoofed-user", DateTimeOffset.UtcNow, null), CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("identity-user", result.Value!.OrganizerId);
     }
 
     [Fact]
@@ -95,5 +107,11 @@ public sealed class CreateMeetingHandlerTests
             return Task.FromResult(result);
         }
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken) => Task.FromResult(1);
+    }
+
+    private sealed class FakeCurrentUserService(string? userId = null) : ICurrentUserService
+    {
+        public string? UserId => userId;
+        public bool IsAuthenticated => userId is not null;
     }
 }

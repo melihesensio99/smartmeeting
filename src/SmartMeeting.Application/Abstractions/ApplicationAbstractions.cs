@@ -2,6 +2,12 @@ using SmartMeeting.Domain.Meetings;
 
 namespace SmartMeeting.Application.Abstractions;
 
+public interface ICurrentUserService
+{
+    string? UserId { get; }
+    bool IsAuthenticated { get; }
+}
+
 public interface IApplicationDbContext
 {
     void AddMeeting(Meeting meeting);

@@ -19,11 +19,12 @@ public sealed class CreateMeetingValidator : AbstractValidator<CreateMeetingComm
     }
 }
 
-public sealed class CreateMeetingHandler(IApplicationDbContext db) : IRequestHandler<CreateMeetingCommand, Result<MeetingDto>>
+public sealed class CreateMeetingHandler(IApplicationDbContext db, ICurrentUserService currentUser) : IRequestHandler<CreateMeetingCommand, Result<MeetingDto>>
 {
     public async Task<Result<MeetingDto>> Handle(CreateMeetingCommand request, CancellationToken cancellationToken)
     {
-        var meeting = Meeting.Create(request.Title, request.OrganizerId, request.StartsAt, request.EndsAt);
+        var organizerId = currentUser.UserId ?? request.OrganizerId;
+        var meeting = Meeting.Create(request.Title, organizerId, request.StartsAt, request.EndsAt);
         db.AddMeeting(meeting);
         await db.SaveChangesAsync(cancellationToken);
         return Result<MeetingDto>.Success(MeetingDto.From(meeting));

@@ -12,6 +12,8 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 var authenticationOptions = builder.Configuration.GetSection("Authentication").Get<AuthenticationOptions>() ?? new();
 builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<SmartMeeting.Application.Abstractions.ICurrentUserService, HttpCurrentUserService>();
 if (authenticationOptions.Enabled)
 {
     var hasAuthority = !string.IsNullOrWhiteSpace(authenticationOptions.Authority);
