@@ -13,7 +13,12 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<IMeetingProcessingQueue, InMemoryMeetingProcessingQueue>();
-        services.AddSingleton<ISpeechToTextService, DemoSpeechToTextService>();
+        services.AddHttpClient<ISpeechToTextService, MistralSpeechToTextService>((serviceProvider, client) =>
+        {
+            var options = serviceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<MistralOptions>>().Value;
+            client.BaseAddress = new Uri(options.BaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(120);
+        });
         services.Configure<MistralOptions>(configuration.GetSection(MistralOptions.SectionName));
         services.AddHttpClient<IAiSummarizerService, MistralSummarizerService>((serviceProvider, client) =>
         {
