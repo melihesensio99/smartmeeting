@@ -27,6 +27,7 @@ public sealed class MeetingDbContext(DbContextOptions<MeetingDbContext> options)
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Meeting>(entity =>
         {
             entity.ToTable("meetings");

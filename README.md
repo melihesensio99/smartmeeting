@@ -58,6 +58,8 @@ dotnet user-secrets set "Authentication:SigningKey" "at-least-32-character-rando
 
 Endpoints: `POST /api/auth/register` and `POST /api/auth/login`.
 
+Production deployments should set `Database:ApplyMigrations=true` so the Identity and meeting schema migrations are applied at startup. Existing local databases created with `EnsureCreated` should be backed up before switching to migrations.
+
 ## Katmanlar
 
 - `SmartMeeting.Domain`: rich domain modeli ve domain event sözleşmeleri

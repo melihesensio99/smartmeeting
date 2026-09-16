@@ -7,6 +7,7 @@ using SmartMeeting.Api.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 var authenticationOptions = builder.Configuration.GetSection("Authentication").Get<AuthenticationOptions>() ?? new();
@@ -67,7 +68,10 @@ app.MapHub<MeetingStatusHub>("/hubs/meeting-status");
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<MeetingDbContext>();
-    await db.Database.EnsureCreatedAsync();
+    if (builder.Configuration.GetValue<bool>("Database:ApplyMigrations"))
+        await db.Database.MigrateAsync();
+    else
+        await db.Database.EnsureCreatedAsync();
 }
 
 await app.RunAsync();
