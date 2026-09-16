@@ -4,6 +4,7 @@ import { authResponseSchema, type AuthResponse } from '../types/auth'
 const client = axios.create({ baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:5080/api', withCredentials: true })
 export async function getMeetings(): Promise<Meeting[]> { const response = await client.get<unknown>('/meetings'); if (!Array.isArray(response.data)) throw new Error('API toplantı listesi beklenen formatta değil.'); return response.data.map((item: unknown) => meetingSchema.parse(item)) }
 export async function createMeeting(input: CreateMeetingInput): Promise<Meeting> { const response = await client.post<unknown>('/meetings', { ...input, endsAt: input.endsAt || null }); return meetingSchema.parse(response.data) }
+export async function startMeetingRecording(meetingId: string): Promise<Meeting> { const response = await client.post<unknown>(`/meetings/${meetingId}/recording/start`); return meetingSchema.parse(response.data) }
 
 export async function uploadMeetingAudio(meetingId: string, audio: Blob, fileName = 'meeting.webm'): Promise<Meeting> {
   const formData = new FormData()

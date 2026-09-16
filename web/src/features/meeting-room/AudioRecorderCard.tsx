@@ -2,9 +2,9 @@ import { Alert, Button, Card, CardContent, FormControl, InputLabel, MenuItem, Se
 import { useAudioRecorder } from '../../hooks/useAudioRecorder'
 import type { Meeting } from '../../types/meeting'
 
-type Props = { meetings: Meeting[]; selectedMeetingId: string; onMeetingChange: (meetingId: string) => void; onAudioReady: (audio: Blob) => void; uploading: boolean }
+type Props = { meetings: Meeting[]; selectedMeetingId: string; onMeetingChange: (meetingId: string) => void; onRecordingStart: (meetingId: string) => Promise<void>; onAudioReady: (audio: Blob) => void; uploading: boolean; starting: boolean }
 
-export function AudioRecorderCard({ meetings, selectedMeetingId, onMeetingChange, onAudioReady, uploading }: Props) {
+export function AudioRecorderCard({ meetings, selectedMeetingId, onMeetingChange, onRecordingStart, onAudioReady, uploading, starting }: Props) {
   const recorder = useAudioRecorder()
   const selectedMeeting = meetings.find((meeting) => meeting.id === selectedMeetingId)
   const stop = async () => { const audio = await recorder.stop(); if (audio) onAudioReady(audio) }
@@ -15,6 +15,6 @@ export function AudioRecorderCard({ meetings, selectedMeetingId, onMeetingChange
     {!selectedMeeting && <Alert severity="info">Kayıt başlatmak için planlanmış bir toplantı seçin.</Alert>}
     {recorder.state === 'recording' && <Alert severity="warning">Kayıt devam ediyor</Alert>}
     {uploading && <Alert severity="info">Ses dosyası yükleniyor ve işleme kuyruğa alınıyor…</Alert>}
-    {recorder.state === 'recording' ? <Button variant="contained" color="secondary" onClick={() => void stop()}>Kaydı durdur ve gönder</Button> : <Button variant="contained" onClick={() => void recorder.start()} disabled={!selectedMeeting || uploading}>Kaydı başlat</Button>}
+    {recorder.state === 'recording' ? <Button variant="contained" color="secondary" onClick={() => void stop()}>Kaydı durdur ve gönder</Button> : <Button variant="contained" onClick={() => void (async () => { if (!selectedMeetingId) return; await onRecordingStart(selectedMeetingId); await recorder.start() })()} disabled={!selectedMeeting || uploading || starting}>{starting ? 'Toplantı durumu güncelleniyor…' : 'Kaydı başlat'}</Button>}
   </Stack></CardContent></Card>
 }
