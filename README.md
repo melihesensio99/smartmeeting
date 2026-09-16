@@ -71,7 +71,7 @@ dotnet user-secrets set "Mistral:ApiKey" "<MISTRAL_API_KEY>" --project src/Smart
 
 JWT authentication is provider-neutral and disabled for local development by default. For a production identity provider, set `Authentication:Enabled=true`, `Authentication:RequireAuthentication=true`, `Authentication:Authority` and `Authentication:Audience` through environment variables or user secrets.
 
-Local Identity login can use the built-in JWT issuer. Keep the signing key outside source control:
+Local Identity login uses the built-in JWT issuer. Authentication is required by default. Keep the signing key outside source control:
 
 ```powershell
 dotnet user-secrets set "Authentication:Enabled" "true" --project src/SmartMeeting.Api
@@ -94,4 +94,4 @@ SMTP e-mail delivery is disabled by default. Configure `Email:Enabled`, `Email:H
 - `SmartMeeting.Api`: controller, middleware ve DI composition root
 - `web`: React 19, TypeScript, MUI 9, React Query v5, Zod ve React Hook Form
 
-Demo STT ve özetleme adapter’ları dış servis anahtarı gerektirmeden çalışır; gerçek Whisper/Azure Speech ve OpenAI Structured Outputs adapter’ları aynı application arayüzlerine takılacak şekilde izole edilmiştir.
+STT ve özetleme işlemleri Mistral Voxtral/Mistral Chat Completions servisleri üzerinden yürütülür; `Mistral:ApiKey` yapılandırılmadan işleme alınmaz.

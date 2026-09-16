@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -14,6 +15,7 @@ namespace SmartMeeting.Api.Controllers;
 public sealed class AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration) : ControllerBase
 {
     [HttpPost("register")]
+    [AllowAnonymous]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
         var user = new ApplicationUser { UserName = request.Email, Email = request.Email, DisplayName = request.DisplayName.Trim() };
@@ -23,6 +25,7 @@ public sealed class AuthController(UserManager<ApplicationUser> userManager, ICo
     }
 
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<IActionResult> Login(LoginRequest request)
     {
         var user = await userManager.FindByEmailAsync(request.Email);

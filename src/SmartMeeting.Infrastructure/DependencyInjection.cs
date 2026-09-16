@@ -1,7 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using SmartMeeting.Application.Abstractions;
 using SmartMeeting.Infrastructure.Processing;
-using SmartMeeting.Infrastructure.Services;
 using SmartMeeting.Infrastructure.Ai;
 using SmartMeeting.Infrastructure.Storage;
 using Microsoft.Extensions.Configuration;

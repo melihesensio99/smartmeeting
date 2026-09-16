@@ -25,12 +25,12 @@ public sealed class MeetingTests
     [Fact]
     public void Recording_lifecycle_raises_processing_event()
     {
-        var meeting = Meeting.Create("Demo", "user-1", DateTimeOffset.UtcNow);
+        var meeting = Meeting.Create("Sprint planlama", "user-1", DateTimeOffset.UtcNow);
         meeting.StartRecording();
-        meeting.CompleteRecording("audio/demo.webm");
+        meeting.CompleteRecording("audio/sprint-planlama.webm");
 
         Assert.Equal(MeetingStatus.Processing, meeting.Status);
-        Assert.Equal("audio/demo.webm", meeting.AudioFilePath);
+        Assert.Equal("audio/sprint-planlama.webm", meeting.AudioFilePath);
         Assert.Single(meeting.DomainEvents);
         Assert.IsType<SmartMeeting.Domain.Common.MeetingProcessingRequested>(meeting.DomainEvents.Single());
     }
@@ -38,7 +38,7 @@ public sealed class MeetingTests
     [Fact]
     public void AddParticipant_is_idempotent_for_same_user()
     {
-        var meeting = Meeting.Create("Demo", "user-1", DateTimeOffset.UtcNow);
+        var meeting = Meeting.Create("Sprint planlama", "user-1", DateTimeOffset.UtcNow);
         meeting.AddParticipant("user-2", "Ayşe", "ayse@example.com");
         meeting.AddParticipant("user-2", "Ayşe", "ayse@example.com");
 
@@ -48,9 +48,9 @@ public sealed class MeetingTests
     [Fact]
     public void Summary_marks_meeting_ready()
     {
-        var meeting = Meeting.Create("Demo", "user-1", DateTimeOffset.UtcNow);
+        var meeting = Meeting.Create("Sprint planlama", "user-1", DateTimeOffset.UtcNow);
         meeting.StartRecording();
-        meeting.CompleteRecording("demo.webm");
+        meeting.CompleteRecording("sprint-planlama.webm");
         meeting.SetTranscript("Toplantı metni");
         meeting.SetSummary(MeetingSummary.Create("Özet", ["Karar"], [new ActionItem("Takip et", "user-2", null)]));
 

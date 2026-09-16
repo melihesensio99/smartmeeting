@@ -30,7 +30,7 @@ public sealed class MeetingsController(ISender sender) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(CreateMeetingRequest request, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new CreateMeetingCommand(request.Title, request.OrganizerId, request.StartsAt, request.EndsAt), cancellationToken);
+        var result = await sender.Send(new CreateMeetingCommand(request.Title, request.StartsAt, request.EndsAt), cancellationToken);
         if (!result.IsSuccess) return BadRequest(result.Error);
         return CreatedAtAction(nameof(Get), new { id = result.Value!.Id }, result.Value);
     }
@@ -83,7 +83,7 @@ public sealed class MeetingsController(ISender sender) : ControllerBase
         => result.IsSuccess ? NoContent() : BadRequest(result.Error);
 }
 
-public sealed record CreateMeetingRequest(string Title, string OrganizerId, DateTimeOffset StartsAt, DateTimeOffset? EndsAt);
+public sealed record CreateMeetingRequest(string Title, DateTimeOffset StartsAt, DateTimeOffset? EndsAt);
 public sealed record CompleteRecordingRequest(string AudioFilePath);
 public sealed record UpdateNotesRequest(string Notes);
 public sealed record AddParticipantRequest(string UserId, string DisplayName, string Email);

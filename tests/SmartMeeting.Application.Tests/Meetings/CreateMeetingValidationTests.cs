@@ -9,7 +9,7 @@ public sealed class CreateMeetingValidationTests
     [Fact]
     public void Empty_title_is_invalid()
     {
-        var result = _validator.Validate(new CreateMeetingCommand("", "user-1", DateTimeOffset.UtcNow, null));
+        var result = _validator.Validate(new CreateMeetingCommand("", DateTimeOffset.UtcNow, null));
 
         Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateMeetingCommand.Title));
     }
@@ -19,7 +19,7 @@ public sealed class CreateMeetingValidationTests
     {
         var start = DateTimeOffset.UtcNow;
 
-        var result = _validator.Validate(new CreateMeetingCommand("Toplantı", "user-1", start, start.AddMinutes(-5)));
+        var result = _validator.Validate(new CreateMeetingCommand("Toplantı", start, start.AddMinutes(-5)));
 
         Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateMeetingCommand.EndsAt));
     }

@@ -10,8 +10,8 @@ public sealed class CreateMeetingHandlerTests
     public async Task Handle_persists_meeting_and_returns_dto()
     {
         var context = new FakeApplicationDbContext();
-        var handler = new CreateMeetingHandler(context, new FakeCurrentUserService());
-        var command = new CreateMeetingCommand("Sprint planlama", "user-1", DateTimeOffset.UtcNow.AddDays(1), null);
+        var handler = new CreateMeetingHandler(context, new FakeCurrentUserService("user-1"));
+        var command = new CreateMeetingCommand("Sprint planlama", DateTimeOffset.UtcNow.AddDays(1), null);
 
         var result = await handler.Handle(command, CancellationToken.None);
 
@@ -19,6 +19,19 @@ public sealed class CreateMeetingHandlerTests
         Assert.NotNull(result.Value);
         Assert.Equal("Sprint planlama", result.Value.Title);
         Assert.Single(context.AddedMeetings);
+    }
+
+    [Fact]
+    public async Task Handle_rejects_anonymous_meeting_creation()
+    {
+        var context = new FakeApplicationDbContext();
+        var handler = new CreateMeetingHandler(context, new FakeCurrentUserService());
+
+        var result = await handler.Handle(new CreateMeetingCommand("Yetkisiz toplantı", DateTimeOffset.UtcNow, null), CancellationToken.None);
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal("authentication_required", result.Error!.Code);
+        Assert.Empty(context.AddedMeetings);
     }
 
     [Fact]
@@ -42,7 +55,7 @@ public sealed class CreateMeetingHandlerTests
         var context = new FakeApplicationDbContext();
         var handler = new CreateMeetingHandler(context, new FakeCurrentUserService("identity-user"));
 
-        var result = await handler.Handle(new CreateMeetingCommand("Güvenli toplantı", "spoofed-user", DateTimeOffset.UtcNow, null), CancellationToken.None);
+        var result = await handler.Handle(new CreateMeetingCommand("Güvenli toplantı", DateTimeOffset.UtcNow, null), CancellationToken.None);
 
         Assert.True(result.IsSuccess);
         Assert.Equal("identity-user", result.Value!.OrganizerId);
