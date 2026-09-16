@@ -8,6 +8,8 @@ using SmartMeeting.Application.Meetings.Commands.CompleteRecording;
 using SmartMeeting.Application.Meetings.Commands.UploadMeetingAudio;
 using SmartMeeting.Application.Meetings.Commands.CompleteActionItem;
 using SmartMeeting.Application.Meetings.Commands.UpdateMeetingNotes;
+using SmartMeeting.Application.Meetings.Commands.AddParticipant;
+using SmartMeeting.Application.Meetings.Commands.MapSpeaker;
 using SmartMeeting.Application.Meetings.Queries.GetMeeting;
 
 namespace SmartMeeting.Api.Controllers;
@@ -44,6 +46,14 @@ public sealed class MeetingsController(ISender sender) : ControllerBase
     public async Task<IActionResult> UpdateNotes(Guid meetingId, UpdateNotesRequest request, CancellationToken cancellationToken)
         => ToActionResult(await sender.Send(new UpdateMeetingNotesCommand(meetingId, request.Notes), cancellationToken));
 
+    [HttpPost("{meetingId:guid}/participants")]
+    public async Task<IActionResult> AddParticipant(Guid meetingId, AddParticipantRequest request, CancellationToken cancellationToken)
+        => ToActionResult(await sender.Send(new AddParticipantCommand(meetingId, request.UserId, request.DisplayName, request.Email), cancellationToken));
+
+    [HttpPut("{meetingId:guid}/participants/{participantId:guid}/speaker")]
+    public async Task<IActionResult> MapSpeaker(Guid meetingId, Guid participantId, MapSpeakerRequest request, CancellationToken cancellationToken)
+        => ToActionResult(await sender.Send(new MapSpeakerCommand(meetingId, participantId, request.SpeakerLabel), cancellationToken));
+
     [HttpPost("{meetingId:guid}/recording/complete")]
     public async Task<IActionResult> CompleteRecording(Guid meetingId, CompleteRecordingRequest request, CancellationToken cancellationToken)
         => ToActionResult(await sender.Send(new CompleteRecordingCommand(meetingId, request.AudioFilePath), cancellationToken));
@@ -68,3 +78,5 @@ public sealed class MeetingsController(ISender sender) : ControllerBase
 public sealed record CreateMeetingRequest(string Title, string OrganizerId, DateTimeOffset StartsAt, DateTimeOffset? EndsAt);
 public sealed record CompleteRecordingRequest(string AudioFilePath);
 public sealed record UpdateNotesRequest(string Notes);
+public sealed record AddParticipantRequest(string UserId, string DisplayName, string Email);
+public sealed record MapSpeakerRequest(string SpeakerLabel);

@@ -20,3 +20,8 @@ export async function updateMeetingNotes(meetingId: string, notes: string): Prom
   const response = await client.put<unknown>(`/meetings/${meetingId}/notes`, { notes })
   return meetingSchema.parse(response.data)
 }
+
+export async function mapSpeaker(meetingId: string, participantId: string, speakerLabel: string): Promise<Meeting> {
+  const response = await client.put<unknown>(`/meetings/${meetingId}/participants/${participantId}/speaker`, { speakerLabel })
+  return meetingSchema.parse(response.data)
+}

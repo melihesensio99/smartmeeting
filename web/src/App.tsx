@@ -16,7 +16,7 @@ import type { CreateMeetingInput } from './types/meeting'
 export function App() {
   const path = useAppPath()
   const route = routeFromPath(path)
-  const { meetings, create, upload, completeAction, updateNotes } = useMeetings()
+  const { meetings, create, upload, completeAction, updateNotes, mapSpeaker } = useMeetings()
   useMeetingStatus()
   const [open, setOpen] = useState(false)
   const [selectedMeetingId, setSelectedMeetingId] = useState('')
@@ -29,6 +29,6 @@ export function App() {
   if (route === 'dashboard') page = <DashboardPage meetings={items} />
   else if (route === 'meetings') page = <MeetingsPage meetings={items} />
   else if (route === 'actions') page = <ActionsPage meetings={items} onComplete={complete} />
-  else page = <MeetingDetailPage meeting={items.find((meeting) => meeting.id === meetingIdFromPath(path))} onComplete={complete} onSaveNotes={(meetingId, notes) => updateNotes.mutate({ meetingId, notes })} savingNotes={updateNotes.isPending} />
+  else page = <MeetingDetailPage meeting={items.find((meeting) => meeting.id === meetingIdFromPath(path))} onComplete={complete} onSaveNotes={(meetingId, notes) => updateNotes.mutate({ meetingId, notes })} onMapSpeaker={(meetingId, participantId, speakerLabel) => mapSpeaker.mutate({ meetingId, participantId, speakerLabel })} savingNotes={updateNotes.isPending} />
   return <AppShell route={route}><Stack spacing={3}>{meetings.isError && <Alert severity="error">Toplantılar yüklenemedi. API adresini ve backend’i kontrol edin.</Alert>}{page}{route === 'meetings' && <Card><CardContent><Typography variant="h6">Sesli toplantı kaydı</Typography><Typography color="text.secondary" sx={{ mb: 2 }}>Planlanmış bir toplantı seçerek kayıt başlatın.</Typography><Grid container spacing={2}><Grid size={{ xs: 12, md: 5 }}><AudioRecorderCard meetings={items} selectedMeetingId={selectedMeetingId} onMeetingChange={setSelectedMeetingId} onAudioReady={uploadAudio} uploading={upload.isPending} /></Grid></Grid></CardContent></Card>}</Stack><Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm"><DialogTitle>Yeni toplantı</DialogTitle><DialogContent sx={{ pt: 2 }}><MeetingForm onSubmit={submit} loading={create.isPending} /></DialogContent></Dialog>{route === 'meetings' && <Button onClick={() => setOpen(true)} sx={{ position: 'fixed', right: 32, bottom: 32 }} variant="contained">＋ Yeni Toplantı</Button>}{route === 'dashboard' && <Box sx={{ display: 'none' }} />}</AppShell>
 }

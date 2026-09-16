@@ -42,6 +42,14 @@ public sealed class Meeting : Entity
         Touch();
     }
 
+    public void MapSpeaker(Guid participantId, string speakerLabel)
+    {
+        var participant = _participants.SingleOrDefault(x => x.Id == participantId);
+        if (participant is null) throw new DomainException("Katılımcı bulunamadı.");
+        participant.AssignSpeakerLabel(speakerLabel);
+        Touch();
+    }
+
     public void StartRecording()
     {
         EnsureStatus(MeetingStatus.Scheduled);

@@ -14,6 +14,9 @@ public sealed class MeetingParticipant : Entity
     public string UserId { get; private set; } = string.Empty;
     public string DisplayName { get; private set; } = string.Empty;
     public string Email { get; private set; } = string.Empty;
+    public string? SpeakerLabel { get; private set; }
     public static MeetingParticipant Create(Guid meetingId, string userId, string displayName, string email)
         => new(Guid.NewGuid(), meetingId, userId.Trim(), displayName.Trim(), email.Trim());
+
+    public void AssignSpeakerLabel(string speakerLabel) => SpeakerLabel = string.IsNullOrWhiteSpace(speakerLabel) ? null : speakerLabel.Trim();
 }

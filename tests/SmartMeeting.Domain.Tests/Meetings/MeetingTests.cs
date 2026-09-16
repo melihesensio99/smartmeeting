@@ -82,4 +82,16 @@ public sealed class MeetingTests
 
         Assert.Equal("Önemli takip notu", meeting.Notes);
     }
+
+    [Fact]
+    public void MapSpeaker_assigns_label_to_participant()
+    {
+        var meeting = Meeting.Create("Planlama", "user-1", DateTimeOffset.UtcNow);
+        meeting.AddParticipant("user-2", "Ayşe", "ayse@example.com");
+        var participant = meeting.Participants.Single();
+
+        meeting.MapSpeaker(participant.Id, "Speaker 1");
+
+        Assert.Equal("Speaker 1", participant.SpeakerLabel);
+    }
 }
