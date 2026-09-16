@@ -17,14 +17,18 @@ public sealed class AddParticipantValidator : AbstractValidator<AddParticipantCo
     }
 }
 
-public sealed class AddParticipantCommandHandler(IApplicationDbContext db, ICurrentUserService currentUser) : IRequestHandler<AddParticipantCommand, Result<MeetingResponse>>
+public sealed class AddParticipantCommandHandler(IApplicationDbContext db, IIdentityService identityService, ICurrentUserService currentUser) : IRequestHandler<AddParticipantCommand, Result<MeetingResponse>>
 {
     public async Task<Result<MeetingResponse>> Handle(AddParticipantCommand request, CancellationToken cancellationToken)
     {
         var meeting = await db.GetMeetingAsync(request.MeetingId, cancellationToken);
         if (meeting is null) return Result<MeetingResponse>.Failure("meeting_not_found", "Toplantı bulunamadı.");
         if (!currentUser.CanAccess(meeting.OrganizerId)) return Result<MeetingResponse>.Failure("meeting_forbidden", "Bu toplantıya erişim yetkiniz yok.");
-        meeting.AddParticipant(request.UserId, request.DisplayName, request.Email);
+        var user = await identityService.FindByIdAsync(request.UserId, cancellationToken);
+        if (user is null) return Result<MeetingResponse>.Failure("participant_not_found", "Katılımcı olarak eklenmek istenen kullanıcı bulunamadı.");
+        if (!string.Equals(user.Email, request.Email.Trim(), StringComparison.OrdinalIgnoreCase) || !string.Equals(user.DisplayName, request.DisplayName.Trim(), StringComparison.Ordinal))
+            return Result<MeetingResponse>.Failure("participant_identity_mismatch", "Katılımcı bilgileri sistemdeki kullanıcı kaydıyla eşleşmiyor.");
+        meeting.AddParticipant(user.UserId, user.DisplayName, user.Email);
         await db.SaveChangesAsync(cancellationToken);
         return Result<MeetingResponse>.Success(MeetingResponse.From(meeting));
     }

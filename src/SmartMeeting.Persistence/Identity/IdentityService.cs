@@ -25,4 +25,10 @@ public sealed class IdentityService(UserManager<ApplicationUser> userManager, IJ
         var token = jwtTokenService.CreateToken(user.Id, user.Email!, user.DisplayName);
         return Result<AuthenticatedUser>.Success(new AuthenticatedUser(user.Id, user.Email!, user.DisplayName, token.Value, token.ExpiresAt));
     }
+
+    public async Task<RegisteredUser?> FindByIdAsync(string userId, CancellationToken cancellationToken)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+        return user is null ? null : new RegisteredUser(user.Id, user.Email!, user.DisplayName);
+    }
 }

@@ -4,5 +4,5 @@ public interface ICurrentUserService
 {
     string? UserId { get; }
     bool IsAuthenticated { get; }
-    bool CanAccess(string organizerId) => !IsAuthenticated || UserId == organizerId;
+    bool CanAccess(string organizerId) => IsAuthenticated && UserId == organizerId;
 }

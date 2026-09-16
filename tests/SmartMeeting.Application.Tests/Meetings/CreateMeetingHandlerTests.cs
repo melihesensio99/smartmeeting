@@ -84,7 +84,7 @@ public sealed class CreateMeetingCommandHandlerTests
         meeting.SetTranscript("transcript");
         meeting.SetSummary(MeetingSummary.Create("Özet", [], [action]));
         context.Seed(meeting);
-        var handler = new Application.Meetings.Commands.CompleteActionItem.CompleteActionItemCommandHandler(context, new FakeCurrentUserService());
+        var handler = new Application.Meetings.Commands.CompleteActionItem.CompleteActionItemCommandHandler(context, new FakeCurrentUserService("user-1"));
 
         var result = await handler.Handle(new Application.Meetings.Commands.CompleteActionItem.CompleteActionItemCommand(meeting.Id, action.Id), CancellationToken.None);
 
@@ -98,7 +98,7 @@ public sealed class CreateMeetingCommandHandlerTests
         var context = new FakeApplicationDbContext();
         var meeting = Meeting.Create("Planlama", "user-1", DateTimeOffset.UtcNow);
         context.Seed(meeting);
-        var handler = new Application.Meetings.Commands.UpdateMeetingNotes.UpdateMeetingNotesCommandHandler(context, new FakeCurrentUserService());
+        var handler = new Application.Meetings.Commands.UpdateMeetingNotes.UpdateMeetingNotesCommandHandler(context, new FakeCurrentUserService("user-1"));
 
         var result = await handler.Handle(new Application.Meetings.Commands.UpdateMeetingNotes.UpdateMeetingNotesCommand(meeting.Id, "Takip notu"), CancellationToken.None);
 
