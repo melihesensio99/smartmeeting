@@ -5,6 +5,7 @@ namespace SmartMeeting.Application.Abstractions;
 public interface IApplicationDbContext
 {
     void AddMeeting(Meeting meeting);
+    Task<Meeting?> GetMeetingAsync(Guid meetingId, CancellationToken cancellationToken);
     Task<IReadOnlyCollection<Meeting>> GetMeetingsAsync(string? organizerId, CancellationToken cancellationToken);
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }
@@ -23,4 +24,9 @@ public interface IMeetingProcessingQueue
 {
     ValueTask EnqueueAsync(Guid meetingId, CancellationToken cancellationToken);
     ValueTask<Guid> DequeueAsync(CancellationToken cancellationToken);
+}
+
+public interface IMeetingStatusPublisher
+{
+    Task PublishAsync(Guid meetingId, string status, CancellationToken cancellationToken);
 }

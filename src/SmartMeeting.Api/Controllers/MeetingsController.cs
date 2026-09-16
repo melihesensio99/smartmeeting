@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using SmartMeeting.Application.Common;
 using SmartMeeting.Application.Meetings.Commands.CreateMeeting;
 using SmartMeeting.Application.Meetings.Queries.GetMeetings;
+using SmartMeeting.Application.Meetings.Commands.StartRecording;
+using SmartMeeting.Application.Meetings.Commands.CompleteRecording;
 
 namespace SmartMeeting.Api.Controllers;
 
@@ -22,8 +24,20 @@ public sealed class MeetingsController(ISender sender) : ControllerBase
         return CreatedAtAction(nameof(Get), new { id = result.Value!.Id }, result.Value);
     }
 
+    [HttpPost("{meetingId:guid}/recording/start")]
+    public async Task<IActionResult> StartRecording(Guid meetingId, CancellationToken cancellationToken)
+        => ToActionResult(await sender.Send(new StartRecordingCommand(meetingId), cancellationToken));
+
+    [HttpPost("{meetingId:guid}/recording/complete")]
+    public async Task<IActionResult> CompleteRecording(Guid meetingId, CompleteRecordingRequest request, CancellationToken cancellationToken)
+        => ToActionResult(await sender.Send(new CompleteRecordingCommand(meetingId, request.AudioFilePath), cancellationToken));
+
     private IActionResult ToActionResult(Result<IReadOnlyCollection<Application.Meetings.Dtos.MeetingDto>> result)
+        => result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+
+    private IActionResult ToActionResult(Result<Application.Meetings.Dtos.MeetingDto> result)
         => result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
 }
 
 public sealed record CreateMeetingRequest(string Title, string OrganizerId, DateTimeOffset StartsAt, DateTimeOffset? EndsAt);
+public sealed record CompleteRecordingRequest(string AudioFilePath);

@@ -42,6 +42,8 @@ public sealed class CreateMeetingHandlerTests
         public List<Meeting> AddedMeetings { get; } = [];
         public void Seed(Meeting meeting) => _meetings.Add(meeting);
         public void AddMeeting(Meeting meeting) { _meetings.Add(meeting); AddedMeetings.Add(meeting); }
+        public Task<Meeting?> GetMeetingAsync(Guid meetingId, CancellationToken cancellationToken)
+            => Task.FromResult(_meetings.SingleOrDefault(x => x.Id == meetingId));
         public Task<IReadOnlyCollection<Meeting>> GetMeetingsAsync(string? organizerId, CancellationToken cancellationToken)
         {
             IReadOnlyCollection<Meeting> result = _meetings.Where(x => string.IsNullOrWhiteSpace(organizerId) || x.OrganizerId == organizerId).ToList();

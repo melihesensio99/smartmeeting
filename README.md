@@ -26,6 +26,14 @@ dotnet test SmartMeeting.slnx
 
 Test kapsamı domain yaşam döngüsü, domain event üretimi, katılımcı idempotency’si, CQRS handler’ları ve FluentValidation kurallarını içerir.
 
+## Toplantı işleme akışı
+
+- `POST /api/meetings`: toplantı oluşturur.
+- `POST /api/meetings/{id}/recording/start`: kayıt durumunu başlatır.
+- `POST /api/meetings/{id}/recording/complete`: ses dosyasını kuyruğa gönderir.
+- Worker, STT ve yapılandırılmış özetleme adapter’larını çalıştırır; sonuç `Ready` olduğunda kaydeder.
+- SignalR hub: `/hubs/meeting-status`; istemci metodu `JoinMeeting`, event adı `meetingStatusChanged`.
+
 API varsayılan olarak `http://localhost:5080/api` adresindedir. Frontend için `web/.env.example` dosyasını `.env` olarak kopyalayabilirsiniz.
 
 ## Katmanlar

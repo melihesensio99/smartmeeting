@@ -12,6 +12,9 @@ public sealed class MeetingDbContext(DbContextOptions<MeetingDbContext> options)
 
     public void AddMeeting(Meeting meeting) => MeetingSet.Add(meeting);
 
+    public Task<Meeting?> GetMeetingAsync(Guid meetingId, CancellationToken cancellationToken)
+        => MeetingSet.Include(x => x.Participants).SingleOrDefaultAsync(x => x.Id == meetingId, cancellationToken);
+
     public async Task<IReadOnlyCollection<Meeting>> GetMeetingsAsync(string? organizerId, CancellationToken cancellationToken)
     {
         var query = MeetingSet.AsNoTracking().Include(x => x.Participants).AsQueryable();
@@ -30,9 +33,7 @@ public sealed class MeetingDbContext(DbContextOptions<MeetingDbContext> options)
             entity.Property(x => x.OrganizerId).HasMaxLength(100).IsRequired();
             entity.Property(x => x.Status).HasConversion<string>().HasMaxLength(32);
             entity.Property(x => x.Transcript).HasColumnType("TEXT");
-            entity.Property(x => x.Summary).HasConversion(new ValueConverter<MeetingSummary?, string?>(
-                value => value == null ? null : JsonSerializer.Serialize(value, JsonOptions),
-                value => value == null ? null : JsonSerializer.Deserialize<MeetingSummary>(value, JsonOptions)));
+            entity.Property(x => x.Summary).HasConversion(new ValueConverter<MeetingSummary?, string?>(value => SerializeSummary(value), value => DeserializeSummary(value)));
             entity.Ignore(x => x.DomainEvents);
             entity.HasMany(x => x.Participants).WithOne().HasForeignKey(x => x.MeetingId).OnDelete(DeleteBehavior.Cascade);
         });
@@ -50,4 +51,20 @@ public sealed class MeetingDbContext(DbContextOptions<MeetingDbContext> options)
     }
 
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+
+    private static string? SerializeSummary(MeetingSummary? summary)
+        => summary is null ? null : JsonSerializer.Serialize(new SummaryData(summary.Overview, summary.Decisions, summary.ActionItems.Select(x => new ActionData(x.Description, x.Assignee, x.DueAt, x.Completed)).ToList()), JsonOptions);
+
+    private static MeetingSummary? DeserializeSummary(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return null;
+        var data = JsonSerializer.Deserialize<SummaryData>(json, JsonOptions) ?? throw new InvalidOperationException("Toplantı özeti okunamadı.");
+        var actionItems = data.ActionItems.ToList();
+        var items = actionItems.Select(x => new ActionItem(x.Description, x.Assignee, x.DueAt)).ToList();
+        foreach (var pair in items.Zip(actionItems)) if (pair.Second.Completed) pair.First.Complete();
+        return MeetingSummary.Create(data.Overview, data.Decisions, items);
+    }
+
+    private sealed record SummaryData(string Overview, IReadOnlyCollection<string> Decisions, IReadOnlyCollection<ActionData> ActionItems);
+    private sealed record ActionData(string Description, string? Assignee, DateTimeOffset? DueAt, bool Completed);
 }
