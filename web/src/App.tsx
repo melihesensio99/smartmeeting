@@ -18,7 +18,7 @@ export function App() {
   const path = useAppPath()
   const route = routeFromPath(path)
   const { meetings, create, startRecording, upload, completeAction, updateNotes, mapSpeaker, addParticipant, sendEmail } = useMeetings()
-  useMeetingStatus()
+  useMeetingStatus((meetings.data ?? []).map((meeting) => meeting.id))
   const [open, setOpen] = useState(false)
   const [selectedMeetingId, setSelectedMeetingId] = useState('')
   if (route === 'login') return <LoginPage />
