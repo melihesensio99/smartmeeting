@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
 using SmartMeeting.Persistence.Identity;
 using SmartMeeting.Application.Abstractions;
+using SmartMeeting.Application.Abstractions.Identity;
 
 namespace SmartMeeting.Persistence;
 
@@ -19,6 +20,7 @@ public static class DependencyInjection
             options.Password.RequireNonAlphanumeric = false;
         }).AddEntityFrameworkStores<MeetingDbContext>();
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IUserDirectoryService>(sp => sp.GetRequiredService<IdentityService>());
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<MeetingDbContext>());
         return services;
     }

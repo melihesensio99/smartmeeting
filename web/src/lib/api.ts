@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { meetingSchema, type AddParticipantInput, type CreateMeetingInput, type Meeting } from '../types/meeting'
+import { meetingSchema, userResponseSchema, type AddParticipantInput, type CreateMeetingInput, type Meeting, type UserResponse } from '../types/meeting'
 import { authResponseSchema, type AuthResponse } from '../types/auth'
 const client = axios.create({ baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:5080/api', withCredentials: true })
 export async function getMeetings(): Promise<Meeting[]> { const response = await client.get<unknown>('/meetings'); if (!Array.isArray(response.data)) throw new Error('API toplantı listesi beklenen formatta değil.'); return response.data.map((item: unknown) => meetingSchema.parse(item)) }
@@ -31,6 +31,12 @@ export async function mapSpeaker(meetingId: string, participantId: string, speak
 export async function addParticipant(meetingId: string, input: AddParticipantInput): Promise<Meeting> {
   const response = await client.post<unknown>(`/meetings/${meetingId}/participants`, input)
   return meetingSchema.parse(response.data)
+}
+
+export async function searchUsers(search: string): Promise<UserResponse[]> {
+  const response = await client.get<unknown>('/users', { params: { search } })
+  if (!Array.isArray(response.data)) throw new Error('API kullanıcı listesi beklenen formatta değil.')
+  return response.data.map((item: unknown) => userResponseSchema.parse(item))
 }
 
 export async function sendSummaryEmail(meetingId: string): Promise<void> { await client.post(`/meetings/${meetingId}/summary/email`) }

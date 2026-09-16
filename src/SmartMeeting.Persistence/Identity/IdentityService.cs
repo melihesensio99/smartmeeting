@@ -1,11 +1,14 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using SmartMeeting.Application.Abstractions;
+using SmartMeeting.Application.Abstractions.Identity;
 using SmartMeeting.Application.Common;
 using SmartMeeting.Application.Auth.Contracts;
+using SmartMeeting.Application.Users.Responses;
 
 namespace SmartMeeting.Persistence.Identity;
 
-public sealed class IdentityService(UserManager<ApplicationUser> userManager, IJwtTokenService jwtTokenService) : IIdentityService
+public sealed class IdentityService(UserManager<ApplicationUser> userManager, IJwtTokenService jwtTokenService) : IIdentityService, IUserDirectoryService
 {
     public async Task<Result<RegisteredUser>> RegisterAsync(string email, string password, string displayName, CancellationToken cancellationToken)
     {
@@ -30,5 +33,16 @@ public sealed class IdentityService(UserManager<ApplicationUser> userManager, IJ
     {
         var user = await userManager.FindByIdAsync(userId);
         return user is null ? null : new RegisteredUser(user.Id, user.Email!, user.DisplayName);
+    }
+
+    public async Task<IReadOnlyCollection<UserResponse>> SearchAsync(string search, CancellationToken cancellationToken)
+    {
+        var normalized = search.Trim().ToLowerInvariant();
+        return await userManager.Users
+            .Where(user => user.Email!.ToLower().Contains(normalized) || user.DisplayName.ToLower().Contains(normalized))
+            .OrderBy(user => user.DisplayName)
+            .Take(20)
+            .Select(user => new UserResponse(user.Id, user.DisplayName, user.Email!))
+            .ToListAsync(cancellationToken);
     }
 }
