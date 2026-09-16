@@ -33,7 +33,24 @@ public sealed class AuthController(UserManager<ApplicationUser> userManager, ICo
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.SigningKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(options.Issuer, options.Audience, claims, expires: DateTime.UtcNow.AddHours(8), signingCredentials: credentials);
-        return Ok(new { accessToken = new JwtSecurityTokenHandler().WriteToken(token), expiresAt = token.ValidTo, userId = user.Id, displayName = user.DisplayName });
+        Response.Cookies.Append(options.CookieName, new JwtSecurityTokenHandler().WriteToken(token), new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = Request.IsHttps,
+            SameSite = SameSiteMode.Lax,
+            Expires = token.ValidTo,
+            IsEssential = true,
+            Path = "/"
+        });
+        return Ok(new { expiresAt = token.ValidTo, userId = user.Id, displayName = user.DisplayName });
+    }
+
+    [HttpPost("logout")]
+    public IActionResult Logout()
+    {
+        var options = configuration.GetSection("Authentication").Get<AuthenticationOptions>() ?? new();
+        Response.Cookies.Delete(options.CookieName, new CookieOptions { HttpOnly = true, SameSite = SameSiteMode.Lax, Path = "/" });
+        return NoContent();
     }
 }
 

@@ -41,6 +41,14 @@ if (authenticationOptions.Enabled)
                     ClockSkew = TimeSpan.FromMinutes(1)
                 };
             }
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    context.Token = context.Request.Cookies[authenticationOptions.CookieName];
+                    return Task.CompletedTask;
+                }
+            };
         });
 }
 builder.Services.AddAuthorization(options =>
@@ -55,7 +63,8 @@ builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddSingleton<SmartMeeting.Application.Abstractions.IMeetingStatusPublisher, SignalRMeetingStatusPublisher>();
-builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
+var corsOrigins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? ["http://localhost:5173"];
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.WithOrigins(corsOrigins).AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 
 var app = builder.Build();
 app.UseMiddleware<ExceptionHandlingMiddleware>();

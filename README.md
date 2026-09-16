@@ -56,7 +56,7 @@ dotnet user-secrets set "Authentication:RequireAuthentication" "true" --project 
 dotnet user-secrets set "Authentication:SigningKey" "at-least-32-character-random-secret" --project src/SmartMeeting.Api
 ```
 
-Endpoints: `POST /api/auth/register` and `POST /api/auth/login`.
+Endpoints: `POST /api/auth/register`, `POST /api/auth/login` and `POST /api/auth/logout`. Login JWT is delivered only as an HttpOnly cookie; the frontend never reads or stores the token.
 
 Production deployments should set `Database:ApplyMigrations=true` so the Identity and meeting schema migrations are applied at startup. Existing local databases created with `EnsureCreated` should be backed up before switching to migrations.
 

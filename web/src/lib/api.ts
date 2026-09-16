@@ -1,8 +1,7 @@
 import axios from 'axios'
 import { meetingSchema, type CreateMeetingInput, type Meeting } from '../types/meeting'
 import { authResponseSchema, type AuthResponse } from '../types/auth'
-const client = axios.create({ baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:5080/api' })
-client.interceptors.request.use((config) => { const token = localStorage.getItem('smartmeeting-access-token'); if (token) config.headers.Authorization = `Bearer ${token}`; return config })
+const client = axios.create({ baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:5080/api', withCredentials: true })
 export async function getMeetings(): Promise<Meeting[]> { const response = await client.get<unknown>('/meetings'); if (!Array.isArray(response.data)) throw new Error('API toplantı listesi beklenen formatta değil.'); return response.data.map((item: unknown) => meetingSchema.parse(item)) }
 export async function createMeeting(input: CreateMeetingInput): Promise<Meeting> { const response = await client.post<unknown>('/meetings', { ...input, endsAt: input.endsAt || null }); return meetingSchema.parse(response.data) }
 
@@ -32,3 +31,5 @@ export async function login(email: string, password: string): Promise<AuthRespon
   const response = await client.post<unknown>('/auth/login', { email, password })
   return authResponseSchema.parse(response.data)
 }
+
+export async function logout(): Promise<void> { await client.post('/auth/logout') }
