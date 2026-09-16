@@ -43,3 +43,8 @@ public interface IMeetingStatusPublisher
 {
     Task PublishAsync(Guid meetingId, string status, CancellationToken cancellationToken);
 }
+
+public interface IEmailService
+{
+    Task SendMeetingSummaryAsync(Meeting meeting, CancellationToken cancellationToken);
+}

@@ -10,6 +10,7 @@ using SmartMeeting.Application.Meetings.Commands.CompleteActionItem;
 using SmartMeeting.Application.Meetings.Commands.UpdateMeetingNotes;
 using SmartMeeting.Application.Meetings.Commands.AddParticipant;
 using SmartMeeting.Application.Meetings.Commands.MapSpeaker;
+using SmartMeeting.Application.Meetings.Commands.SendMeetingSummaryEmail;
 using SmartMeeting.Application.Meetings.Queries.GetMeeting;
 
 namespace SmartMeeting.Api.Controllers;
@@ -54,6 +55,10 @@ public sealed class MeetingsController(ISender sender) : ControllerBase
     public async Task<IActionResult> MapSpeaker(Guid meetingId, Guid participantId, MapSpeakerRequest request, CancellationToken cancellationToken)
         => ToActionResult(await sender.Send(new MapSpeakerCommand(meetingId, participantId, request.SpeakerLabel), cancellationToken));
 
+    [HttpPost("{meetingId:guid}/summary/email")]
+    public async Task<IActionResult> SendSummaryEmail(Guid meetingId, CancellationToken cancellationToken)
+        => ToActionResult(await sender.Send(new SendMeetingSummaryEmailCommand(meetingId), cancellationToken));
+
     [HttpPost("{meetingId:guid}/recording/complete")]
     public async Task<IActionResult> CompleteRecording(Guid meetingId, CompleteRecordingRequest request, CancellationToken cancellationToken)
         => ToActionResult(await sender.Send(new CompleteRecordingCommand(meetingId, request.AudioFilePath), cancellationToken));
@@ -73,6 +78,9 @@ public sealed class MeetingsController(ISender sender) : ControllerBase
 
     private IActionResult ToActionResult(Result<Application.Meetings.Dtos.MeetingDto> result)
         => result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+
+    private IActionResult ToActionResult(Result result)
+        => result.IsSuccess ? NoContent() : BadRequest(result.Error);
 }
 
 public sealed record CreateMeetingRequest(string Title, string OrganizerId, DateTimeOffset StartsAt, DateTimeOffset? EndsAt);

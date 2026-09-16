@@ -5,6 +5,7 @@ using SmartMeeting.Infrastructure.Services;
 using SmartMeeting.Infrastructure.Ai;
 using SmartMeeting.Infrastructure.Storage;
 using Microsoft.Extensions.Configuration;
+using SmartMeeting.Infrastructure.Email;
 
 namespace SmartMeeting.Infrastructure;
 
@@ -30,6 +31,8 @@ public static class DependencyInjection
         services.AddHostedService<MeetingProcessingWorker>();
         services.Configure<AudioStorageOptions>(configuration.GetSection(AudioStorageOptions.SectionName));
         services.AddScoped<IAudioStorage, LocalAudioStorage>();
+        services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
+        services.AddScoped<IEmailService, SmtpEmailService>();
         return services;
     }
 }

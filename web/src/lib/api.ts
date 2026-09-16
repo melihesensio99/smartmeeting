@@ -32,6 +32,8 @@ export async function addParticipant(meetingId: string, input: AddParticipantInp
   return meetingSchema.parse(response.data)
 }
 
+export async function sendSummaryEmail(meetingId: string): Promise<void> { await client.post(`/meetings/${meetingId}/summary/email`) }
+
 export async function login(email: string, password: string): Promise<AuthResponse> {
   const response = await client.post<unknown>('/auth/login', { email, password })
   return authResponseSchema.parse(response.data)

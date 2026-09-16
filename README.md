@@ -60,6 +60,8 @@ Endpoints: `POST /api/auth/register`, `POST /api/auth/login` and `POST /api/auth
 
 Production deployments should set `Database:ApplyMigrations=true` so the Identity and meeting schema migrations are applied at startup. Existing local databases created with `EnsureCreated` should be backed up before switching to migrations.
 
+SMTP e-mail delivery is disabled by default. Configure `Email:Enabled`, `Email:Host`, `Email:Port`, `Email:Username`, `Email:Password` and `Email:FromAddress` through environment variables or user secrets before using `POST /api/meetings/{id}/summary/email`.
+
 ## Katmanlar
 
 - `SmartMeeting.Domain`: rich domain modeli ve domain event sözleşmeleri
