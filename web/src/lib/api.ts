@@ -40,4 +40,8 @@ export async function login(email: string, password: string): Promise<AuthRespon
   return authResponseSchema.parse(response.data)
 }
 
+export async function register(email: string, password: string, displayName: string): Promise<void> {
+  await client.post('/auth/register', { email, password, displayName })
+}
+
 export async function logout(): Promise<void> { await client.post('/auth/logout') }

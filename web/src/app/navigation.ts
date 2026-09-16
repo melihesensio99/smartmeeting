@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 
-export type AppRoute = 'dashboard' | 'meetings' | 'actions' | 'login' | 'meeting-detail'
+export type AppRoute = 'dashboard' | 'meetings' | 'actions' | 'login' | 'register' | 'meeting-detail'
 
 export function routeFromPath(path: string): AppRoute {
   if (path === '/login') return 'login'
+  if (path === '/register') return 'register'
   if (path === '/meetings') return 'meetings'
   if (path.startsWith('/meetings/')) return 'meeting-detail'
   if (path === '/actions') return 'actions'

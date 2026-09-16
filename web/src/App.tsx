@@ -5,6 +5,7 @@ import { AppShell } from './components/AppShell'
 import { ActionsPage } from './features/actions/ActionsPage'
 import { DashboardPage } from './features/dashboard/DashboardPage'
 import { LoginPage } from './features/auth/LoginPage'
+import { RegisterPage } from './features/auth/RegisterPage'
 import { MeetingsPage } from './features/calendar/MeetingsPage'
 import { MeetingForm } from './features/calendar/MeetingForm'
 import { useMeetings } from './features/calendar/useMeetings'
@@ -21,6 +22,7 @@ export function App() {
   const [open, setOpen] = useState(false)
   const [selectedMeetingId, setSelectedMeetingId] = useState('')
   if (route === 'login') return <LoginPage />
+  if (route === 'register') return <RegisterPage />
   const items = meetings.data ?? []
   const submit = (input: CreateMeetingInput) => create.mutate(input, { onSuccess: () => setOpen(false) })
   const complete = (meetingId: string, actionItemId: string) => completeAction.mutate({ meetingId, actionItemId })
