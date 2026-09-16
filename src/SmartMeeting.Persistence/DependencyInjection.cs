@@ -19,7 +19,7 @@ public static class DependencyInjection
             options.Password.RequireNonAlphanumeric = false;
         }).AddEntityFrameworkStores<MeetingDbContext>();
         services.AddScoped<IIdentityService, IdentityService>();
-        services.AddScoped<Application.Abstractions.IApplicationDbContext>(sp => sp.GetRequiredService<MeetingDbContext>());
+        services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<MeetingDbContext>());
         return services;
     }
 }

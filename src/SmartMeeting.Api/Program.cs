@@ -15,7 +15,7 @@ var authenticationOptions = builder.Configuration.GetSection(JwtOptions.SectionN
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAuthCookieService, HttpAuthCookieService>();
-builder.Services.AddScoped<SmartMeeting.Application.Abstractions.ICurrentUserService, HttpCurrentUserService>();
+builder.Services.AddScoped<ICurrentUserService, HttpCurrentUserService>();
 if (authenticationOptions.Enabled)
 {
     var hasAuthority = !string.IsNullOrWhiteSpace(authenticationOptions.Authority);
@@ -64,7 +64,7 @@ builder.Services.AddSignalR();
 builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddSingleton<SmartMeeting.Application.Abstractions.IMeetingStatusPublisher, SignalRMeetingStatusPublisher>();
+builder.Services.AddSingleton<IMeetingStatusPublisher, SignalRMeetingStatusPublisher>();
 var corsOrigins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? ["http://localhost:5173"];
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.WithOrigins(corsOrigins).AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 
