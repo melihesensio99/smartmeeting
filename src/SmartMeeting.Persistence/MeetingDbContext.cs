@@ -61,14 +61,14 @@ public sealed class MeetingDbContext(DbContextOptions<MeetingDbContext> options)
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     private static string? SerializeSummary(MeetingSummary? summary)
-        => summary is null ? null : JsonSerializer.Serialize(new SummaryData(summary.Overview, summary.Decisions, summary.ActionItems.Select(x => new ActionData(x.Id, x.Description, x.Assignee, x.DueAt, x.Completed)).ToList()), JsonOptions);
+        => summary is null ? null : JsonSerializer.Serialize(new SummaryData(summary.Overview, summary.Decisions, summary.ActionItems.Select(x => new ActionData(x.Id, x.Description, x.Assignee, x.DueAt, x.Priority, x.Completed)).ToList()), JsonOptions);
 
     private static MeetingSummary? DeserializeSummary(string? json)
     {
         if (string.IsNullOrWhiteSpace(json)) return null;
         var data = JsonSerializer.Deserialize<SummaryData>(json, JsonOptions) ?? throw new InvalidOperationException("Toplantı özeti okunamadı.");
         var actionItems = data.ActionItems.ToList();
-        var items = actionItems.Select(x => new ActionItem(x.Description, x.Assignee, x.DueAt, x.Id == Guid.Empty ? Guid.NewGuid() : x.Id)).ToList();
+        var items = actionItems.Select(x => new ActionItem(x.Description, x.Assignee, x.DueAt, x.Id == Guid.Empty ? Guid.NewGuid() : x.Id, x.Priority ?? ActionPriority.Medium)).ToList();
         foreach (var pair in items.Zip(actionItems)) if (pair.Second.Completed) pair.First.Complete();
         return MeetingSummary.Create(data.Overview, data.Decisions, items);
     }

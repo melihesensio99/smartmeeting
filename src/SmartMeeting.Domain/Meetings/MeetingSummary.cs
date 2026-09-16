@@ -17,12 +17,13 @@ public sealed class MeetingSummary
 public sealed class ActionItem
 {
     private ActionItem() { }
-    public ActionItem(string description, string? assignee, DateTimeOffset? dueAt, Guid? id = null)
-    { Id = id ?? Guid.NewGuid(); Description = description.Trim(); Assignee = assignee?.Trim(); DueAt = dueAt; }
+    public ActionItem(string description, string? assignee, DateTimeOffset? dueAt, Guid? id = null, ActionPriority priority = ActionPriority.Medium)
+    { Id = id ?? Guid.NewGuid(); Description = description.Trim(); Assignee = assignee?.Trim(); DueAt = dueAt; Priority = priority; }
     public Guid Id { get; private set; }
     public string Description { get; private set; } = string.Empty;
     public string? Assignee { get; private set; }
     public DateTimeOffset? DueAt { get; private set; }
+    public ActionPriority Priority { get; private set; }
     public bool Completed { get; private set; }
     public void Complete() => Completed = true;
 }

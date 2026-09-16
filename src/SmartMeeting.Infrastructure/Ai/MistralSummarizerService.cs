@@ -27,9 +27,10 @@ public sealed class MistralSummarizerService(HttpClient httpClient, IOptions<Mis
                     {
                         description = new { type = "string" },
                         assignee = new { type = new[] { "string", "null" } },
-                        dueAt = new { type = new[] { "string", "null" } }
+                        dueAt = new { type = new[] { "string", "null" } },
+                        priority = new { type = "string", @enum = new[] { "low", "medium", "high" } }
                     },
-                    required = new[] { "description", "assignee", "dueAt" },
+                    required = new[] { "description", "assignee", "dueAt", "priority" },
                     additionalProperties = false
                 }
             }
@@ -65,9 +66,15 @@ public sealed class MistralSummarizerService(HttpClient httpClient, IOptions<Mis
         var content = document.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
         if (string.IsNullOrWhiteSpace(content)) throw new InvalidOperationException("Mistral boş özet döndürdü.");
         var result = JsonSerializer.Deserialize<MistralSummaryResponse>(content, JsonOptions) ?? throw new InvalidOperationException("Mistral structured output okunamadı.");
-        return MeetingSummary.Create(result.Overview, result.Decisions, result.ActionItems.Select(x => new ActionItem(x.Description, x.Assignee, ParseDate(x.DueAt))));
+        return MeetingSummary.Create(result.Overview, result.Decisions, result.ActionItems.Select(x => new ActionItem(x.Description, x.Assignee, ParseDate(x.DueAt), priority: ParsePriority(x.Priority))));
     }
 
     private static DateTimeOffset? ParseDate(string? value) => DateTimeOffset.TryParse(value, out var date) ? date : null;
+    private static ActionPriority ParsePriority(string? value) => value?.Trim().ToLowerInvariant() switch
+    {
+        "high" => ActionPriority.High,
+        "low" => ActionPriority.Low,
+        _ => ActionPriority.Medium
+    };
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 }

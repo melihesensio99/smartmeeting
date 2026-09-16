@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.Extensions.Options;
+using SmartMeeting.Domain.Meetings;
 using SmartMeeting.Infrastructure.Ai;
 
 namespace SmartMeeting.Application.Tests.Ai;
@@ -19,6 +20,7 @@ public sealed class MistralSummarizerServiceTests
         Assert.Equal("Lansman tarihi belirlendi.", summary.Overview);
         Assert.Single(summary.Decisions);
         Assert.Equal("Lansman tarihini duyur", summary.ActionItems.Single().Description);
+        Assert.Equal(ActionPriority.Medium, summary.ActionItems.Single().Priority);
         Assert.Equal("Bearer", handler.AuthorizationScheme);
         Assert.Contains("json_schema", handler.RequestBody);
     }
