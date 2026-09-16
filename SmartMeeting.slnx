@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SmartMeeting.Api/SmartMeeting.Api.csproj" />
+    <Project Path="src/SmartMeeting.Application/SmartMeeting.Application.csproj" />
+    <Project Path="src/SmartMeeting.Domain/SmartMeeting.Domain.csproj" />
+    <Project Path="src/SmartMeeting.Infrastructure/SmartMeeting.Infrastructure.csproj" />
+    <Project Path="src/SmartMeeting.Persistence/SmartMeeting.Persistence.csproj" />
+  </Folder>
+</Solution>
