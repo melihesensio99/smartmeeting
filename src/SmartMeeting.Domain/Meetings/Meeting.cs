@@ -72,6 +72,15 @@ public sealed class Meeting : Entity
         Touch();
     }
 
+    public void CompleteActionItem(Guid actionItemId)
+    {
+        if (Summary is null) throw new DomainException("Toplantının özeti henüz hazır değil.");
+        var actionItem = Summary.ActionItems.SingleOrDefault(x => x.Id == actionItemId);
+        if (actionItem is null) throw new DomainException("Aksiyon maddesi bulunamadı.");
+        actionItem.Complete();
+        Touch();
+    }
+
     public void MarkFailed() { Status = MeetingStatus.Failed; Touch(); }
 
     private void EnsureStatus(MeetingStatus expected)

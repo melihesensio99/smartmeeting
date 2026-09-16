@@ -57,4 +57,19 @@ public sealed class MeetingTests
         Assert.Equal(MeetingStatus.Ready, meeting.Status);
         Assert.Equal("Özet", meeting.Summary?.Overview);
     }
+
+    [Fact]
+    public void CompleteActionItem_marks_matching_action_item_completed()
+    {
+        var action = new ActionItem("Takip et", "user-2", null);
+        var meeting = Meeting.Create("Planlama", "user-1", DateTimeOffset.UtcNow);
+        meeting.StartRecording();
+        meeting.CompleteRecording("audio.webm");
+        meeting.SetTranscript("transcript");
+        meeting.SetSummary(MeetingSummary.Create("Özet", [], [action]));
+
+        meeting.CompleteActionItem(action.Id);
+
+        Assert.True(meeting.Summary!.ActionItems.Single().Completed);
+    }
 }

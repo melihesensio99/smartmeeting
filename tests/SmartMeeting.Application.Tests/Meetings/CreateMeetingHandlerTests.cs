@@ -48,6 +48,25 @@ public sealed class CreateMeetingHandlerTests
         Assert.Equal("meeting_not_found", result.Error!.Code);
     }
 
+    [Fact]
+    public async Task CompleteActionItem_persists_completion()
+    {
+        var context = new FakeApplicationDbContext();
+        var action = new ActionItem("Takip et", "user-2", null);
+        var meeting = Meeting.Create("Planlama", "user-1", DateTimeOffset.UtcNow);
+        meeting.StartRecording();
+        meeting.CompleteRecording("audio.webm");
+        meeting.SetTranscript("transcript");
+        meeting.SetSummary(MeetingSummary.Create("Özet", [], [action]));
+        context.Seed(meeting);
+        var handler = new Application.Meetings.Commands.CompleteActionItem.CompleteActionItemHandler(context);
+
+        var result = await handler.Handle(new Application.Meetings.Commands.CompleteActionItem.CompleteActionItemCommand(meeting.Id, action.Id), CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        Assert.True(result.Value!.Summary!.ActionItems.Single().Completed);
+    }
+
     private sealed class FakeApplicationDbContext : IApplicationDbContext
     {
         private readonly List<Meeting> _meetings = [];
