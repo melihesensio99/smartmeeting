@@ -43,7 +43,7 @@ public sealed class MeetingProcessingWorker(
         await using var audio = await audioStorage.OpenReadAsync(audioPath, cancellationToken);
         var transcript = await speechToText.TranscribeAsync(audio, Path.GetFileName(audioPath), cancellationToken);
         meeting.SetTranscript(transcript);
-        var summary = await summarizer.SummarizeAsync(transcript, cancellationToken);
+        var summary = await summarizer.SummarizeAsync(transcript, meeting.Notes, cancellationToken);
         meeting.SetSummary(summary);
         await db.SaveChangesAsync(cancellationToken);
         await PublishAsync(meetingId, "Ready", cancellationToken);

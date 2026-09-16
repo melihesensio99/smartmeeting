@@ -38,12 +38,15 @@ public sealed class MistralSummarizerService(HttpClient httpClient, IOptions<Mis
         additionalProperties = false
     };
 
-    public async Task<MeetingSummary> SummarizeAsync(string transcript, CancellationToken cancellationToken)
+    public async Task<MeetingSummary> SummarizeAsync(string transcript, string? notes, CancellationToken cancellationToken)
     {
         var configuration = options.Value;
         if (string.IsNullOrWhiteSpace(configuration.ApiKey)) throw new InvalidOperationException("Mistral API anahtarı yapılandırılmamış.");
         using var request = new HttpRequestMessage(HttpMethod.Post, "chat/completions");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", configuration.ApiKey);
+        var meetingContent = string.IsNullOrWhiteSpace(notes)
+            ? transcript
+            : $"TOPLANTI TRANSKRİPTİ:\n{transcript}\n\nKULLANICI NOTLARI:\n{notes}";
         request.Content = JsonContent.Create(new
         {
             model = configuration.Model,
@@ -51,7 +54,7 @@ public sealed class MistralSummarizerService(HttpClient httpClient, IOptions<Mis
             messages = new object[]
             {
                 new { role = "system", content = "Toplantı transkriptini Türkçe olarak özetle. Yalnızca istenen JSON şemasına uygun çıktı üret. dueAt bilinmiyorsa null kullan." },
-                new { role = "user", content = transcript }
+                new { role = "user", content = meetingContent }
             },
             response_format = new { type = "json_schema", json_schema = new { name = "meeting_summary", schema = ResponseSchema, strict = true } }
         });

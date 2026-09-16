@@ -4,5 +4,5 @@ namespace SmartMeeting.Application.Abstractions.Ai;
 
 public interface IAiSummarizerService
 {
-    Task<MeetingSummary> SummarizeAsync(string transcript, CancellationToken cancellationToken);
+    Task<MeetingSummary> SummarizeAsync(string transcript, string? notes, CancellationToken cancellationToken);
 }

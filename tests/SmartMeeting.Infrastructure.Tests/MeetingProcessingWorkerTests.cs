@@ -108,7 +108,7 @@ public sealed class MeetingProcessingWorkerTests
 
     private sealed class TestSummarizerService : IAiSummarizerService
     {
-        public Task<MeetingSummary> SummarizeAsync(string transcript, CancellationToken cancellationToken) => Task.FromResult(MeetingSummary.Create("Özet", [], []));
+        public Task<MeetingSummary> SummarizeAsync(string transcript, string? notes, CancellationToken cancellationToken) => Task.FromResult(MeetingSummary.Create("Özet", [], []));
     }
 
     private sealed class TestStatusPublisher : IMeetingStatusPublisher

@@ -14,7 +14,7 @@ public sealed class MistralSummarizerServiceTests
         using var client = new HttpClient(handler) { BaseAddress = new Uri("https://api.mistral.ai/v1/") };
         var service = new MistralSummarizerService(client, Options.Create(new MistralOptions { ApiKey = "test-key" }));
 
-        var summary = await service.SummarizeAsync("Toplantıda lansman tarihi 20 Eylül olarak kararlaştırıldı.", CancellationToken.None);
+        var summary = await service.SummarizeAsync("Toplantıda lansman tarihi 20 Eylül olarak kararlaştırıldı.", null, CancellationToken.None);
 
         Assert.Equal("Lansman tarihi belirlendi.", summary.Overview);
         Assert.Single(summary.Decisions);
