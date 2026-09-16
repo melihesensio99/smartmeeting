@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using SmartMeeting.Application.Abstractions;
 using SmartMeeting.Domain.Meetings;
 using SmartMeeting.Persistence.Identity;
+using SmartMeeting.Persistence.Serialization;
 
 namespace SmartMeeting.Persistence;
 
@@ -72,6 +73,4 @@ public sealed class MeetingDbContext(DbContextOptions<MeetingDbContext> options)
         return MeetingSummary.Create(data.Overview, data.Decisions, items);
     }
 
-    private sealed record SummaryData(string Overview, IReadOnlyCollection<string> Decisions, IReadOnlyCollection<ActionData> ActionItems);
-    private sealed record ActionData(Guid Id, string Description, string? Assignee, DateTimeOffset? DueAt, bool Completed);
 }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using SmartMeeting.Application.Abstractions;
 using SmartMeeting.Application.Common;
+using SmartMeeting.Application.Auth.Contracts;
 
 namespace SmartMeeting.Persistence.Identity;
 

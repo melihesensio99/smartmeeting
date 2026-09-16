@@ -4,6 +4,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using SmartMeeting.Application.Abstractions;
+using SmartMeeting.Application.Processing.Contracts;
 
 namespace SmartMeeting.Infrastructure.Processing;
 

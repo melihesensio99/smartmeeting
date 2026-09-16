@@ -4,6 +4,7 @@ using MediatR;
 using SmartMeeting.Api.Security;
 using SmartMeeting.Application.Auth.Commands.Login;
 using SmartMeeting.Application.Auth.Commands.Register;
+using SmartMeeting.Api.Contracts.Auth;
 
 namespace SmartMeeting.Api.Controllers;
 
@@ -37,6 +38,3 @@ public sealed class AuthController(ISender sender, IAuthCookieService authCookie
         return NoContent();
     }
 }
-
-public sealed record RegisterRequest(string Email, string Password, string DisplayName);
-public sealed record LoginRequest(string Email, string Password);

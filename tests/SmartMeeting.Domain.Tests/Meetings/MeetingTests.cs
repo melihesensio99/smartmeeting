@@ -32,7 +32,7 @@ public sealed class MeetingTests
         Assert.Equal(MeetingStatus.Processing, meeting.Status);
         Assert.Equal("audio/sprint-planlama.webm", meeting.AudioFilePath);
         Assert.Single(meeting.DomainEvents);
-        Assert.IsType<SmartMeeting.Domain.Common.MeetingProcessingRequested>(meeting.DomainEvents.Single());
+        Assert.IsType<SmartMeeting.Domain.Common.Events.MeetingProcessingRequested>(meeting.DomainEvents.Single());
     }
 
     [Fact]

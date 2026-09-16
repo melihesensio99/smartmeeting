@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SmartMeeting.Application.Abstractions;
+using SmartMeeting.Application.Auth.Contracts;
 
 namespace SmartMeeting.Infrastructure.Security;
 

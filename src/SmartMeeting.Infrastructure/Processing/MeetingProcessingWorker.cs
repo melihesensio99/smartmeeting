@@ -2,6 +2,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SmartMeeting.Application.Abstractions;
+using SmartMeeting.Application.Processing.Contracts;
 using SmartMeeting.Domain.Meetings;
 
 namespace SmartMeeting.Infrastructure.Processing;

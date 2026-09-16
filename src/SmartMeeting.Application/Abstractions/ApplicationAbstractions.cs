@@ -1,5 +1,7 @@
 using SmartMeeting.Domain.Meetings;
 using SmartMeeting.Application.Common;
+using SmartMeeting.Application.Auth.Contracts;
+using SmartMeeting.Application.Processing.Contracts;
 
 namespace SmartMeeting.Application.Abstractions;
 
@@ -41,8 +43,6 @@ public interface IMeetingProcessingQueue
     ValueTask CompleteAsync(QueuedMeeting message, bool requeue, CancellationToken cancellationToken);
 }
 
-public sealed record QueuedMeeting(Guid MeetingId, string Receipt);
-
 public interface IMeetingStatusPublisher
 {
     Task PublishAsync(Guid meetingId, string status, CancellationToken cancellationToken);
@@ -63,7 +63,3 @@ public interface IJwtTokenService
 {
     AuthToken CreateToken(string userId, string email, string displayName);
 }
-
-public sealed record RegisteredUser(string UserId, string Email, string DisplayName);
-public sealed record AuthenticatedUser(string UserId, string Email, string DisplayName, string AccessToken, DateTimeOffset ExpiresAt);
-public sealed record AuthToken(string Value, DateTimeOffset ExpiresAt);

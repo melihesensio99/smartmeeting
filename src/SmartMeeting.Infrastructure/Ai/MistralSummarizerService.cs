@@ -4,6 +4,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Options;
 using SmartMeeting.Application.Abstractions;
 using SmartMeeting.Domain.Meetings;
+using SmartMeeting.Infrastructure.Ai.Contracts;
 
 namespace SmartMeeting.Infrastructure.Ai;
 
@@ -60,12 +61,10 @@ public sealed class MistralSummarizerService(HttpClient httpClient, IOptions<Mis
         using var document = JsonDocument.Parse(responseBody);
         var content = document.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
         if (string.IsNullOrWhiteSpace(content)) throw new InvalidOperationException("Mistral boş özet döndürdü.");
-        var result = JsonSerializer.Deserialize<MistralSummary>(content, JsonOptions) ?? throw new InvalidOperationException("Mistral structured output okunamadı.");
+        var result = JsonSerializer.Deserialize<MistralSummaryResponse>(content, JsonOptions) ?? throw new InvalidOperationException("Mistral structured output okunamadı.");
         return MeetingSummary.Create(result.Overview, result.Decisions, result.ActionItems.Select(x => new ActionItem(x.Description, x.Assignee, ParseDate(x.DueAt))));
     }
 
     private static DateTimeOffset? ParseDate(string? value) => DateTimeOffset.TryParse(value, out var date) ? date : null;
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
-    private sealed record MistralSummary(string Overview, IReadOnlyCollection<string> Decisions, IReadOnlyCollection<MistralActionItem> ActionItems);
-    private sealed record MistralActionItem(string Description, string? Assignee, string? DueAt);
 }

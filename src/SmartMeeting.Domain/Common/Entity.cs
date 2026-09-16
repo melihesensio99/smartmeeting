@@ -24,5 +24,3 @@ public interface IDomainEvent
 {
     DateTimeOffset OccurredAt { get; }
 }
-
-public sealed record MeetingProcessingRequested(Guid MeetingId, DateTimeOffset OccurredAt) : IDomainEvent;

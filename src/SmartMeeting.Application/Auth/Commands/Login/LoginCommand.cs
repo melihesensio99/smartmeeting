@@ -2,6 +2,7 @@ using FluentValidation;
 using MediatR;
 using SmartMeeting.Application.Abstractions;
 using SmartMeeting.Application.Common;
+using SmartMeeting.Application.Auth.Contracts;
 
 namespace SmartMeeting.Application.Auth.Commands.Login;
 

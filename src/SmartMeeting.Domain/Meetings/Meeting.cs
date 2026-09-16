@@ -1,4 +1,5 @@
 using SmartMeeting.Domain.Common;
+using SmartMeeting.Domain.Common.Events;
 
 namespace SmartMeeting.Domain.Meetings;
 

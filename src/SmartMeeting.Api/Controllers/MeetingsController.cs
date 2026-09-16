@@ -12,6 +12,7 @@ using SmartMeeting.Application.Meetings.Commands.AddParticipant;
 using SmartMeeting.Application.Meetings.Commands.MapSpeaker;
 using SmartMeeting.Application.Meetings.Commands.SendMeetingSummaryEmail;
 using SmartMeeting.Application.Meetings.Queries.GetMeeting;
+using SmartMeeting.Api.Contracts.Meetings;
 
 namespace SmartMeeting.Api.Controllers;
 
@@ -82,9 +83,3 @@ public sealed class MeetingsController(ISender sender) : ControllerBase
     private IActionResult ToActionResult(Result result)
         => result.IsSuccess ? NoContent() : BadRequest(result.Error);
 }
-
-public sealed record CreateMeetingRequest(string Title, DateTimeOffset StartsAt, DateTimeOffset? EndsAt);
-public sealed record CompleteRecordingRequest(string AudioFilePath);
-public sealed record UpdateNotesRequest(string Notes);
-public sealed record AddParticipantRequest(string UserId, string DisplayName, string Email);
-public sealed record MapSpeakerRequest(string SpeakerLabel);
