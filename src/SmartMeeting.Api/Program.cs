@@ -5,14 +5,18 @@ using SmartMeeting.Persistence;
 using SmartMeeting.Api.Hubs;
 using SmartMeeting.Api.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 var authenticationOptions = builder.Configuration.GetSection("Authentication").Get<AuthenticationOptions>() ?? new();
 builder.Services.AddControllers();
 if (authenticationOptions.Enabled)
 {
-    if (string.IsNullOrWhiteSpace(authenticationOptions.Authority))
-        throw new InvalidOperationException("Authentication:Authority, JWT authentication etkinleştirildiğinde zorunludur.");
+    var hasAuthority = !string.IsNullOrWhiteSpace(authenticationOptions.Authority);
+    var hasSigningKey = !string.IsNullOrWhiteSpace(authenticationOptions.SigningKey);
+    if (!hasAuthority && !hasSigningKey)
+        throw new InvalidOperationException("Authentication:Authority veya Authentication:SigningKey yapılandırılmalıdır.");
 
     builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
@@ -20,6 +24,20 @@ if (authenticationOptions.Enabled)
             options.Authority = authenticationOptions.Authority;
             options.Audience = authenticationOptions.Audience;
             options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
+            if (!hasAuthority)
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = !string.IsNullOrWhiteSpace(authenticationOptions.Issuer),
+                    ValidIssuer = authenticationOptions.Issuer,
+                    ValidateAudience = !string.IsNullOrWhiteSpace(authenticationOptions.Audience),
+                    ValidAudience = authenticationOptions.Audience,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authenticationOptions.SigningKey!)),
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.FromMinutes(1)
+                };
+            }
         });
 }
 builder.Services.AddAuthorization(options =>

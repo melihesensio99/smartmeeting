@@ -1,12 +1,14 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using SmartMeeting.Application.Abstractions;
 using SmartMeeting.Domain.Meetings;
+using SmartMeeting.Persistence.Identity;
 
 namespace SmartMeeting.Persistence;
 
-public sealed class MeetingDbContext(DbContextOptions<MeetingDbContext> options) : DbContext(options), IApplicationDbContext
+public sealed class MeetingDbContext(DbContextOptions<MeetingDbContext> options) : IdentityDbContext<ApplicationUser>(options), IApplicationDbContext
 {
     public DbSet<Meeting> MeetingSet => Set<Meeting>();
 
@@ -49,6 +51,8 @@ public sealed class MeetingDbContext(DbContextOptions<MeetingDbContext> options)
             entity.Property(x => x.DisplayName).HasMaxLength(160).IsRequired();
             entity.Ignore(x => x.DomainEvents);
         });
+
+        modelBuilder.Entity<ApplicationUser>(entity => entity.Property(x => x.DisplayName).HasMaxLength(160));
     }
 
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);

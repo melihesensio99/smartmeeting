@@ -48,6 +48,16 @@ dotnet user-secrets set "Mistral:ApiKey" "<MISTRAL_API_KEY>" --project src/Smart
 
 JWT authentication is provider-neutral and disabled for local development by default. For a production identity provider, set `Authentication:Enabled=true`, `Authentication:RequireAuthentication=true`, `Authentication:Authority` and `Authentication:Audience` through environment variables or user secrets.
 
+Local Identity login can use the built-in JWT issuer. Keep the signing key outside source control:
+
+```powershell
+dotnet user-secrets set "Authentication:Enabled" "true" --project src/SmartMeeting.Api
+dotnet user-secrets set "Authentication:RequireAuthentication" "true" --project src/SmartMeeting.Api
+dotnet user-secrets set "Authentication:SigningKey" "at-least-32-character-random-secret" --project src/SmartMeeting.Api
+```
+
+Endpoints: `POST /api/auth/register` and `POST /api/auth/login`.
+
 ## Katmanlar
 
 - `SmartMeeting.Domain`: rich domain modeli ve domain event sözleşmeleri
