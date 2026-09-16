@@ -1,20 +1,24 @@
-import { Alert, Box, Button, Card, CardContent, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material'
+import { Alert, Box, Button, Card, CardContent, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material'
+import { useEffect, useState } from 'react'
 import { useAudioRecorder } from '../../hooks/useAudioRecorder'
 import { useAudioVisualizer } from '../../hooks/useAudioVisualizer'
 import type { Meeting } from '../../types/meeting'
 
-type Props = { meetings: Meeting[]; selectedMeetingId: string; onMeetingChange: (meetingId: string) => void; onRecordingStart: (meetingId: string) => Promise<void>; onAudioReady: (audio: Blob) => void; uploading: boolean; starting: boolean }
+type Props = { meetings: Meeting[]; selectedMeetingId: string; onMeetingChange: (meetingId: string) => void; onRecordingStart: (meetingId: string) => Promise<void>; onAudioReady: (audio: Blob) => void; onSaveNotes: (meetingId: string, notes: string) => void; uploading: boolean; starting: boolean; savingNotes: boolean }
 
-export function AudioRecorderCard({ meetings, selectedMeetingId, onMeetingChange, onRecordingStart, onAudioReady, uploading, starting }: Props) {
+export function AudioRecorderCard({ meetings, selectedMeetingId, onMeetingChange, onRecordingStart, onAudioReady, onSaveNotes, uploading, starting, savingNotes }: Props) {
   const recorder = useAudioRecorder()
   const levels = useAudioVisualizer(recorder.stream)
   const selectedMeeting = meetings.find((meeting) => meeting.id === selectedMeetingId)
+  const [notes, setNotes] = useState(selectedMeeting?.notes ?? '')
+  useEffect(() => setNotes(selectedMeeting?.notes ?? ''), [selectedMeetingId, selectedMeeting?.notes])
   const stop = async () => { const audio = await recorder.stop(); if (audio) onAudioReady(audio) }
   const duration = [Math.floor(recorder.elapsedSeconds / 3600), Math.floor((recorder.elapsedSeconds % 3600) / 60), recorder.elapsedSeconds % 60].map((value) => value.toString().padStart(2, '0')).join(':')
   return <Card sx={{ height: '100%' }}><CardContent><Stack spacing={2}>
     <Typography variant="h6">Canlı toplantı odası</Typography>
     <FormControl fullWidth disabled={recorder.state === 'recording' || uploading}><InputLabel id="meeting-select-label">Toplantı</InputLabel><Select labelId="meeting-select-label" label="Toplantı" value={selectedMeetingId} onChange={(event) => onMeetingChange(event.target.value)}><MenuItem value=""><em>Toplantı seçin</em></MenuItem>{meetings.filter((meeting) => String(meeting.status) === '0').map((meeting) => <MenuItem key={meeting.id} value={meeting.id}>{meeting.title}</MenuItem>)}</Select></FormControl>
     <Typography color="text.secondary">Kayıt tamamlandığında ses dosyası storage’a yüklenir ve Voxtral transkripsiyonu başlar.</Typography>
+    {selectedMeeting && <Stack spacing={1}><TextField fullWidth multiline minRows={3} label="Canlı toplantı notları" value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Toplantı sırasında önemli kararları veya bağlamı yazın..." disabled={uploading} /><Button variant="outlined" onClick={() => onSaveNotes(selectedMeeting.id, notes)} disabled={!notes.trim() || savingNotes}>{savingNotes ? 'Not kaydediliyor…' : 'Notları kaydet'}</Button><Typography variant="caption" color="text.secondary">Bu notlar STT tamamlandıktan sonra AI özetine bağlam olarak dahil edilir.</Typography></Stack>}
     {!selectedMeeting && <Alert severity="info">Kayıt başlatmak için planlanmış bir toplantı seçin.</Alert>}
     {recorder.state === 'recording' && <Alert severity="warning">Kayıt devam ediyor</Alert>}
     <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 2, p: 2, borderRadius: 2, bgcolor: 'grey.100' }}><Typography variant="h4" sx={{ fontVariantNumeric: 'tabular-nums', letterSpacing: 1 }}>{duration}</Typography><Typography color="text.secondary">Kayıt süresi</Typography></Stack>
