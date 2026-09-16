@@ -6,6 +6,7 @@ using SmartMeeting.Application.Meetings.Queries.GetMeetings;
 using SmartMeeting.Application.Meetings.Commands.StartRecording;
 using SmartMeeting.Application.Meetings.Commands.CompleteRecording;
 using SmartMeeting.Application.Meetings.Commands.UploadMeetingAudio;
+using SmartMeeting.Application.Meetings.Queries.GetMeeting;
 
 namespace SmartMeeting.Api.Controllers;
 
@@ -16,6 +17,10 @@ public sealed class MeetingsController(ISender sender) : ControllerBase
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] string? organizerId, CancellationToken cancellationToken)
         => ToActionResult(await sender.Send(new GetMeetingsQuery(organizerId), cancellationToken));
+
+    [HttpGet("{meetingId:guid}")]
+    public async Task<IActionResult> GetById(Guid meetingId, CancellationToken cancellationToken)
+        => ToActionResult(await sender.Send(new GetMeetingQuery(meetingId), cancellationToken));
 
     [HttpPost]
     public async Task<IActionResult> Create(CreateMeetingRequest request, CancellationToken cancellationToken)

@@ -36,6 +36,18 @@ public sealed class CreateMeetingHandlerTests
         Assert.Equal("Birinci", result.Value!.Single().Title);
     }
 
+    [Fact]
+    public async Task GetMeeting_returns_not_found_for_unknown_id()
+    {
+        var context = new FakeApplicationDbContext();
+        var handler = new Application.Meetings.Queries.GetMeeting.GetMeetingHandler(context);
+
+        var result = await handler.Handle(new Application.Meetings.Queries.GetMeeting.GetMeetingQuery(Guid.NewGuid()), CancellationToken.None);
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal("meeting_not_found", result.Error!.Code);
+    }
+
     private sealed class FakeApplicationDbContext : IApplicationDbContext
     {
         private readonly List<Meeting> _meetings = [];
