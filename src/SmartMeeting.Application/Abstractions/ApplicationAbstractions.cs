@@ -1,4 +1,5 @@
 using SmartMeeting.Domain.Meetings;
+using SmartMeeting.Application.Common;
 
 namespace SmartMeeting.Application.Abstractions;
 
@@ -51,3 +52,18 @@ public interface IEmailService
 {
     Task SendMeetingSummaryAsync(Meeting meeting, CancellationToken cancellationToken);
 }
+
+public interface IIdentityService
+{
+    Task<Result<RegisteredUser>> RegisterAsync(string email, string password, string displayName, CancellationToken cancellationToken);
+    Task<Result<AuthenticatedUser>> LoginAsync(string email, string password, CancellationToken cancellationToken);
+}
+
+public interface IJwtTokenService
+{
+    AuthToken CreateToken(string userId, string email, string displayName);
+}
+
+public sealed record RegisteredUser(string UserId, string Email, string DisplayName);
+public sealed record AuthenticatedUser(string UserId, string Email, string DisplayName, string AccessToken, DateTimeOffset ExpiresAt);
+public sealed record AuthToken(string Value, DateTimeOffset ExpiresAt);

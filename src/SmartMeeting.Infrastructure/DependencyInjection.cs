@@ -5,6 +5,7 @@ using SmartMeeting.Infrastructure.Ai;
 using SmartMeeting.Infrastructure.Storage;
 using Microsoft.Extensions.Configuration;
 using SmartMeeting.Infrastructure.Email;
+using SmartMeeting.Infrastructure.Security;
 
 namespace SmartMeeting.Infrastructure;
 
@@ -13,6 +14,8 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddTransient<MistralRetryHandler>();
+        services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services.AddSingleton<IJwtTokenService, JwtTokenService>();
         services.Configure<RabbitMqOptions>(configuration.GetSection(RabbitMqOptions.SectionName));
         services.AddSingleton<IMeetingProcessingQueue, RabbitMqMeetingProcessingQueue>();
         services.AddHttpClient<ISpeechToTextService, MistralSpeechToTextService>((serviceProvider, client) =>

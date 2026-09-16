@@ -1,58 +1,39 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
+using MediatR;
 using SmartMeeting.Api.Security;
-using SmartMeeting.Persistence.Identity;
+using SmartMeeting.Application.Auth.Commands.Login;
+using SmartMeeting.Application.Auth.Commands.Register;
 
 namespace SmartMeeting.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public sealed class AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration) : ControllerBase
+public sealed class AuthController(ISender sender, IAuthCookieService authCookieService) : ControllerBase
 {
     [HttpPost("register")]
     [AllowAnonymous]
-    public async Task<IActionResult> Register(RegisterRequest request)
+    public async Task<IActionResult> Register(RegisterRequest request, CancellationToken cancellationToken)
     {
-        var user = new ApplicationUser { UserName = request.Email, Email = request.Email, DisplayName = request.DisplayName.Trim() };
-        var result = await userManager.CreateAsync(user, request.Password);
-        if (!result.Succeeded) return BadRequest(result.Errors.Select(error => new { code = error.Code, message = error.Description }));
-        return Ok(new { userId = user.Id, email = user.Email, displayName = user.DisplayName });
+        var result = await sender.Send(new RegisterCommand(request.Email, request.Password, request.DisplayName), cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     [HttpPost("login")]
     [AllowAnonymous]
-    public async Task<IActionResult> Login(LoginRequest request)
+    public async Task<IActionResult> Login(LoginRequest request, CancellationToken cancellationToken)
     {
-        var user = await userManager.FindByEmailAsync(request.Email);
-        if (user is null || !await userManager.CheckPasswordAsync(user, request.Password)) return Unauthorized(new { code = "invalid_credentials", message = "E-posta veya şifre hatalı." });
-        var options = configuration.GetSection("Authentication").Get<AuthenticationOptions>() ?? new();
-        if (string.IsNullOrWhiteSpace(options.SigningKey)) return StatusCode(StatusCodes.Status503ServiceUnavailable, new { code = "auth_not_configured", message = "JWT signing key yapılandırılmamış." });
-        var claims = new[] { new Claim(JwtRegisteredClaimNames.Sub, user.Id), new Claim(JwtRegisteredClaimNames.Email, user.Email ?? request.Email), new Claim(ClaimTypes.Name, user.DisplayName) };
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.SigningKey));
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        var token = new JwtSecurityToken(options.Issuer, options.Audience, claims, expires: DateTime.UtcNow.AddHours(8), signingCredentials: credentials);
-        Response.Cookies.Append(options.CookieName, new JwtSecurityTokenHandler().WriteToken(token), new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = Request.IsHttps,
-            SameSite = SameSiteMode.Lax,
-            Expires = token.ValidTo,
-            IsEssential = true,
-            Path = "/"
-        });
-        return Ok(new { expiresAt = token.ValidTo, userId = user.Id, displayName = user.DisplayName });
+        var result = await sender.Send(new LoginCommand(request.Email, request.Password), cancellationToken);
+        if (!result.IsSuccess) return Unauthorized(result.Error);
+        var user = result.Value!;
+        authCookieService.Write(user.AccessToken, user.ExpiresAt);
+        return Ok(new { expiresAt = user.ExpiresAt, userId = user.UserId, displayName = user.DisplayName });
     }
 
     [HttpPost("logout")]
     public IActionResult Logout()
     {
-        var options = configuration.GetSection("Authentication").Get<AuthenticationOptions>() ?? new();
-        Response.Cookies.Delete(options.CookieName, new CookieOptions { HttpOnly = true, SameSite = SameSiteMode.Lax, Path = "/" });
+        authCookieService.Delete();
         return NoContent();
     }
 }

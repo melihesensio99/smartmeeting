@@ -8,11 +8,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using SmartMeeting.Infrastructure.Security;
 
 var builder = WebApplication.CreateBuilder(args);
-var authenticationOptions = builder.Configuration.GetSection("Authentication").Get<AuthenticationOptions>() ?? new();
+var authenticationOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new();
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAuthCookieService, HttpAuthCookieService>();
 builder.Services.AddScoped<SmartMeeting.Application.Abstractions.ICurrentUserService, HttpCurrentUserService>();
 if (authenticationOptions.Enabled)
 {
