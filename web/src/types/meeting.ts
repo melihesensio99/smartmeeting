@@ -5,3 +5,5 @@ export const meetingSchema = z.object({ id: z.string().uuid(), title: z.string()
 export type Meeting = z.infer<typeof meetingSchema>
 export const createMeetingSchema = z.object({ title: z.string().min(3, 'Toplantı adı en az 3 karakter olmalıdır.').max(160), organizerId: z.string().min(1, 'Organizatör zorunludur.'), startsAt: z.string().min(1, 'Başlangıç zamanı zorunludur.'), endsAt: z.string().optional() })
 export type CreateMeetingInput = z.infer<typeof createMeetingSchema>
+export const addParticipantSchema = z.object({ userId: z.string().min(1, 'Kullanıcı ID zorunludur.').max(100), displayName: z.string().min(2, 'Ad soyad zorunludur.').max(160), email: z.string().email('Geçerli bir e-posta giriniz.') })
+export type AddParticipantInput = z.infer<typeof addParticipantSchema>
