@@ -46,6 +46,8 @@ Mistral yapılandırması için API anahtarını User Secrets ile tanımlayın:
 dotnet user-secrets set "Mistral:ApiKey" "<MISTRAL_API_KEY>" --project src/SmartMeeting.Api
 ```
 
+JWT authentication is provider-neutral and disabled for local development by default. For a production identity provider, set `Authentication:Enabled=true`, `Authentication:RequireAuthentication=true`, `Authentication:Authority` and `Authentication:Audience` through environment variables or user secrets.
+
 ## Katmanlar
 
 - `SmartMeeting.Domain`: rich domain modeli ve domain event sözleşmeleri

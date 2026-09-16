@@ -3,9 +3,32 @@ using SmartMeeting.Application;
 using SmartMeeting.Infrastructure;
 using SmartMeeting.Persistence;
 using SmartMeeting.Api.Hubs;
+using SmartMeeting.Api.Security;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
+var authenticationOptions = builder.Configuration.GetSection("Authentication").Get<AuthenticationOptions>() ?? new();
 builder.Services.AddControllers();
+if (authenticationOptions.Enabled)
+{
+    if (string.IsNullOrWhiteSpace(authenticationOptions.Authority))
+        throw new InvalidOperationException("Authentication:Authority, JWT authentication etkinleştirildiğinde zorunludur.");
+
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.Authority = authenticationOptions.Authority;
+            options.Audience = authenticationOptions.Audience;
+            options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
+        });
+}
+builder.Services.AddAuthorization(options =>
+{
+    if (authenticationOptions.RequireAuthentication)
+        options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
+            .Build();
+});
 builder.Services.AddSignalR();
 builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
@@ -16,6 +39,9 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.Al
 var app = builder.Build();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseCors();
+if (authenticationOptions.Enabled)
+    app.UseAuthentication();
+app.UseAuthorization();
 app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "smartmeeting-api" }));
 app.MapControllers();
 app.MapHub<MeetingStatusHub>("/hubs/meeting-status");
