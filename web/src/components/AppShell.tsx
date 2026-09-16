@@ -8,7 +8,7 @@ export function AppShell({ route, children }: { route: AppRoute; children: React
   const menu = [
     { label: 'Dashboard', path: '/', route: 'dashboard' as const, icon: '▦' },
     { label: 'Toplantılar', path: '/meetings', route: 'meetings' as const, icon: '▣' },
-    { label: 'Aksiyonlarım', path: '/actions', route: 'actions' as const, icon: '☑' },
+    { label: 'Aksiyonlarım', path: '/my-actions', route: 'actions' as const, icon: '☑' },
   ]
   return <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
     <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}><Toolbar><Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 800 }}>Toplantı Asistanı</Typography><Typography sx={{ mr: 3 }}>{localStorage.getItem('smartmeeting-user') ?? 'Hesabım'}</Typography><Button color="inherit" variant="outlined" onClick={async () => { await logout(); localStorage.removeItem('smartmeeting-user'); navigate('/login') }}>Çıkış Yap</Button></Toolbar></AppBar>

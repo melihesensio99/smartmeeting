@@ -7,7 +7,7 @@ export function routeFromPath(path: string): AppRoute {
   if (path === '/register') return 'register'
   if (path === '/meetings') return 'meetings'
   if (path.startsWith('/meetings/')) return 'meeting-detail'
-  if (path === '/actions') return 'actions'
+  if (path === '/actions' || path === '/my-actions') return 'actions'
   return 'dashboard'
 }
 
