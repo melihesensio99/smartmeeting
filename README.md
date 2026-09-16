@@ -36,6 +36,12 @@ Test kapsamı domain yaşam döngüsü, domain event üretimi, katılımcı idem
 
 API varsayılan olarak `http://localhost:5080/api` adresindedir. Frontend için `web/.env.example` dosyasını `.env` olarak kopyalayabilirsiniz.
 
+Mistral yapılandırması için API anahtarını User Secrets ile tanımlayın:
+
+```powershell
+dotnet user-secrets set "Mistral:ApiKey" "<MISTRAL_API_KEY>" --project src/SmartMeeting.Api
+```
+
 ## Katmanlar
 
 - `SmartMeeting.Domain`: rich domain modeli ve domain event sözleşmeleri

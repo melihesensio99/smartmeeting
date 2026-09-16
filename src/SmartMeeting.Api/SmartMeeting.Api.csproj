@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
     <ProjectReference Include="..\SmartMeeting.Application\SmartMeeting.Application.csproj" />
@@ -10,6 +10,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>e0a33b91-0f05-472b-9205-47e397c1396f</UserSecretsId>
   </PropertyGroup>
 
 </Project>

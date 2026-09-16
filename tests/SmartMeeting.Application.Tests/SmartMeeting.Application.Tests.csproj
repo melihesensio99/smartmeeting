@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\SmartMeeting.Application\SmartMeeting.Application.csproj" />
     <ProjectReference Include="..\..\src\SmartMeeting.Domain\SmartMeeting.Domain.csproj" />
+    <ProjectReference Include="..\..\src\SmartMeeting.Infrastructure\SmartMeeting.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
