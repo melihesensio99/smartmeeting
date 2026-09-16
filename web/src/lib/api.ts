@@ -15,3 +15,8 @@ export async function completeActionItem(meetingId: string, actionItemId: string
   const response = await client.post<unknown>(`/meetings/${meetingId}/action-items/${actionItemId}/complete`)
   return meetingSchema.parse(response.data)
 }
+
+export async function updateMeetingNotes(meetingId: string, notes: string): Promise<Meeting> {
+  const response = await client.put<unknown>(`/meetings/${meetingId}/notes`, { notes })
+  return meetingSchema.parse(response.data)
+}

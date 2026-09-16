@@ -7,6 +7,7 @@ using SmartMeeting.Application.Meetings.Commands.StartRecording;
 using SmartMeeting.Application.Meetings.Commands.CompleteRecording;
 using SmartMeeting.Application.Meetings.Commands.UploadMeetingAudio;
 using SmartMeeting.Application.Meetings.Commands.CompleteActionItem;
+using SmartMeeting.Application.Meetings.Commands.UpdateMeetingNotes;
 using SmartMeeting.Application.Meetings.Queries.GetMeeting;
 
 namespace SmartMeeting.Api.Controllers;
@@ -39,6 +40,10 @@ public sealed class MeetingsController(ISender sender) : ControllerBase
     public async Task<IActionResult> CompleteActionItem(Guid meetingId, Guid actionItemId, CancellationToken cancellationToken)
         => ToActionResult(await sender.Send(new CompleteActionItemCommand(meetingId, actionItemId), cancellationToken));
 
+    [HttpPut("{meetingId:guid}/notes")]
+    public async Task<IActionResult> UpdateNotes(Guid meetingId, UpdateNotesRequest request, CancellationToken cancellationToken)
+        => ToActionResult(await sender.Send(new UpdateMeetingNotesCommand(meetingId, request.Notes), cancellationToken));
+
     [HttpPost("{meetingId:guid}/recording/complete")]
     public async Task<IActionResult> CompleteRecording(Guid meetingId, CompleteRecordingRequest request, CancellationToken cancellationToken)
         => ToActionResult(await sender.Send(new CompleteRecordingCommand(meetingId, request.AudioFilePath), cancellationToken));
@@ -62,3 +67,4 @@ public sealed class MeetingsController(ISender sender) : ControllerBase
 
 public sealed record CreateMeetingRequest(string Title, string OrganizerId, DateTimeOffset StartsAt, DateTimeOffset? EndsAt);
 public sealed record CompleteRecordingRequest(string AudioFilePath);
+public sealed record UpdateNotesRequest(string Notes);

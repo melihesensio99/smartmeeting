@@ -33,6 +33,7 @@ public sealed class MeetingDbContext(DbContextOptions<MeetingDbContext> options)
             entity.Property(x => x.OrganizerId).HasMaxLength(100).IsRequired();
             entity.Property(x => x.Status).HasConversion<string>().HasMaxLength(32);
             entity.Property(x => x.Transcript).HasColumnType("TEXT");
+            entity.Property(x => x.Notes).HasColumnType("TEXT");
             entity.Property(x => x.Summary).HasConversion(new ValueConverter<MeetingSummary?, string?>(value => SerializeSummary(value), value => DeserializeSummary(value)));
             entity.Ignore(x => x.DomainEvents);
             entity.HasMany(x => x.Participants).WithOne().HasForeignKey(x => x.MeetingId).OnDelete(DeleteBehavior.Cascade);

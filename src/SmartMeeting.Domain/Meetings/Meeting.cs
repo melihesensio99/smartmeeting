@@ -24,6 +24,7 @@ public sealed class Meeting : Entity
     public MeetingStatus Status { get; private set; }
     public string? AudioFilePath { get; private set; }
     public string? Transcript { get; private set; }
+    public string? Notes { get; private set; }
     public MeetingSummary? Summary { get; private set; }
     public IReadOnlyCollection<MeetingParticipant> Participants => _participants.AsReadOnly();
 
@@ -69,6 +70,12 @@ public sealed class Meeting : Entity
         ArgumentNullException.ThrowIfNull(summary);
         Summary = summary;
         Status = MeetingStatus.Ready;
+        Touch();
+    }
+
+    public void SetNotes(string notes)
+    {
+        Notes = Require(notes, nameof(notes), 10000);
         Touch();
     }
 

@@ -72,4 +72,14 @@ public sealed class MeetingTests
 
         Assert.True(meeting.Summary!.ActionItems.Single().Completed);
     }
+
+    [Fact]
+    public void SetNotes_stores_trimmed_notes()
+    {
+        var meeting = Meeting.Create("Planlama", "user-1", DateTimeOffset.UtcNow);
+
+        meeting.SetNotes("  Önemli takip notu  ");
+
+        Assert.Equal("Önemli takip notu", meeting.Notes);
+    }
 }

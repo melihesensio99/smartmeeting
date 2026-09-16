@@ -67,6 +67,20 @@ public sealed class CreateMeetingHandlerTests
         Assert.True(result.Value!.Summary!.ActionItems.Single().Completed);
     }
 
+    [Fact]
+    public async Task UpdateMeetingNotes_returns_updated_meeting()
+    {
+        var context = new FakeApplicationDbContext();
+        var meeting = Meeting.Create("Planlama", "user-1", DateTimeOffset.UtcNow);
+        context.Seed(meeting);
+        var handler = new Application.Meetings.Commands.UpdateMeetingNotes.UpdateMeetingNotesHandler(context);
+
+        var result = await handler.Handle(new Application.Meetings.Commands.UpdateMeetingNotes.UpdateMeetingNotesCommand(meeting.Id, "Takip notu"), CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("Takip notu", result.Value!.Notes);
+    }
+
     private sealed class FakeApplicationDbContext : IApplicationDbContext
     {
         private readonly List<Meeting> _meetings = [];
