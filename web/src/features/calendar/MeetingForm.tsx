@@ -1,0 +1,6 @@
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Button, Stack, TextField } from '@mui/material'
+import { useForm } from 'react-hook-form'
+import { createMeetingSchema, type CreateMeetingInput } from '../../types/meeting'
+type Props = { onSubmit: (input: CreateMeetingInput) => void; loading: boolean }
+export function MeetingForm({ onSubmit, loading }: Props) { const { register, handleSubmit, formState: { errors } } = useForm<CreateMeetingInput>({ resolver: zodResolver(createMeetingSchema), defaultValues: { organizerId: 'demo-user' } }); return <Stack component="form" spacing={2} onSubmit={handleSubmit(onSubmit)}><TextField label="Toplantı adı" {...register('title')} error={Boolean(errors.title)} helperText={errors.title?.message} /><TextField label="Organizatör" {...register('organizerId')} error={Boolean(errors.organizerId)} helperText={errors.organizerId?.message} /><TextField label="Başlangıç" type="datetime-local" slotProps={{ inputLabel: { shrink: true } }} {...register('startsAt')} error={Boolean(errors.startsAt)} helperText={errors.startsAt?.message} /><TextField label="Bitiş" type="datetime-local" slotProps={{ inputLabel: { shrink: true } }} {...register('endsAt')} /><Button type="submit" variant="contained" disabled={loading}>Toplantı oluştur</Button></Stack> }
