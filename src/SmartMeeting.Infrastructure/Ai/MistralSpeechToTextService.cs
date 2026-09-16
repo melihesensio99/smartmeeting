@@ -15,6 +15,7 @@ public sealed class MistralSpeechToTextService(HttpClient httpClient, IOptions<M
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", configuration.ApiKey);
         using var form = new MultipartFormDataContent();
         form.Add(new StringContent(configuration.TranscriptionModel), "model");
+        form.Add(new StringContent(configuration.EnableDiarization ? "true" : "false"), "diarize");
         var audioContent = new StreamContent(audio);
         audioContent.Headers.ContentType = new MediaTypeHeaderValue(ContentTypeFor(fileName));
         form.Add(audioContent, "file", fileName);
@@ -23,7 +24,11 @@ public sealed class MistralSpeechToTextService(HttpClient httpClient, IOptions<M
         var body = await response.Content.ReadAsStringAsync(cancellationToken);
         response.EnsureSuccessStatusCode();
         using var document = JsonDocument.Parse(body);
-        return document.RootElement.GetProperty("text").GetString() ?? throw new InvalidOperationException("Mistral boş transkript döndürdü.");
+        var root = document.RootElement;
+        var text = root.GetProperty("text").GetString() ?? throw new InvalidOperationException("Mistral boş transkript döndürdü.");
+        if (!configuration.EnableDiarization || !root.TryGetProperty("segments", out var segments) || segments.ValueKind != JsonValueKind.Array || segments.GetArrayLength() == 0) return text;
+        var labeledSegments = segments.EnumerateArray().Select(segment => FormatSegment(segment)).Where(segment => segment is not null).Cast<string>().ToList();
+        return labeledSegments.Count == 0 ? text : string.Join(Environment.NewLine, labeledSegments);
     }
 
     private static string ContentTypeFor(string fileName) => Path.GetExtension(fileName).ToLowerInvariant() switch
@@ -34,4 +39,16 @@ public sealed class MistralSpeechToTextService(HttpClient httpClient, IOptions<M
         ".ogg" => "audio/ogg",
         _ => "audio/webm"
     };
+
+    private static string? FormatSegment(JsonElement segment)
+    {
+        if (!segment.TryGetProperty("text", out var textElement)) return null;
+        var text = textElement.GetString()?.Trim();
+        if (string.IsNullOrWhiteSpace(text)) return null;
+        var speaker = segment.TryGetProperty("speaker", out var speakerElement) ? speakerElement.GetString() : null;
+        var start = segment.TryGetProperty("start", out var startElement) ? startElement.ToString() : null;
+        var end = segment.TryGetProperty("end", out var endElement) ? endElement.ToString() : null;
+        var time = start is not null && end is not null ? $" [{start}-{end}]" : string.Empty;
+        return $"{speaker ?? "Konuşmacı"}{time}: {text}";
+    }
 }
