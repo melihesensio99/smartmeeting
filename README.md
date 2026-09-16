@@ -31,8 +31,11 @@ Test kapsamı domain yaşam döngüsü, domain event üretimi, katılımcı idem
 - `POST /api/meetings`: toplantı oluşturur.
 - `POST /api/meetings/{id}/recording/start`: kayıt durumunu başlatır.
 - `POST /api/meetings/{id}/recording/complete`: ses dosyasını kuyruğa gönderir.
+- `POST /api/meetings/{id}/audio`: multipart ses dosyasını local/object storage’a kaydeder ve işleme kuyruğuna gönderir.
 - Worker, STT ve yapılandırılmış özetleme adapter’larını çalıştırır; sonuç `Ready` olduğunda kaydeder.
 - SignalR hub: `/hubs/meeting-status`; istemci metodu `JoinMeeting`, event adı `meetingStatusChanged`.
+
+Geliştirme ortamında ses dosyaları `data/audio/yyyy/MM/dd` altında tutulur. Üretimde `IAudioStorage` implementasyonu Azure Blob veya S3-compatible object storage ile değiştirilmelidir; dosyanın kendisi SQLite’a yazılmaz.
 
 API varsayılan olarak `http://localhost:5080/api` adresindedir. Frontend için `web/.env.example` dosyasını `.env` olarak kopyalayabilirsiniz.
 

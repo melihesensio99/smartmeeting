@@ -20,6 +20,11 @@ public interface IAiSummarizerService
     Task<MeetingSummary> SummarizeAsync(string transcript, CancellationToken cancellationToken);
 }
 
+public interface IAudioStorage
+{
+    Task<string> SaveAsync(Stream audio, string originalFileName, string contentType, CancellationToken cancellationToken);
+}
+
 public interface IMeetingProcessingQueue
 {
     ValueTask EnqueueAsync(Guid meetingId, CancellationToken cancellationToken);

@@ -5,6 +5,7 @@ using SmartMeeting.Application.Meetings.Commands.CreateMeeting;
 using SmartMeeting.Application.Meetings.Queries.GetMeetings;
 using SmartMeeting.Application.Meetings.Commands.StartRecording;
 using SmartMeeting.Application.Meetings.Commands.CompleteRecording;
+using SmartMeeting.Application.Meetings.Commands.UploadMeetingAudio;
 
 namespace SmartMeeting.Api.Controllers;
 
@@ -31,6 +32,16 @@ public sealed class MeetingsController(ISender sender) : ControllerBase
     [HttpPost("{meetingId:guid}/recording/complete")]
     public async Task<IActionResult> CompleteRecording(Guid meetingId, CompleteRecordingRequest request, CancellationToken cancellationToken)
         => ToActionResult(await sender.Send(new CompleteRecordingCommand(meetingId, request.AudioFilePath), cancellationToken));
+
+    [HttpPost("{meetingId:guid}/audio")]
+    [RequestSizeLimit(524_288_000)]
+    public async Task<IActionResult> UploadAudio(Guid meetingId, IFormFile file, CancellationToken cancellationToken)
+    {
+        if (file.Length == 0) return BadRequest(new { code = "empty_file", message = "Ses dosyası boş olamaz." });
+        await using var stream = file.OpenReadStream();
+        var result = await sender.Send(new UploadMeetingAudioCommand(meetingId, stream, file.FileName, file.ContentType), cancellationToken);
+        return ToActionResult(result);
+    }
 
     private IActionResult ToActionResult(Result<IReadOnlyCollection<Application.Meetings.Dtos.MeetingDto>> result)
         => result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);

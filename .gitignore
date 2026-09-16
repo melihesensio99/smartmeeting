@@ -8,5 +8,6 @@ dist/
 *.db
 *.db-shm
 *.db-wal
+data/
 .vs/
 .idea/

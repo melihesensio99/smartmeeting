@@ -3,6 +3,7 @@ using SmartMeeting.Application.Abstractions;
 using SmartMeeting.Infrastructure.Processing;
 using SmartMeeting.Infrastructure.Services;
 using SmartMeeting.Infrastructure.Ai;
+using SmartMeeting.Infrastructure.Storage;
 using Microsoft.Extensions.Configuration;
 
 namespace SmartMeeting.Infrastructure;
@@ -21,6 +22,8 @@ public static class DependencyInjection
             client.Timeout = TimeSpan.FromSeconds(90);
         });
         services.AddHostedService<MeetingProcessingWorker>();
+        services.Configure<AudioStorageOptions>(configuration.GetSection(AudioStorageOptions.SectionName));
+        services.AddScoped<IAudioStorage, LocalAudioStorage>();
         return services;
     }
 }
