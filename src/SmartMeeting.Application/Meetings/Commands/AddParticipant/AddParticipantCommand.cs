@@ -17,7 +17,7 @@ public sealed class AddParticipantValidator : AbstractValidator<AddParticipantCo
     }
 }
 
-public sealed class AddParticipantHandler(IApplicationDbContext db, ICurrentUserService currentUser) : IRequestHandler<AddParticipantCommand, Result<MeetingResponse>>
+public sealed class AddParticipantCommandHandler(IApplicationDbContext db, ICurrentUserService currentUser) : IRequestHandler<AddParticipantCommand, Result<MeetingResponse>>
 {
     public async Task<Result<MeetingResponse>> Handle(AddParticipantCommand request, CancellationToken cancellationToken)
     {

@@ -6,7 +6,7 @@ namespace SmartMeeting.Application.Meetings.Commands.CompleteRecording;
 
 public sealed record CompleteRecordingCommand(Guid MeetingId, string AudioFilePath) : IRequest<Result<MeetingResponse>>;
 
-public sealed class CompleteRecordingHandler(IApplicationDbContext db, IMeetingProcessingQueue queue, ICurrentUserService currentUser) : IRequestHandler<CompleteRecordingCommand, Result<MeetingResponse>>
+public sealed class CompleteRecordingCommandHandler(IApplicationDbContext db, IMeetingProcessingQueue queue, ICurrentUserService currentUser) : IRequestHandler<CompleteRecordingCommand, Result<MeetingResponse>>
 {
     public async Task<Result<MeetingResponse>> Handle(CompleteRecordingCommand request, CancellationToken cancellationToken)
     {

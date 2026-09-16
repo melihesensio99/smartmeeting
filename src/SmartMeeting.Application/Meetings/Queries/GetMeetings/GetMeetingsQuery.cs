@@ -6,7 +6,7 @@ namespace SmartMeeting.Application.Meetings.Queries.GetMeetings;
 
 public sealed record GetMeetingsQuery(string? OrganizerId) : IRequest<Result<IReadOnlyCollection<MeetingResponse>>>;
 
-public sealed class GetMeetingsHandler(IApplicationDbContext db, ICurrentUserService currentUser) : IRequestHandler<GetMeetingsQuery, Result<IReadOnlyCollection<MeetingResponse>>>
+public sealed class GetMeetingsQueryHandler(IApplicationDbContext db, ICurrentUserService currentUser) : IRequestHandler<GetMeetingsQuery, Result<IReadOnlyCollection<MeetingResponse>>>
 {
     public async Task<Result<IReadOnlyCollection<MeetingResponse>>> Handle(GetMeetingsQuery request, CancellationToken cancellationToken)
     {

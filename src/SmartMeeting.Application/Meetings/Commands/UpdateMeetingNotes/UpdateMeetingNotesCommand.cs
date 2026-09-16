@@ -12,7 +12,7 @@ public sealed class UpdateMeetingNotesValidator : AbstractValidator<UpdateMeetin
     public UpdateMeetingNotesValidator() => RuleFor(x => x.Notes).NotEmpty().MaximumLength(10000);
 }
 
-public sealed class UpdateMeetingNotesHandler(IApplicationDbContext db, ICurrentUserService currentUser) : IRequestHandler<UpdateMeetingNotesCommand, Result<MeetingResponse>>
+public sealed class UpdateMeetingNotesCommandHandler(IApplicationDbContext db, ICurrentUserService currentUser) : IRequestHandler<UpdateMeetingNotesCommand, Result<MeetingResponse>>
 {
     public async Task<Result<MeetingResponse>> Handle(UpdateMeetingNotesCommand request, CancellationToken cancellationToken)
     {

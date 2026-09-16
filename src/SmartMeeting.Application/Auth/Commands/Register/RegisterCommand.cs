@@ -18,7 +18,7 @@ public sealed class RegisterValidator : AbstractValidator<RegisterCommand>
     }
 }
 
-public sealed class RegisterHandler(IIdentityService identityService) : IRequestHandler<RegisterCommand, Result<RegisteredUser>>
+public sealed class RegisterCommandHandler(IIdentityService identityService) : IRequestHandler<RegisterCommand, Result<RegisteredUser>>
 {
     public Task<Result<RegisteredUser>> Handle(RegisterCommand request, CancellationToken cancellationToken)
         => identityService.RegisterAsync(request.Email, request.Password, request.DisplayName, cancellationToken);

@@ -17,7 +17,7 @@ public sealed class LoginValidator : AbstractValidator<LoginCommand>
     }
 }
 
-public sealed class LoginHandler(IIdentityService identityService) : IRequestHandler<LoginCommand, Result<AuthenticatedUser>>
+public sealed class LoginCommandHandler(IIdentityService identityService) : IRequestHandler<LoginCommand, Result<AuthenticatedUser>>
 {
     public Task<Result<AuthenticatedUser>> Handle(LoginCommand request, CancellationToken cancellationToken)
         => identityService.LoginAsync(request.Email, request.Password, cancellationToken);

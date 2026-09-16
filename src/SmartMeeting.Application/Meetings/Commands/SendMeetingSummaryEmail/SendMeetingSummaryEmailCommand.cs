@@ -6,7 +6,7 @@ namespace SmartMeeting.Application.Meetings.Commands.SendMeetingSummaryEmail;
 
 public sealed record SendMeetingSummaryEmailCommand(Guid MeetingId) : IRequest<Result>;
 
-public sealed class SendMeetingSummaryEmailHandler(IApplicationDbContext db, ICurrentUserService currentUser, IEmailService emailService) : IRequestHandler<SendMeetingSummaryEmailCommand, Result>
+public sealed class SendMeetingSummaryEmailCommandHandler(IApplicationDbContext db, ICurrentUserService currentUser, IEmailService emailService) : IRequestHandler<SendMeetingSummaryEmailCommand, Result>
 {
     public async Task<Result> Handle(SendMeetingSummaryEmailCommand request, CancellationToken cancellationToken)
     {

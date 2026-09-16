@@ -6,7 +6,7 @@ namespace SmartMeeting.Application.Meetings.Commands.CompleteActionItem;
 
 public sealed record CompleteActionItemCommand(Guid MeetingId, Guid ActionItemId) : IRequest<Result<MeetingResponse>>;
 
-public sealed class CompleteActionItemHandler(IApplicationDbContext db, ICurrentUserService currentUser) : IRequestHandler<CompleteActionItemCommand, Result<MeetingResponse>>
+public sealed class CompleteActionItemCommandHandler(IApplicationDbContext db, ICurrentUserService currentUser) : IRequestHandler<CompleteActionItemCommand, Result<MeetingResponse>>
 {
     public async Task<Result<MeetingResponse>> Handle(CompleteActionItemCommand request, CancellationToken cancellationToken)
     {

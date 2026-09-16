@@ -12,7 +12,7 @@ public sealed class MapSpeakerValidator : AbstractValidator<MapSpeakerCommand>
     public MapSpeakerValidator() => RuleFor(x => x.SpeakerLabel).NotEmpty().MaximumLength(80);
 }
 
-public sealed class MapSpeakerHandler(IApplicationDbContext db, ICurrentUserService currentUser) : IRequestHandler<MapSpeakerCommand, Result<MeetingResponse>>
+public sealed class MapSpeakerCommandHandler(IApplicationDbContext db, ICurrentUserService currentUser) : IRequestHandler<MapSpeakerCommand, Result<MeetingResponse>>
 {
     public async Task<Result<MeetingResponse>> Handle(MapSpeakerCommand request, CancellationToken cancellationToken)
     {

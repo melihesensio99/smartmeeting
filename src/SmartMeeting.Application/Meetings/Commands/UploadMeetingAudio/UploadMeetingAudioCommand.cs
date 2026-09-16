@@ -6,7 +6,7 @@ namespace SmartMeeting.Application.Meetings.Commands.UploadMeetingAudio;
 
 public sealed record UploadMeetingAudioCommand(Guid MeetingId, Stream Audio, string OriginalFileName, string ContentType) : IRequest<Result<MeetingResponse>>;
 
-public sealed class UploadMeetingAudioHandler(IApplicationDbContext db, IAudioStorage storage, IMeetingProcessingQueue queue, ICurrentUserService currentUser) : IRequestHandler<UploadMeetingAudioCommand, Result<MeetingResponse>>
+public sealed class UploadMeetingAudioCommandHandler(IApplicationDbContext db, IAudioStorage storage, IMeetingProcessingQueue queue, ICurrentUserService currentUser) : IRequestHandler<UploadMeetingAudioCommand, Result<MeetingResponse>>
 {
     public async Task<Result<MeetingResponse>> Handle(UploadMeetingAudioCommand request, CancellationToken cancellationToken)
     {

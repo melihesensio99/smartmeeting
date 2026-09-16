@@ -6,7 +6,7 @@ namespace SmartMeeting.Application.Meetings.Commands.StartRecording;
 
 public sealed record StartRecordingCommand(Guid MeetingId) : IRequest<Result<MeetingResponse>>;
 
-public sealed class StartRecordingHandler(IApplicationDbContext db, ICurrentUserService currentUser) : IRequestHandler<StartRecordingCommand, Result<MeetingResponse>>
+public sealed class StartRecordingCommandHandler(IApplicationDbContext db, ICurrentUserService currentUser) : IRequestHandler<StartRecordingCommand, Result<MeetingResponse>>
 {
     public async Task<Result<MeetingResponse>> Handle(StartRecordingCommand request, CancellationToken cancellationToken)
     {

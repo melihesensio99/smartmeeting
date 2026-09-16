@@ -6,7 +6,7 @@ namespace SmartMeeting.Application.Meetings.Queries.GetMeeting;
 
 public sealed record GetMeetingQuery(Guid MeetingId) : IRequest<Result<MeetingResponse>>;
 
-public sealed class GetMeetingHandler(IApplicationDbContext db, ICurrentUserService currentUser) : IRequestHandler<GetMeetingQuery, Result<MeetingResponse>>
+public sealed class GetMeetingQueryHandler(IApplicationDbContext db, ICurrentUserService currentUser) : IRequestHandler<GetMeetingQuery, Result<MeetingResponse>>
 {
     public async Task<Result<MeetingResponse>> Handle(GetMeetingQuery request, CancellationToken cancellationToken)
     {
