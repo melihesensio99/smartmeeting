@@ -19,7 +19,8 @@ public static class DependencyInjection
             options.Password.RequiredLength = 8;
             options.Password.RequireNonAlphanumeric = false;
         }).AddEntityFrameworkStores<MeetingDbContext>();
-        services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IdentityService>();
+        services.AddScoped<IIdentityService>(sp => sp.GetRequiredService<IdentityService>());
         services.AddScoped<IUserDirectoryService>(sp => sp.GetRequiredService<IdentityService>());
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<MeetingDbContext>());
         return services;
