@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+using SmartMeeting.Application.Abstractions.Processing;
+using SmartMeeting.Application.Abstractions.Storage;
+using SmartMeeting.Application.Processing.Contracts;
 
 namespace SmartMeeting.Api.Tests;
 
@@ -83,6 +86,46 @@ public sealed class AuthenticationAndUsersApiTests(ApiFactory factory) : IClassF
         Assert.Equal(1, startedDocument.RootElement.GetProperty("status").GetInt32());
     }
 
+    [Fact]
+    public async Task Uploading_audio_moves_meeting_to_processing_and_enqueues_message()
+    {
+        using var client = factory.CreateClient();
+        var meetingId = await CreateAndStartMeetingAsync(client);
+        var queue = factory.Services.GetRequiredService<TestMeetingProcessingQueue>();
+        queue.LastMeetingId = null;
+
+        using var content = new MultipartFormDataContent();
+        content.Add(new ByteArrayContent([1, 2, 3, 4]), "file", "meeting.webm");
+        using var uploadRequest = new HttpRequestMessage(HttpMethod.Post, $"/api/meetings/{meetingId}/audio") { Content = content };
+        uploadRequest.Headers.Add("X-Test-User", "integration-user");
+
+        var response = await client.SendAsync(uploadRequest);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        Assert.Equal(2, document.RootElement.GetProperty("status").GetInt32());
+        Assert.Equal(meetingId, queue.LastMeetingId);
+    }
+
+    private static async Task<Guid> CreateAndStartMeetingAsync(HttpClient client)
+    {
+        using var createRequest = new HttpRequestMessage(HttpMethod.Post, "/api/meetings")
+        {
+            Content = JsonContent.Create(new { title = "Integration ses testi", startsAt = DateTimeOffset.UtcNow.AddHours(1) })
+        };
+        createRequest.Headers.Add("X-Test-User", "integration-user");
+        var createResponse = await client.SendAsync(createRequest);
+        createResponse.EnsureSuccessStatusCode();
+        using var createdDocument = JsonDocument.Parse(await createResponse.Content.ReadAsStringAsync());
+        var meetingId = createdDocument.RootElement.GetProperty("id").GetGuid();
+
+        using var startRequest = new HttpRequestMessage(HttpMethod.Post, $"/api/meetings/{meetingId}/recording/start");
+        startRequest.Headers.Add("X-Test-User", "integration-user");
+        var startResponse = await client.SendAsync(startRequest);
+        startResponse.EnsureSuccessStatusCode();
+        return meetingId;
+    }
+
     private sealed record UserSearchResponse(string UserId, string DisplayName, string Email);
 }
 
@@ -93,11 +136,18 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Development");
-        builder.ConfigureTestServices(services => services.AddAuthentication(options =>
+        builder.ConfigureTestServices(services =>
         {
-            options.DefaultAuthenticateScheme = TestAuthenticationHandler.SchemeName;
-            options.DefaultChallengeScheme = TestAuthenticationHandler.SchemeName;
-        }).AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>(TestAuthenticationHandler.SchemeName, _ => { }));
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = TestAuthenticationHandler.SchemeName;
+                options.DefaultChallengeScheme = TestAuthenticationHandler.SchemeName;
+            }).AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>(TestAuthenticationHandler.SchemeName, _ => { });
+            services.AddSingleton<TestMeetingProcessingQueue>();
+            services.AddSingleton<IMeetingProcessingQueue>(serviceProvider => serviceProvider.GetRequiredService<TestMeetingProcessingQueue>());
+            services.AddSingleton<TestAudioStorage>();
+            services.AddSingleton<IAudioStorage>(serviceProvider => serviceProvider.GetRequiredService<TestAudioStorage>());
+        });
         builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
             ["ConnectionStrings:Default"] = $"Data Source={databasePath}",
@@ -120,6 +170,33 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
             try { File.Delete(databasePath); } catch (IOException) { }
         }
     }
+}
+
+public sealed class TestMeetingProcessingQueue : IMeetingProcessingQueue
+{
+    public Guid? LastMeetingId { get; set; }
+
+    public ValueTask EnqueueAsync(Guid meetingId, CancellationToken cancellationToken)
+    {
+        LastMeetingId = meetingId;
+        return ValueTask.CompletedTask;
+    }
+
+    public async ValueTask<QueuedMeeting> DequeueAsync(CancellationToken cancellationToken)
+    {
+        await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+        throw new OperationCanceledException(cancellationToken);
+    }
+    public ValueTask CompleteAsync(QueuedMeeting message, bool requeue, CancellationToken cancellationToken) => ValueTask.CompletedTask;
+}
+
+public sealed class TestAudioStorage : IAudioStorage
+{
+    public Task<string> SaveAsync(Stream audio, string originalFileName, string contentType, CancellationToken cancellationToken)
+        => Task.FromResult("integration/audio.webm");
+
+    public Task<Stream> OpenReadAsync(string relativePath, CancellationToken cancellationToken)
+        => Task.FromResult<Stream>(new MemoryStream());
 }
 
 internal sealed class TestAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
