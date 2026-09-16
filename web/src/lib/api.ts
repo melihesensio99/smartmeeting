@@ -10,3 +10,8 @@ export async function uploadMeetingAudio(meetingId: string, audio: Blob, fileNam
   const response = await client.post<unknown>(`/meetings/${meetingId}/audio`, formData)
   return meetingSchema.parse(response.data)
 }
+
+export async function completeActionItem(meetingId: string, actionItemId: string): Promise<Meeting> {
+  const response = await client.post<unknown>(`/meetings/${meetingId}/action-items/${actionItemId}/complete`)
+  return meetingSchema.parse(response.data)
+}
