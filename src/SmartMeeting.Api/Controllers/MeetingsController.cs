@@ -74,10 +74,10 @@ public sealed class MeetingsController(ISender sender) : ControllerBase
         return ToActionResult(result);
     }
 
-    private IActionResult ToActionResult(Result<IReadOnlyCollection<Application.Meetings.Dtos.MeetingDto>> result)
+    private IActionResult ToActionResult(Result<IReadOnlyCollection<MeetingResponse>> result)
         => result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
 
-    private IActionResult ToActionResult(Result<Application.Meetings.Dtos.MeetingDto> result)
+    private IActionResult ToActionResult(Result<MeetingResponse> result)
         => result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
 
     private IActionResult ToActionResult(Result result)

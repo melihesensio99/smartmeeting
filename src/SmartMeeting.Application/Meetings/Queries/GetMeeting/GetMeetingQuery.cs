@@ -1,20 +1,19 @@
 using MediatR;
 using SmartMeeting.Application.Abstractions;
 using SmartMeeting.Application.Common;
-using SmartMeeting.Application.Meetings.Dtos;
 
 namespace SmartMeeting.Application.Meetings.Queries.GetMeeting;
 
-public sealed record GetMeetingQuery(Guid MeetingId) : IRequest<Result<MeetingDto>>;
+public sealed record GetMeetingQuery(Guid MeetingId) : IRequest<Result<MeetingResponse>>;
 
-public sealed class GetMeetingHandler(IApplicationDbContext db, ICurrentUserService currentUser) : IRequestHandler<GetMeetingQuery, Result<MeetingDto>>
+public sealed class GetMeetingHandler(IApplicationDbContext db, ICurrentUserService currentUser) : IRequestHandler<GetMeetingQuery, Result<MeetingResponse>>
 {
-    public async Task<Result<MeetingDto>> Handle(GetMeetingQuery request, CancellationToken cancellationToken)
+    public async Task<Result<MeetingResponse>> Handle(GetMeetingQuery request, CancellationToken cancellationToken)
     {
         var meeting = await db.GetMeetingAsync(request.MeetingId, cancellationToken);
-        if (meeting is not null && !currentUser.CanAccess(meeting.OrganizerId)) return Result<MeetingDto>.Failure("meeting_forbidden", "Bu toplantıya erişim yetkiniz yok.");
+        if (meeting is not null && !currentUser.CanAccess(meeting.OrganizerId)) return Result<MeetingResponse>.Failure("meeting_forbidden", "Bu toplantıya erişim yetkiniz yok.");
         return meeting is null
-            ? Result<MeetingDto>.Failure("meeting_not_found", "Toplantı bulunamadı.")
-            : Result<MeetingDto>.Success(MeetingDto.From(meeting));
+            ? Result<MeetingResponse>.Failure("meeting_not_found", "Toplantı bulunamadı.")
+            : Result<MeetingResponse>.Success(MeetingResponse.From(meeting));
     }
 }
