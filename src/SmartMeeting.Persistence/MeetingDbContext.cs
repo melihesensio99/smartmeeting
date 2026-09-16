@@ -16,7 +16,8 @@ public sealed class MeetingDbContext(DbContextOptions<MeetingDbContext> options)
     {
         var query = MeetingSet.AsNoTracking().Include(x => x.Participants).AsQueryable();
         if (!string.IsNullOrWhiteSpace(organizerId)) query = query.Where(x => x.OrganizerId == organizerId);
-        return await query.OrderByDescending(x => x.StartsAt).ToListAsync(cancellationToken);
+        var meetings = await query.ToListAsync(cancellationToken);
+        return meetings.OrderByDescending(x => x.StartsAt).ToList();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
