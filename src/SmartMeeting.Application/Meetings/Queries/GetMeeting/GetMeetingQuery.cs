@@ -7,11 +7,12 @@ namespace SmartMeeting.Application.Meetings.Queries.GetMeeting;
 
 public sealed record GetMeetingQuery(Guid MeetingId) : IRequest<Result<MeetingDto>>;
 
-public sealed class GetMeetingHandler(IApplicationDbContext db) : IRequestHandler<GetMeetingQuery, Result<MeetingDto>>
+public sealed class GetMeetingHandler(IApplicationDbContext db, ICurrentUserService currentUser) : IRequestHandler<GetMeetingQuery, Result<MeetingDto>>
 {
     public async Task<Result<MeetingDto>> Handle(GetMeetingQuery request, CancellationToken cancellationToken)
     {
         var meeting = await db.GetMeetingAsync(request.MeetingId, cancellationToken);
+        if (meeting is not null && !currentUser.CanAccess(meeting.OrganizerId)) return Result<MeetingDto>.Failure("meeting_forbidden", "Bu toplantıya erişim yetkiniz yok.");
         return meeting is null
             ? Result<MeetingDto>.Failure("meeting_not_found", "Toplantı bulunamadı.")
             : Result<MeetingDto>.Success(MeetingDto.From(meeting));

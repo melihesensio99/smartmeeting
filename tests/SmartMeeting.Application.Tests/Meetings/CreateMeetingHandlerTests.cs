@@ -27,7 +27,7 @@ public sealed class CreateMeetingHandlerTests
         var context = new FakeApplicationDbContext();
         context.Seed(Meeting.Create("Birinci", "user-1", DateTimeOffset.UtcNow));
         context.Seed(Meeting.Create("İkinci", "user-2", DateTimeOffset.UtcNow.AddHours(1)));
-        var handler = new Application.Meetings.Queries.GetMeetings.GetMeetingsHandler(context);
+        var handler = new Application.Meetings.Queries.GetMeetings.GetMeetingsHandler(context, new FakeCurrentUserService());
 
         var result = await handler.Handle(new Application.Meetings.Queries.GetMeetings.GetMeetingsQuery("user-1"), CancellationToken.None);
 
@@ -52,7 +52,7 @@ public sealed class CreateMeetingHandlerTests
     public async Task GetMeeting_returns_not_found_for_unknown_id()
     {
         var context = new FakeApplicationDbContext();
-        var handler = new Application.Meetings.Queries.GetMeeting.GetMeetingHandler(context);
+        var handler = new Application.Meetings.Queries.GetMeeting.GetMeetingHandler(context, new FakeCurrentUserService());
 
         var result = await handler.Handle(new Application.Meetings.Queries.GetMeeting.GetMeetingQuery(Guid.NewGuid()), CancellationToken.None);
 
@@ -71,7 +71,7 @@ public sealed class CreateMeetingHandlerTests
         meeting.SetTranscript("transcript");
         meeting.SetSummary(MeetingSummary.Create("Özet", [], [action]));
         context.Seed(meeting);
-        var handler = new Application.Meetings.Commands.CompleteActionItem.CompleteActionItemHandler(context);
+        var handler = new Application.Meetings.Commands.CompleteActionItem.CompleteActionItemHandler(context, new FakeCurrentUserService());
 
         var result = await handler.Handle(new Application.Meetings.Commands.CompleteActionItem.CompleteActionItemCommand(meeting.Id, action.Id), CancellationToken.None);
 
@@ -85,7 +85,7 @@ public sealed class CreateMeetingHandlerTests
         var context = new FakeApplicationDbContext();
         var meeting = Meeting.Create("Planlama", "user-1", DateTimeOffset.UtcNow);
         context.Seed(meeting);
-        var handler = new Application.Meetings.Commands.UpdateMeetingNotes.UpdateMeetingNotesHandler(context);
+        var handler = new Application.Meetings.Commands.UpdateMeetingNotes.UpdateMeetingNotesHandler(context, new FakeCurrentUserService());
 
         var result = await handler.Handle(new Application.Meetings.Commands.UpdateMeetingNotes.UpdateMeetingNotesCommand(meeting.Id, "Takip notu"), CancellationToken.None);
 

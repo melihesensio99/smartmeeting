@@ -13,12 +13,13 @@ public sealed class UpdateMeetingNotesValidator : AbstractValidator<UpdateMeetin
     public UpdateMeetingNotesValidator() => RuleFor(x => x.Notes).NotEmpty().MaximumLength(10000);
 }
 
-public sealed class UpdateMeetingNotesHandler(IApplicationDbContext db) : IRequestHandler<UpdateMeetingNotesCommand, Result<MeetingDto>>
+public sealed class UpdateMeetingNotesHandler(IApplicationDbContext db, ICurrentUserService currentUser) : IRequestHandler<UpdateMeetingNotesCommand, Result<MeetingDto>>
 {
     public async Task<Result<MeetingDto>> Handle(UpdateMeetingNotesCommand request, CancellationToken cancellationToken)
     {
         var meeting = await db.GetMeetingAsync(request.MeetingId, cancellationToken);
         if (meeting is null) return Result<MeetingDto>.Failure("meeting_not_found", "Toplantı bulunamadı.");
+        if (!currentUser.CanAccess(meeting.OrganizerId)) return Result<MeetingDto>.Failure("meeting_forbidden", "Bu toplantıya erişim yetkiniz yok.");
         meeting.SetNotes(request.Notes);
         await db.SaveChangesAsync(cancellationToken);
         return Result<MeetingDto>.Success(MeetingDto.From(meeting));
