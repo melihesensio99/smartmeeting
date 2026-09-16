@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
@@ -51,6 +52,35 @@ public sealed class AuthenticationAndUsersApiTests(ApiFactory factory) : IClassF
         var response = await client.GetAsync("/api/meetings");
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Authenticated_user_can_create_meeting_and_start_recording()
+    {
+        using var client = factory.CreateClient();
+        using var createRequest = new HttpRequestMessage(HttpMethod.Post, "/api/meetings")
+        {
+            Content = JsonContent.Create(new
+            {
+                title = "Integration kayıt testi",
+                startsAt = DateTimeOffset.UtcNow.AddHours(1),
+                endsAt = DateTimeOffset.UtcNow.AddHours(2)
+            })
+        };
+        createRequest.Headers.Add("X-Test-User", "integration-user");
+
+        var createResponse = await client.SendAsync(createRequest);
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+        using var createdDocument = JsonDocument.Parse(await createResponse.Content.ReadAsStringAsync());
+        var meetingId = createdDocument.RootElement.GetProperty("id").GetGuid();
+
+        using var startRequest = new HttpRequestMessage(HttpMethod.Post, $"/api/meetings/{meetingId}/recording/start");
+        startRequest.Headers.Add("X-Test-User", "integration-user");
+        var startResponse = await client.SendAsync(startRequest);
+
+        Assert.Equal(HttpStatusCode.OK, startResponse.StatusCode);
+        using var startedDocument = JsonDocument.Parse(await startResponse.Content.ReadAsStringAsync());
+        Assert.Equal(1, startedDocument.RootElement.GetProperty("status").GetInt32());
     }
 
     private sealed record UserSearchResponse(string UserId, string DisplayName, string Email);
