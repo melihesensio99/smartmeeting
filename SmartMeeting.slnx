@@ -6,4 +6,8 @@
     <Project Path="src/SmartMeeting.Infrastructure/SmartMeeting.Infrastructure.csproj" />
     <Project Path="src/SmartMeeting.Persistence/SmartMeeting.Persistence.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SmartMeeting.Application.Tests/SmartMeeting.Application.Tests.csproj" />
+    <Project Path="tests/SmartMeeting.Domain.Tests/SmartMeeting.Domain.Tests.csproj" />
+  </Folder>
 </Solution>

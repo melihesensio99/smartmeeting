@@ -18,6 +18,14 @@ npm install
 npm run dev
 ```
 
+Testler:
+
+```powershell
+dotnet test SmartMeeting.slnx
+```
+
+Test kapsamı domain yaşam döngüsü, domain event üretimi, katılımcı idempotency’si, CQRS handler’ları ve FluentValidation kurallarını içerir.
+
 API varsayılan olarak `http://localhost:5080/api` adresindedir. Frontend için `web/.env.example` dosyasını `.env` olarak kopyalayabilirsiniz.
 
 ## Katmanlar
