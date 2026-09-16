@@ -10,5 +10,6 @@
     <Project Path="tests/SmartMeeting.Application.Tests/SmartMeeting.Application.Tests.csproj" />
     <Project Path="tests/SmartMeeting.Domain.Tests/SmartMeeting.Domain.Tests.csproj" />
     <Project Path="tests/SmartMeeting.Api.Tests/SmartMeeting.Api.Tests.csproj" />
+    <Project Path="tests/SmartMeeting.Infrastructure.Tests/SmartMeeting.Infrastructure.Tests.csproj" />
   </Folder>
 </Solution>
