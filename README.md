@@ -33,6 +33,7 @@ Test kapsamı domain yaşam döngüsü, domain event üretimi, katılımcı idem
 - `POST /api/meetings/{id}/recording/complete`: ses dosyasını kuyruğa gönderir.
 - `POST /api/meetings/{id}/audio`: multipart ses dosyasını local/object storage’a kaydeder ve işleme kuyruğuna gönderir.
 - Worker, STT ve yapılandırılmış özetleme adapter’larını çalıştırır; sonuç `Ready` olduğunda kaydeder.
+- STT adapter’ı Mistral `voxtral-mini-latest`, özetleme adapter’ı Mistral `mistral-medium-latest` kullanır.
 - SignalR hub: `/hubs/meeting-status`; istemci metodu `JoinMeeting`, event adı `meetingStatusChanged`.
 
 Geliştirme ortamında ses dosyaları `data/audio/yyyy/MM/dd` altında tutulur. Üretimde `IAudioStorage` implementasyonu Azure Blob veya S3-compatible object storage ile değiştirilmelidir; dosyanın kendisi SQLite’a yazılmaz.

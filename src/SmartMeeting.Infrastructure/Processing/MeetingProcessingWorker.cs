@@ -32,10 +32,13 @@ public sealed class MeetingProcessingWorker(
         using var scope = scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
         var speechToText = scope.ServiceProvider.GetRequiredService<ISpeechToTextService>();
+        var audioStorage = scope.ServiceProvider.GetRequiredService<IAudioStorage>();
         var summarizer = scope.ServiceProvider.GetRequiredService<IAiSummarizerService>();
         var meeting = await db.GetMeetingAsync(meetingId, cancellationToken) ?? throw new DomainException("Toplantı bulunamadı.");
         await PublishAsync(meetingId, "Processing", cancellationToken);
-        var transcript = await speechToText.TranscribeAsync(meeting.AudioFilePath!, cancellationToken);
+        var audioPath = meeting.AudioFilePath ?? throw new DomainException("Ses dosyası yolu bulunamadı.");
+        await using var audio = await audioStorage.OpenReadAsync(audioPath, cancellationToken);
+        var transcript = await speechToText.TranscribeAsync(audio, Path.GetFileName(audioPath), cancellationToken);
         meeting.SetTranscript(transcript);
         var summary = await summarizer.SummarizeAsync(transcript, cancellationToken);
         meeting.SetSummary(summary);

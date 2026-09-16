@@ -20,4 +20,13 @@ public sealed class LocalAudioStorage(IOptions<AudioStorageOptions> options) : I
         await audio.CopyToAsync(output, cancellationToken);
         return relativePath.Replace(Path.DirectorySeparatorChar, '/');
     }
+
+    public Task<Stream> OpenReadAsync(string relativePath, CancellationToken cancellationToken)
+    {
+        var root = Path.GetFullPath(options.Value.AudioRoot);
+        var fullPath = Path.GetFullPath(Path.Combine(root, relativePath.Replace('/', Path.DirectorySeparatorChar)));
+        if (!fullPath.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("Geçersiz ses dosyası yolu.");
+        Stream stream = File.OpenRead(fullPath);
+        return Task.FromResult(stream);
+    }
 }

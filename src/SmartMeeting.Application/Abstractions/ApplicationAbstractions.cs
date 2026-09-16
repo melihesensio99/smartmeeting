@@ -12,7 +12,7 @@ public interface IApplicationDbContext
 
 public interface ISpeechToTextService
 {
-    Task<string> TranscribeAsync(string audioFilePath, CancellationToken cancellationToken);
+    Task<string> TranscribeAsync(Stream audio, string fileName, CancellationToken cancellationToken);
 }
 
 public interface IAiSummarizerService
@@ -23,6 +23,7 @@ public interface IAiSummarizerService
 public interface IAudioStorage
 {
     Task<string> SaveAsync(Stream audio, string originalFileName, string contentType, CancellationToken cancellationToken);
+    Task<Stream> OpenReadAsync(string relativePath, CancellationToken cancellationToken);
 }
 
 public interface IMeetingProcessingQueue
