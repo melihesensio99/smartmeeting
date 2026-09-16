@@ -13,16 +13,18 @@ public sealed class MeetingProcessingWorker(
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await foreach (var meetingId in ReadQueue(stoppingToken))
+        await foreach (var message in ReadQueue(stoppingToken))
         {
             try
             {
-                await ProcessAsync(meetingId, stoppingToken);
+                await ProcessAsync(message.MeetingId, stoppingToken);
+                await queue.CompleteAsync(message, false, stoppingToken);
             }
             catch (Exception exception)
             {
-                logger.LogError(exception, "Toplantı işlenemedi: {MeetingId}", meetingId);
-                await PublishAsync(meetingId, "Failed", stoppingToken);
+                logger.LogError(exception, "Toplantı işlenemedi: {MeetingId}", message.MeetingId);
+                await queue.CompleteAsync(message, false, stoppingToken);
+                await PublishAsync(message.MeetingId, "Failed", stoppingToken);
             }
         }
     }
@@ -53,7 +55,7 @@ public sealed class MeetingProcessingWorker(
         if (publisher is not null) await publisher.PublishAsync(meetingId, status, cancellationToken);
     }
 
-    private async IAsyncEnumerable<Guid> ReadQueue([System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken)
+    private async IAsyncEnumerable<QueuedMeeting> ReadQueue([System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken)
     {
         while (!cancellationToken.IsCancellationRequested) yield return await queue.DequeueAsync(cancellationToken);
     }

@@ -36,8 +36,11 @@ public interface IAudioStorage
 public interface IMeetingProcessingQueue
 {
     ValueTask EnqueueAsync(Guid meetingId, CancellationToken cancellationToken);
-    ValueTask<Guid> DequeueAsync(CancellationToken cancellationToken);
+    ValueTask<QueuedMeeting> DequeueAsync(CancellationToken cancellationToken);
+    ValueTask CompleteAsync(QueuedMeeting message, bool requeue, CancellationToken cancellationToken);
 }
+
+public sealed record QueuedMeeting(Guid MeetingId, string Receipt);
 
 public interface IMeetingStatusPublisher
 {

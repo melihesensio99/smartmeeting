@@ -26,6 +26,29 @@ dotnet test SmartMeeting.slnx
 
 Test kapsamı domain yaşam döngüsü, domain event üretimi, katılımcı idempotency’si, CQRS handler’ları ve FluentValidation kurallarını içerir.
 
+## RabbitMQ ile arka plan işleme
+
+Ses dosyası STT ve AI özetleme işlemleri RabbitMQ üzerindeki `smartmeeting.meeting-processing` kuyruğuna bırakılır. Worker mesajı aldıktan sonra işi tamamlar ve başarılı/başarısız sonucu SignalR üzerinden yayınlar. RabbitMQ’da mesaj kalıcılığı ve worker tarafında `prefetch=1` kullanılır.
+
+Docker üzerinde yerel RabbitMQ başlatmak için:
+
+```powershell
+docker run -d --name smartmeeting-rabbitmq --restart unless-stopped `
+  -p 5672:5672 -p 15672:15672 `
+  -e RABBITMQ_DEFAULT_USER=smartmeeting `
+  -e RABBITMQ_DEFAULT_PASS="<RABBITMQ_PASSWORD>" `
+  rabbitmq:4-management
+```
+
+Yönetim paneli `http://localhost:15672`, uygulama bağlantısı ise `localhost:5672` adresindedir. Uygulama ayarları `RabbitMq:Host`, `RabbitMq:Port`, `RabbitMq:Username`, `RabbitMq:Password` ve `RabbitMq:QueueName` alanlarından okunur. Parola kaynak dosyada tutulmamalı; User Secrets veya ortam değişkeni kullanılmalıdır:
+
+```powershell
+dotnet user-secrets set "RabbitMq:Username" "smartmeeting" --project src/SmartMeeting.Api
+dotnet user-secrets set "RabbitMq:Password" "<RABBITMQ_PASSWORD>" --project src/SmartMeeting.Api
+```
+
+RabbitMQ kapatılırsa API başlarken değil, ilk kuyruğa yazma veya okuma sırasında bağlantı hatası üretir; bu sayede web uygulamasının ayağa kalkması bağımsız kalır. Üretimde RabbitMQ için ayrı kullanıcı, TLS, erişim politikası ve izleme yapılandırılmalıdır.
+
 ## Toplantı işleme akışı
 
 - `POST /api/meetings`: toplantı oluşturur.

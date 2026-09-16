@@ -5,7 +5,8 @@ namespace SmartMeeting.Infrastructure.Processing;
 
 public sealed class InMemoryMeetingProcessingQueue : IMeetingProcessingQueue
 {
-    private readonly Channel<Guid> _queue = Channel.CreateUnbounded<Guid>();
-    public ValueTask EnqueueAsync(Guid meetingId, CancellationToken cancellationToken) => _queue.Writer.WriteAsync(meetingId, cancellationToken);
-    public ValueTask<Guid> DequeueAsync(CancellationToken cancellationToken) => _queue.Reader.ReadAsync(cancellationToken);
+    private readonly Channel<QueuedMeeting> _queue = Channel.CreateUnbounded<QueuedMeeting>();
+    public ValueTask EnqueueAsync(Guid meetingId, CancellationToken cancellationToken) => _queue.Writer.WriteAsync(new QueuedMeeting(meetingId, string.Empty), cancellationToken);
+    public ValueTask<QueuedMeeting> DequeueAsync(CancellationToken cancellationToken) => _queue.Reader.ReadAsync(cancellationToken);
+    public ValueTask CompleteAsync(QueuedMeeting message, bool requeue, CancellationToken cancellationToken) => ValueTask.CompletedTask;
 }
