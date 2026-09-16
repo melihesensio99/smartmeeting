@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using SmartMeeting.Infrastructure.Security;
+using SmartMeeting.Api.Security.Abstractions;
 
 namespace SmartMeeting.Api.Security;
 

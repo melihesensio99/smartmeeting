@@ -1,4 +1,4 @@
-namespace SmartMeeting.Api.Security;
+namespace SmartMeeting.Api.Security.Abstractions;
 
 public interface IAuthCookieService
 {

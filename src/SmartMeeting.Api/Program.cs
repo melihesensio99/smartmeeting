@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using SmartMeeting.Infrastructure.Security;
+using SmartMeeting.Api.Security.Abstractions;
 
 var builder = WebApplication.CreateBuilder(args);
 var authenticationOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new();
