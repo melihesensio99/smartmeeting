@@ -29,16 +29,8 @@ public sealed class IdentityService(UserManager<ApplicationUser> userManager, IJ
         if (user is null || !await userManager.CheckPasswordAsync(user, password))
             return Result<AuthenticatedUser>.Failure("invalid_credentials", "E-posta veya şifre hatalı.");
         var domainUser = user.ToDomain();
-        var globalManagerEmails = configuration.GetSection("Authorization:GlobalManagerEmails")
-            .GetChildren()
-            .Select(section => section.Value)
-            .OfType<string>()
-            .ToArray();
-        var meetingCreatorEmails = configuration.GetSection("Authorization:MeetingCreatorEmails")
-            .GetChildren()
-            .Select(section => section.Value)
-            .OfType<string>()
-            .ToArray();
+        var globalManagerEmails = ReadConfiguredEmails("Authorization:GlobalManagerEmails");
+        var meetingCreatorEmails = ReadConfiguredEmails("Authorization:MeetingCreatorEmails");
         var isGlobalManager = globalManagerEmails.Any(configuredEmail => string.Equals(configuredEmail.Trim(), domainUser.Email, StringComparison.OrdinalIgnoreCase));
         var isMeetingCreator = meetingCreatorEmails.Any(configuredEmail => string.Equals(configuredEmail.Trim(), domainUser.Email, StringComparison.OrdinalIgnoreCase));
         var roles = new List<string>();
@@ -47,6 +39,13 @@ public sealed class IdentityService(UserManager<ApplicationUser> userManager, IJ
         var token = jwtTokenService.CreateToken(domainUser.Id, domainUser.Email, domainUser.DisplayName, roles);
         return Result<AuthenticatedUser>.Success(new AuthenticatedUser(domainUser.Id, domainUser.Email, domainUser.DisplayName, token.Value, token.ExpiresAt));
     }
+
+    private string[] ReadConfiguredEmails(string sectionName)
+        => Enumerable.Range(0, 32)
+            .Select(index => configuration[$"{sectionName}:{index}"])
+            .OfType<string>()
+            .Where(email => !string.IsNullOrWhiteSpace(email))
+            .ToArray();
 
     public async Task<RegisteredUser?> FindByIdAsync(string userId, CancellationToken cancellationToken)
     {
