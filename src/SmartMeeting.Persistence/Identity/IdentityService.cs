@@ -5,6 +5,7 @@ using SmartMeeting.Application.Abstractions.Identity;
 using SmartMeeting.Application.Common;
 using SmartMeeting.Application.Auth.Contracts;
 using SmartMeeting.Application.Users.Responses;
+using SmartMeeting.Domain.Users;
 
 namespace SmartMeeting.Persistence.Identity;
 
@@ -17,7 +18,8 @@ public sealed class IdentityService(UserManager<ApplicationUser> userManager, IJ
         var result = await userManager.CreateAsync(user, password);
         if (!result.Succeeded)
             return Result<RegisteredUser>.Failure("registration_failed", string.Join(" ", result.Errors.Select(error => error.Description)));
-        return Result<RegisteredUser>.Success(new RegisteredUser(user.Id, user.Email!, user.DisplayName));
+        var domainUser = user.ToDomain();
+        return Result<RegisteredUser>.Success(new RegisteredUser(domainUser.Id, domainUser.Email, domainUser.DisplayName));
     }
 
     public async Task<Result<AuthenticatedUser>> LoginAsync(string email, string password, CancellationToken cancellationToken)
@@ -25,24 +27,27 @@ public sealed class IdentityService(UserManager<ApplicationUser> userManager, IJ
         var user = await userManager.FindByEmailAsync(email.Trim());
         if (user is null || !await userManager.CheckPasswordAsync(user, password))
             return Result<AuthenticatedUser>.Failure("invalid_credentials", "E-posta veya şifre hatalı.");
-        var token = jwtTokenService.CreateToken(user.Id, user.Email!, user.DisplayName);
-        return Result<AuthenticatedUser>.Success(new AuthenticatedUser(user.Id, user.Email!, user.DisplayName, token.Value, token.ExpiresAt));
+        var domainUser = user.ToDomain();
+        var token = jwtTokenService.CreateToken(domainUser.Id, domainUser.Email, domainUser.DisplayName);
+        return Result<AuthenticatedUser>.Success(new AuthenticatedUser(domainUser.Id, domainUser.Email, domainUser.DisplayName, token.Value, token.ExpiresAt));
     }
 
     public async Task<RegisteredUser?> FindByIdAsync(string userId, CancellationToken cancellationToken)
     {
         var user = await userManager.FindByIdAsync(userId);
-        return user is null ? null : new RegisteredUser(user.Id, user.Email!, user.DisplayName);
+        if (user is null) return null;
+        var domainUser = user.ToDomain();
+        return new RegisteredUser(domainUser.Id, domainUser.Email, domainUser.DisplayName);
     }
 
     public async Task<IReadOnlyCollection<UserResponse>> SearchAsync(string search, CancellationToken cancellationToken)
     {
         var normalized = search.Trim().ToLowerInvariant();
-        return await userManager.Users
+        var users = await userManager.Users
             .Where(user => user.Email!.ToLower().Contains(normalized) || user.DisplayName.ToLower().Contains(normalized))
             .OrderBy(user => user.DisplayName)
             .Take(20)
-            .Select(user => new UserResponse(user.Id, user.DisplayName, user.Email!))
             .ToListAsync(cancellationToken);
+        return users.Select(user => user.ToDomain()).Select(user => new UserResponse(user.Id, user.DisplayName, user.Email)).ToList();
     }
 }
