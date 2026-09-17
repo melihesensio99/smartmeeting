@@ -61,7 +61,11 @@ public sealed class MistralSummarizerService(HttpClient httpClient, IOptions<Mis
         });
         using var response = await httpClient.SendAsync(request, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var safeBody = responseBody.Length > 1000 ? responseBody[..1000] : responseBody;
+            throw new InvalidOperationException($"Mistral özetleme çağrısı başarısız oldu ({(int)response.StatusCode}): {safeBody}");
+        }
         using var document = JsonDocument.Parse(responseBody);
         var content = document.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
         if (string.IsNullOrWhiteSpace(content)) throw new InvalidOperationException("Mistral boş özet döndürdü.");

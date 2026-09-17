@@ -13,15 +13,27 @@ public sealed class MistralRetryHandler : DelegatingHandler
             using var clonedRequest = await CloneAsync(request, cancellationToken);
             var response = await base.SendAsync(clonedRequest, cancellationToken);
             if (!IsTransient(response.StatusCode) || attempt == MaxAttempts) return response;
+            var retryDelay = GetDelay(response, attempt);
             response.Dispose();
-            await Task.Delay(GetDelay(attempt), cancellationToken);
+            await Task.Delay(retryDelay, cancellationToken);
         }
         throw new InvalidOperationException("Mistral isteği tekrar denemelerinden sonra başarısız oldu.");
     }
 
     private static bool IsTransient(HttpStatusCode statusCode) => statusCode == HttpStatusCode.TooManyRequests || (int)statusCode >= 500;
 
-    private static TimeSpan GetDelay(int attempt) => TimeSpan.FromSeconds(Math.Pow(2, attempt));
+    private static TimeSpan GetDelay(HttpResponseMessage response, int attempt)
+    {
+        var retryAfter = response.Headers.RetryAfter;
+        if (retryAfter?.Delta is { } delta && delta > TimeSpan.Zero) return delta;
+        if (retryAfter?.Date is { } date)
+        {
+            var delay = date - DateTimeOffset.UtcNow;
+            if (delay > TimeSpan.Zero) return delay;
+        }
+
+        return TimeSpan.FromSeconds(Math.Pow(2, attempt));
+    }
 
     private static async Task<HttpRequestMessage> CloneAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
