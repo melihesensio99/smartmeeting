@@ -23,7 +23,7 @@ public sealed class AddParticipantCommandHandler(IApplicationDbContext db, IIden
     {
         var meeting = await db.GetMeetingAsync(request.MeetingId, cancellationToken);
         if (meeting is null) return Result<MeetingResponse>.Failure("meeting_not_found", "Toplantı bulunamadı.");
-        if (currentUser.UserId != meeting.OrganizerId) return Result<MeetingResponse>.Failure("meeting_forbidden", "Katılımcı yetkisini yalnızca toplantı sahibi verebilir.");
+        if (!currentUser.IsGlobalManager && currentUser.UserId != meeting.OrganizerId) return Result<MeetingResponse>.Failure("meeting_forbidden", "Katılımcı yetkisini yalnızca toplantı sahibi veya global yönetici verebilir.");
         var user = await identityService.FindByIdAsync(request.UserId, cancellationToken);
         if (user is null) return Result<MeetingResponse>.Failure("participant_not_found", "Katılımcı olarak eklenmek istenen kullanıcı bulunamadı.");
         if (!string.Equals(user.Email, request.Email.Trim(), StringComparison.OrdinalIgnoreCase) || !string.Equals(user.DisplayName, request.DisplayName.Trim(), StringComparison.Ordinal))

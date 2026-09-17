@@ -10,7 +10,7 @@ public sealed class GetMeetingsQueryHandler(IApplicationDbContext db, ICurrentUs
 {
     public async Task<Result<IReadOnlyCollection<MeetingResponse>>> Handle(GetMeetingsQuery request, CancellationToken cancellationToken)
     {
-        var organizerId = currentUser.IsAuthenticated ? currentUser.UserId : request.OrganizerId;
+        var organizerId = currentUser.IsGlobalManager ? null : currentUser.IsAuthenticated ? currentUser.UserId : request.OrganizerId;
         var meetings = await db.GetMeetingsAsync(organizerId, cancellationToken);
         return Result<IReadOnlyCollection<MeetingResponse>>.Success(meetings.Select(MeetingResponse.From).ToList());
     }

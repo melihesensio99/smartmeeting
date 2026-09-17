@@ -11,7 +11,7 @@ public sealed class GetMeetingQueryHandler(IApplicationDbContext db, ICurrentUse
     public async Task<Result<MeetingResponse>> Handle(GetMeetingQuery request, CancellationToken cancellationToken)
     {
         var meeting = await db.GetMeetingAsync(request.MeetingId, cancellationToken);
-        if (meeting is not null && !meeting.CanAccess(currentUser.UserId)) return Result<MeetingResponse>.Failure("meeting_forbidden", "Bu toplantıya erişim yetkiniz yok.");
+        if (meeting is not null && !currentUser.CanAccess(meeting)) return Result<MeetingResponse>.Failure("meeting_forbidden", "Bu toplantıya erişim yetkiniz yok.");
         return meeting is null
             ? Result<MeetingResponse>.Failure("meeting_not_found", "Toplantı bulunamadı.")
             : Result<MeetingResponse>.Success(MeetingResponse.From(meeting));

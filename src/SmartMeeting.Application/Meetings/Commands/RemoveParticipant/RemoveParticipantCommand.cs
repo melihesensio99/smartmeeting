@@ -13,7 +13,7 @@ public sealed class RemoveParticipantCommandHandler(IApplicationDbContext db, IC
     {
         var meeting = await db.GetMeetingAsync(request.MeetingId, cancellationToken);
         if (meeting is null) return Result<MeetingResponse>.Failure("meeting_not_found", "Toplantı bulunamadı.");
-        if (currentUser.UserId != meeting.OrganizerId) return Result<MeetingResponse>.Failure("meeting_forbidden", "Katılımcıyı yalnızca toplantı sahibi çıkarabilir.");
+        if (!currentUser.IsGlobalManager && currentUser.UserId != meeting.OrganizerId) return Result<MeetingResponse>.Failure("meeting_forbidden", "Katılımcıyı yalnızca toplantı sahibi veya global yönetici çıkarabilir.");
         if (!meeting.RemoveParticipant(request.ParticipantId)) return Result<MeetingResponse>.Failure("participant_not_found", "Katılımcı bulunamadı.");
 
         await db.SaveChangesAsync(cancellationToken);

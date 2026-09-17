@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using SmartMeeting.Application.Abstractions;
 using SmartMeeting.Application.Abstractions.Identity;
 using SmartMeeting.Application.Common;
@@ -9,7 +10,7 @@ using SmartMeeting.Domain.Users;
 
 namespace SmartMeeting.Persistence.Identity;
 
-public sealed class IdentityService(UserManager<ApplicationUser> userManager, IJwtTokenService jwtTokenService) : IIdentityService, IUserDirectoryService
+public sealed class IdentityService(UserManager<ApplicationUser> userManager, IJwtTokenService jwtTokenService, IConfiguration configuration) : IIdentityService, IUserDirectoryService
 {
     public async Task<Result<RegisteredUser>> RegisterAsync(string email, string password, string displayName, CancellationToken cancellationToken)
     {
@@ -28,7 +29,15 @@ public sealed class IdentityService(UserManager<ApplicationUser> userManager, IJ
         if (user is null || !await userManager.CheckPasswordAsync(user, password))
             return Result<AuthenticatedUser>.Failure("invalid_credentials", "E-posta veya şifre hatalı.");
         var domainUser = user.ToDomain();
-        var token = jwtTokenService.CreateToken(domainUser.Id, domainUser.Email, domainUser.DisplayName);
+        var globalManagerEmails = configuration.GetSection("Authorization:GlobalManagerEmails")
+            .GetChildren()
+            .Select(section => section.Value)
+            .OfType<string>()
+            .ToArray();
+        var roles = globalManagerEmails.Any(configuredEmail => string.Equals(configuredEmail.Trim(), domainUser.Email, StringComparison.OrdinalIgnoreCase))
+            ? new[] { "GlobalManager" }
+            : Array.Empty<string>();
+        var token = jwtTokenService.CreateToken(domainUser.Id, domainUser.Email, domainUser.DisplayName, roles);
         return Result<AuthenticatedUser>.Success(new AuthenticatedUser(domainUser.Id, domainUser.Email, domainUser.DisplayName, token.Value, token.ExpiresAt));
     }
 

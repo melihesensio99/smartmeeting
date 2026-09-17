@@ -13,7 +13,7 @@ public sealed class UpdateParticipantPermissionCommandHandler(IApplicationDbCont
     {
         var meeting = await db.GetMeetingAsync(request.MeetingId, cancellationToken);
         if (meeting is null) return Result<MeetingResponse>.Failure("meeting_not_found", "Toplantı bulunamadı.");
-        if (currentUser.UserId != meeting.OrganizerId) return Result<MeetingResponse>.Failure("meeting_forbidden", "Katılımcı yetkisini yalnızca toplantı sahibi değiştirebilir.");
+        if (!currentUser.IsGlobalManager && currentUser.UserId != meeting.OrganizerId) return Result<MeetingResponse>.Failure("meeting_forbidden", "Katılımcı yetkisini yalnızca toplantı sahibi veya global yönetici değiştirebilir.");
         if (!meeting.SetParticipantManagementPermission(request.ParticipantId, request.CanManageMeeting))
             return Result<MeetingResponse>.Failure("participant_not_found", "Katılımcı bulunamadı.");
 

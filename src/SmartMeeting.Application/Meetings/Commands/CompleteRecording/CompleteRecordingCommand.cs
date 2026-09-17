@@ -12,7 +12,7 @@ public sealed class CompleteRecordingCommandHandler(IApplicationDbContext db, IM
     {
         var meeting = await db.GetMeetingAsync(request.MeetingId, cancellationToken);
         if (meeting is null) return Result<MeetingResponse>.Failure("meeting_not_found", "Toplantı bulunamadı.");
-        if (!meeting.CanManage(currentUser.UserId)) return Result<MeetingResponse>.Failure("meeting_forbidden", "Bu toplantı içi işlemi yapma yetkiniz yok.");
+        if (!currentUser.CanManage(meeting)) return Result<MeetingResponse>.Failure("meeting_forbidden", "Bu toplantı içi işlemi yapma yetkiniz yok.");
         meeting.CompleteRecording(request.AudioFilePath);
         await db.SaveChangesAsync(cancellationToken);
         await queue.EnqueueAsync(meeting.Id, cancellationToken);
