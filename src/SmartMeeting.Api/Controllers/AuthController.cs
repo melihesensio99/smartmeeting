@@ -4,6 +4,7 @@ using MediatR;
 using SmartMeeting.Api.Security;
 using SmartMeeting.Application.Auth.Commands.Login;
 using SmartMeeting.Application.Auth.Commands.Register;
+using SmartMeeting.Application.Auth.Queries.GetCurrentUser;
 using SmartMeeting.Api.Contracts.Auth;
 
 namespace SmartMeeting.Api.Controllers;
@@ -36,5 +37,12 @@ public sealed class AuthController(ISender sender, IAuthCookieService authCookie
     {
         authCookieService.Delete();
         return NoContent();
+    }
+
+    [HttpGet("me")]
+    public async Task<IActionResult> GetCurrentUser(CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetCurrentUserQuery(), cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : Unauthorized(result.Error);
     }
 }
