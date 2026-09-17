@@ -64,6 +64,15 @@ public sealed class Meeting : Entity
         return true;
     }
 
+    public bool RemoveParticipant(string userId)
+    {
+        var participant = _participants.SingleOrDefault(x => x.UserId == userId);
+        if (participant is null) return false;
+        _participants.Remove(participant);
+        Touch();
+        return true;
+    }
+
     public void MapSpeaker(Guid participantId, string speakerLabel)
     {
         var participant = _participants.SingleOrDefault(x => x.Id == participantId);

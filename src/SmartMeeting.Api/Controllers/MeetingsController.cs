@@ -15,6 +15,7 @@ using SmartMeeting.Application.Meetings.Commands.UpdateActionItem;
 using SmartMeeting.Application.Meetings.Queries.GetMeeting;
 using SmartMeeting.Application.Meetings.Commands.UpdateParticipantPermission;
 using SmartMeeting.Application.Meetings.Commands.RemoveParticipant;
+using SmartMeeting.Application.Meetings.Commands.LeaveMeeting;
 using SmartMeeting.Api.Contracts.Meetings;
 
 namespace SmartMeeting.Api.Controllers;
@@ -66,6 +67,10 @@ public sealed class MeetingsController(ISender sender) : ControllerBase
     [HttpDelete("{meetingId:guid}/participants/{participantId:guid}")]
     public async Task<IActionResult> RemoveParticipant(Guid meetingId, Guid participantId, CancellationToken cancellationToken)
         => ToActionResult(await sender.Send(new RemoveParticipantCommand(meetingId, participantId), cancellationToken));
+
+    [HttpDelete("{meetingId:guid}/participants/me")]
+    public async Task<IActionResult> LeaveMeeting(Guid meetingId, CancellationToken cancellationToken)
+        => ToActionResult(await sender.Send(new LeaveMeetingCommand(meetingId), cancellationToken));
 
     [HttpPut("{meetingId:guid}/participants/{participantId:guid}/speaker")]
     public async Task<IActionResult> MapSpeaker(Guid meetingId, Guid participantId, MapSpeakerRequest request, CancellationToken cancellationToken)

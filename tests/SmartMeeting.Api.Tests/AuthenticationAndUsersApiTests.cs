@@ -107,6 +107,64 @@ public sealed class AuthenticationAndUsersApiTests(ApiFactory factory) : IClassF
         Assert.Equal(meetingId, queue.LastMeetingId);
     }
 
+    [Fact]
+    public async Task Meeting_owner_can_delegate_revoke_and_participant_can_leave()
+    {
+        using var client = factory.CreateClient();
+        var participantEmail = $"participant-{Guid.NewGuid():N}@example.com";
+        var registerResponse = await client.PostAsJsonAsync("/api/auth/register", new
+        {
+            email = participantEmail,
+            password = "Password123",
+            displayName = "Test Katılımcı"
+        });
+        Assert.Equal(HttpStatusCode.OK, registerResponse.StatusCode);
+        using var registered = JsonDocument.Parse(await registerResponse.Content.ReadAsStringAsync());
+        var participantId = registered.RootElement.GetProperty("userId").GetString();
+
+        using var createRequest = new HttpRequestMessage(HttpMethod.Post, "/api/meetings")
+        {
+            Content = JsonContent.Create(new { title = "Yetki akışı testi", startsAt = DateTimeOffset.UtcNow.AddHours(1) })
+        };
+        createRequest.Headers.Add("X-Test-User", "owner-user");
+        var createResponse = await client.SendAsync(createRequest);
+        createResponse.EnsureSuccessStatusCode();
+        using var created = JsonDocument.Parse(await createResponse.Content.ReadAsStringAsync());
+        var meetingId = created.RootElement.GetProperty("id").GetGuid();
+
+        using var addRequest = new HttpRequestMessage(HttpMethod.Post, $"/api/meetings/{meetingId}/participants")
+        {
+            Content = JsonContent.Create(new { userId = participantId, displayName = "Test Katılımcı", email = participantEmail, canManageMeeting = true })
+        };
+        addRequest.Headers.Add("X-Test-User", "owner-user");
+        var addResponse = await client.SendAsync(addRequest);
+        Assert.Equal(HttpStatusCode.OK, addResponse.StatusCode);
+        using var added = JsonDocument.Parse(await addResponse.Content.ReadAsStringAsync());
+        var participantRecordId = added.RootElement.GetProperty("participants").EnumerateArray().Single().GetProperty("id").GetGuid();
+
+        using var delegatedStart = new HttpRequestMessage(HttpMethod.Post, $"/api/meetings/{meetingId}/recording/start");
+        delegatedStart.Headers.Add("X-Test-User", participantId);
+        Assert.Equal(HttpStatusCode.OK, (await client.SendAsync(delegatedStart)).StatusCode);
+
+        using var revokeRequest = new HttpRequestMessage(HttpMethod.Put, $"/api/meetings/{meetingId}/participants/{participantRecordId}/management-permission")
+        {
+            Content = JsonContent.Create(new { canManageMeeting = false })
+        };
+        revokeRequest.Headers.Add("X-Test-User", "owner-user");
+        Assert.Equal(HttpStatusCode.OK, (await client.SendAsync(revokeRequest)).StatusCode);
+
+        using var forbiddenNotes = new HttpRequestMessage(HttpMethod.Put, $"/api/meetings/{meetingId}/notes")
+        {
+            Content = JsonContent.Create(new { notes = "Yetki kaldırıldı" })
+        };
+        forbiddenNotes.Headers.Add("X-Test-User", participantId);
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.SendAsync(forbiddenNotes)).StatusCode);
+
+        using var leaveRequest = new HttpRequestMessage(HttpMethod.Delete, $"/api/meetings/{meetingId}/participants/me");
+        leaveRequest.Headers.Add("X-Test-User", participantId);
+        Assert.Equal(HttpStatusCode.OK, (await client.SendAsync(leaveRequest)).StatusCode);
+    }
+
     private static async Task<Guid> CreateAndStartMeetingAsync(HttpClient client)
     {
         using var createRequest = new HttpRequestMessage(HttpMethod.Post, "/api/meetings")

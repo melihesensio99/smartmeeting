@@ -5,6 +5,7 @@ using SmartMeeting.Application.Common;
 using SmartMeeting.Application.Meetings.Commands.AddParticipant;
 using SmartMeeting.Application.Meetings.Commands.RemoveParticipant;
 using SmartMeeting.Application.Meetings.Commands.UpdateParticipantPermission;
+using SmartMeeting.Application.Meetings.Commands.LeaveMeeting;
 using SmartMeeting.Application.Users.Queries.SearchUsers;
 using SmartMeeting.Application.Users.Responses;
 using SmartMeeting.Domain.Meetings;
@@ -104,6 +105,23 @@ public sealed class ParticipantAndUserDirectoryTests
 
         Assert.True(permissionResult.IsSuccess);
         Assert.True(removeResult.IsSuccess);
+        Assert.Empty(meeting.Participants);
+    }
+
+    [Fact]
+    public async Task Participant_can_leave_but_organizer_cannot_leave()
+    {
+        var meeting = Meeting.Create("Planlama", "organizer", DateTimeOffset.UtcNow);
+        meeting.AddParticipant("user-2", "Ayşe Yılmaz", "ayse@example.com");
+        var context = new TestDbContext(meeting);
+
+        var participantResult = await new LeaveMeetingCommandHandler(context, new FakeCurrentUserService("user-2"))
+            .Handle(new LeaveMeetingCommand(meeting.Id), CancellationToken.None);
+        var organizerResult = await new LeaveMeetingCommandHandler(context, new FakeCurrentUserService("organizer"))
+            .Handle(new LeaveMeetingCommand(meeting.Id), CancellationToken.None);
+
+        Assert.True(participantResult.IsSuccess);
+        Assert.Equal("organizer_cannot_leave", organizerResult.Error!.Code);
         Assert.Empty(meeting.Participants);
     }
 

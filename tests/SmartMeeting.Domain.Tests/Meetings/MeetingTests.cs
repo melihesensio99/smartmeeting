@@ -73,6 +73,17 @@ public sealed class MeetingTests
     }
 
     [Fact]
+    public void Participant_can_leave_without_removing_the_meeting()
+    {
+        var meeting = Meeting.Create("Sprint planlama", "user-1", DateTimeOffset.UtcNow);
+        meeting.AddParticipant("user-2", "Ayşe", "ayse@example.com");
+
+        Assert.True(meeting.RemoveParticipant("user-2"));
+        Assert.NotEqual(Guid.Empty, meeting.Id);
+        Assert.Empty(meeting.Participants);
+    }
+
+    [Fact]
     public void Summary_marks_meeting_ready()
     {
         var meeting = Meeting.Create("Sprint planlama", "user-1", DateTimeOffset.UtcNow);
