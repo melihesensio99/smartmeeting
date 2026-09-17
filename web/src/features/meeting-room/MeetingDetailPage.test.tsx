@@ -102,7 +102,7 @@ describe('MeetingDetailPage işlem durumu', () => {
     const meeting = createMeeting(3, [{ id: '44444444-4444-4444-4444-444444444444', userId: 'participant-1', displayName: 'Ayşe Katılımcı', email: 'ayse@example.com', canManageMeeting: false, speakerLabel: null, speakerMappingStatus: 'None', speakerConfidence: null }])
     renderPage(meeting, vi.fn(), 'participant-1')
 
-    expect(screen.getByRole('button', { name: 'Toplantıdan ayrıl' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Odaya gir' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Katılımcı ekle' })).not.toBeInTheDocument()
   })
 })

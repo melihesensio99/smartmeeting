@@ -15,6 +15,8 @@ public sealed class MistralSpeechToTextService(HttpClient httpClient, IOptions<M
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", configuration.ApiKey);
         using var form = new MultipartFormDataContent();
         form.Add(new StringContent(configuration.TranscriptionModel), "model");
+        if (!string.IsNullOrWhiteSpace(configuration.TranscriptionLanguage))
+            form.Add(new StringContent(configuration.TranscriptionLanguage), "language");
         form.Add(new StringContent(configuration.EnableDiarization ? "true" : "false"), "diarize");
         if (configuration.EnableDiarization)
         {

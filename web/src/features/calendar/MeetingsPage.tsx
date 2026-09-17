@@ -28,14 +28,14 @@ export function MeetingsPage({ meetings, canCreateMeetings, onCreateMeeting }: {
             onClick={onCreateMeeting}
             sx={{
               borderRadius: '12px',
-              background: 'linear-gradient(45deg, #3B246B 30%, #6D52A5 90%)',
-              boxShadow: '0 4px 12px rgba(59, 36, 107, 0.3)',
+              background: 'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)',
+              boxShadow: '0 4px 14px rgba(99, 102, 241, 0.35)',
               px: 3,
               py: 1,
               fontWeight: 600,
               gap: 1,
               '&:hover': {
-                background: 'linear-gradient(45deg, #241640 30%, #3B246B 90%)',
+                background: 'linear-gradient(135deg, #4F46E5 0%, #4338CA 100%)',
               }
             }}
           >

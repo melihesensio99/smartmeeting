@@ -97,7 +97,9 @@ public sealed class MistralSummarizerService(HttpClient httpClient, IOptions<Mis
         var content = document.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
         if (string.IsNullOrWhiteSpace(content)) throw new InvalidOperationException("Mistral boş özet döndürdü.");
         var result = JsonSerializer.Deserialize<MistralSummaryResponse>(content, JsonOptions) ?? throw new InvalidOperationException("Mistral structured output okunamadı.");
-        return MeetingSummary.Create(result.Overview, result.Decisions, result.ActionItems.Select(x => new ActionItem(x.Description, x.Assignee, ParseDate(x.DueAt), priority: ParsePriority(x.Priority))));
+        // AI yalnızca aday aksiyon metni üretir. Gerçek sorumlu ataması toplantıdaki kayıtlı
+        // katılımcılar arasından yönetici tarafından yapılmalıdır; serbest metin isimleri güvenilir kimlik değildir.
+        return MeetingSummary.Create(result.Overview, result.Decisions, result.ActionItems.Select(x => new ActionItem(x.Description, assignee: null, dueAt: ParseDate(x.DueAt), priority: ParsePriority(x.Priority))));
     }
 
     private static DateTimeOffset? ParseDate(string? value) => DateTimeOffset.TryParse(value, out var date) ? date : null;

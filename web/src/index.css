@@ -6,7 +6,8 @@ html {
 
 body {
   margin: 0;
-  background: #F8F7FC;
+  background: #0B0F19;
+  color: #F9FAFB;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -14,8 +15,8 @@ body {
 
 /* ── Selection ─────────────────────────────────────────────── */
 ::selection {
-  background: rgba(59, 36, 107, 0.15);
-  color: #242238;
+  background: rgba(99, 102, 241, 0.35);
+  color: #FFFFFF;
 }
 
 /* ── Scrollbar (Webkit) ────────────────────────────────────── */
@@ -24,25 +25,25 @@ body {
   height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #0B0F19;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(59, 36, 107, 0.18);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 100px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(59, 36, 107, 0.32);
+  background: rgba(255, 255, 255, 0.28);
 }
 
 /* ── Scrollbar (Firefox) ───────────────────────────────────── */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(59, 36, 107, 0.18) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
 
 /* ── Focus Ring ─────────────────────────────────────────────── */
 :focus-visible {
-  outline: 2px solid rgba(59, 36, 107, 0.4);
+  outline: 2px solid #6366F1;
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -61,6 +62,6 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes sm-glow {
-  0%, 100% { box-shadow: 0 0 8px rgba(255, 107, 107, 0.4); }
-  50%      { box-shadow: 0 0 20px rgba(255, 107, 107, 0.7); }
+  0%, 100% { box-shadow: 0 0 8px rgba(244, 63, 94, 0.4); }
+  50%      { box-shadow: 0 0 20px rgba(244, 63, 94, 0.7); }
 }

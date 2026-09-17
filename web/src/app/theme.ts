@@ -1,20 +1,27 @@
 import { createTheme, alpha } from '@mui/material/styles'
 
-const primaryMain = '#3B246B'
-const primaryDark = '#241640'
-const primaryLight = '#6D52A5'
-const secondaryMain = '#FF6B6B'
+// Modern Dark / Slate-Navy Palette
+const primaryMain = '#6366F1' // Vibrant Indigo
+const primaryDark = '#4F46E5'
+const primaryLight = '#818CF8'
+const secondaryMain = '#F43F5E' // Rose / Coral Accent
+const bgDefault = '#0B0F19' // Deep Slate Navy Dark Background
+const bgPaper = '#111827' // Card & Surface Background
+const bgElevated = '#1F2937' // Borders / Hover / Secondary Surface
+const textPrimary = '#F9FAFB'
+const textSecondary = '#9CA3AF'
 
 export const theme = createTheme({
   palette: {
+    mode: 'dark',
     primary: { main: primaryMain, dark: primaryDark, light: primaryLight, contrastText: '#FFFFFF' },
-    secondary: { main: secondaryMain, dark: '#D94C59', light: '#FF9A98', contrastText: '#FFFFFF' },
-    info: { main: '#4F8CFF' },
-    success: { main: '#2BB673' },
-    warning: { main: '#F4B942' },
-    background: { default: '#F8F7FC', paper: '#FFFFFF' },
-    text: { primary: '#242238', secondary: '#6E6A86' },
-    divider: alpha('#3B246B', 0.08),
+    secondary: { main: secondaryMain, dark: '#E11D48', light: '#FB7185', contrastText: '#FFFFFF' },
+    info: { main: '#38BDF8' },
+    success: { main: '#10B981' },
+    warning: { main: '#F59E0B' },
+    background: { default: bgDefault, paper: bgPaper },
+    text: { primary: textPrimary, secondary: textSecondary },
+    divider: alpha('#E5E7EB', 0.08),
   },
   typography: {
     fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -39,9 +46,10 @@ export const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          background: `linear-gradient(115deg, ${primaryDark} 0%, ${primaryMain} 50%, #5A3B8D 100%)`,
-          boxShadow: `0 4px 24px ${alpha(primaryDark, 0.28)}`,
-          backdropFilter: 'blur(12px)',
+          background: `linear-gradient(115deg, #090D16 0%, #0F172A 50%, #1E1B4B 100%)`,
+          boxShadow: `0 4px 24px rgba(0, 0, 0, 0.45)`,
+          borderBottom: `1px solid ${alpha('#FFFFFF', 0.06)}`,
+          backdropFilter: 'blur(16px)',
         },
       },
     },
@@ -49,11 +57,13 @@ export const theme = createTheme({
       defaultProps: { variant: 'outlined' as const },
       styleOverrides: {
         root: {
-          border: `1px solid ${alpha(primaryMain, 0.08)}`,
-          boxShadow: `0 2px 12px ${alpha(primaryMain, 0.06)}`,
+          backgroundColor: bgPaper,
+          borderColor: alpha('#FFFFFF', 0.08),
+          boxShadow: `0 4px 20px rgba(0, 0, 0, 0.25)`,
           transition: 'box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease',
           '&:hover': {
-            boxShadow: `0 8px 32px ${alpha(primaryMain, 0.12)}`,
+            borderColor: alpha(primaryLight, 0.3),
+            boxShadow: `0 8px 32px rgba(0, 0, 0, 0.4)`,
           },
         },
       },
@@ -71,9 +81,9 @@ export const theme = createTheme({
           overflow: 'hidden' as const,
         },
         contained: {
-          boxShadow: `0 2px 8px ${alpha(primaryMain, 0.2)}`,
+          boxShadow: `0 2px 10px ${alpha(primaryMain, 0.35)}`,
           '&:hover': {
-            boxShadow: `0 4px 16px ${alpha(primaryMain, 0.3)}`,
+            boxShadow: `0 4px 18px ${alpha(primaryMain, 0.55)}`,
             transform: 'translateY(-1px)',
           },
           '&:active': {
@@ -82,9 +92,11 @@ export const theme = createTheme({
         },
         outlined: {
           borderWidth: '1.5px',
+          borderColor: alpha('#FFFFFF', 0.16),
           '&:hover': {
             borderWidth: '1.5px',
-            backgroundColor: alpha(primaryMain, 0.04),
+            borderColor: primaryLight,
+            backgroundColor: alpha(primaryMain, 0.1),
           },
         },
         sizeLarge: {
@@ -108,14 +120,20 @@ export const theme = createTheme({
         root: {
           '& .MuiOutlinedInput-root': {
             borderRadius: 12,
-            transition: 'box-shadow 0.2s ease',
+            backgroundColor: alpha('#FFFFFF', 0.03),
+            transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
+            '& .MuiOutlinedInput-notchedOutline': {
+              borderColor: alpha('#FFFFFF', 0.12),
+            },
             '&:hover .MuiOutlinedInput-notchedOutline': {
-              borderColor: primaryLight,
+              borderColor: alpha(primaryLight, 0.5),
             },
             '&.Mui-focused': {
-              boxShadow: `0 0 0 3px ${alpha(primaryMain, 0.12)}`,
+              boxShadow: `0 0 0 3px ${alpha(primaryMain, 0.25)}`,
+              backgroundColor: alpha('#FFFFFF', 0.05),
             },
             '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+              borderColor: primaryMain,
               borderWidth: '2px',
             },
           },
@@ -126,12 +144,14 @@ export const theme = createTheme({
       styleOverrides: {
         paper: {
           borderRadius: 20,
-          boxShadow: `0 24px 64px ${alpha(primaryDark, 0.2)}, 0 8px 24px ${alpha(primaryDark, 0.12)}`,
+          backgroundColor: '#131B2E',
+          border: `1px solid ${alpha('#FFFFFF', 0.1)}`,
+          boxShadow: `0 24px 64px rgba(0, 0, 0, 0.65)`,
         },
         root: {
           '& .MuiBackdrop-root': {
-            backdropFilter: 'blur(6px)',
-            backgroundColor: alpha(primaryDark, 0.32),
+            backdropFilter: 'blur(10px)',
+            backgroundColor: 'rgba(5, 8, 16, 0.75)',
           },
         },
       },
@@ -158,14 +178,15 @@ export const theme = createTheme({
         },
         outlined: {
           borderWidth: '1.5px',
+          borderColor: alpha('#FFFFFF', 0.16),
         },
       },
     },
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          background: `linear-gradient(180deg, #FAFAFF 0%, #F3F1FA 100%)`,
-          borderRight: `1px solid ${alpha(primaryMain, 0.08)}`,
+          background: `linear-gradient(180deg, #0D131F 0%, #0B0F19 100%)`,
+          borderRight: `1px solid ${alpha('#FFFFFF', 0.06)}`,
         },
       },
     },
@@ -176,12 +197,12 @@ export const theme = createTheme({
           marginRight: 12,
           transition: 'all 0.2s ease',
           '&:hover': {
-            backgroundColor: alpha(primaryMain, 0.06),
+            backgroundColor: alpha('#FFFFFF', 0.04),
           },
           '&.Mui-selected': {
-            backgroundColor: alpha(primaryMain, 0.08),
+            backgroundColor: alpha(primaryMain, 0.15),
             '&:hover': {
-              backgroundColor: alpha(primaryMain, 0.12),
+              backgroundColor: alpha(primaryMain, 0.22),
             },
           },
         },
@@ -200,7 +221,7 @@ export const theme = createTheme({
         root: {
           height: 8,
           borderRadius: 4,
-          backgroundColor: alpha(primaryMain, 0.08),
+          backgroundColor: alpha('#FFFFFF', 0.08),
         },
         bar: {
           borderRadius: 4,
@@ -213,14 +234,14 @@ export const theme = createTheme({
           backgroundImage: 'none',
         },
         outlined: {
-          border: `1px solid ${alpha(primaryMain, 0.1)}`,
+          borderColor: alpha('#FFFFFF', 0.08),
         },
       },
     },
     MuiDivider: {
       styleOverrides: {
         root: {
-          borderColor: alpha(primaryMain, 0.08),
+          borderColor: alpha('#FFFFFF', 0.08),
         },
       },
     },
@@ -239,9 +260,9 @@ export const theme = createTheme({
     MuiCheckbox: {
       styleOverrides: {
         root: {
-          color: alpha(primaryMain, 0.4),
+          color: alpha('#FFFFFF', 0.4),
           '&.Mui-checked': {
-            color: '#2BB673',
+            color: '#10B981',
           },
         },
       },
@@ -259,8 +280,10 @@ export const theme = createTheme({
           borderRadius: 8,
           fontSize: '0.75rem',
           fontWeight: 600,
-          backgroundColor: alpha(primaryDark, 0.92),
-          boxShadow: `0 4px 12px ${alpha(primaryDark, 0.2)}`,
+          backgroundColor: '#1E293B',
+          color: '#F8FAFC',
+          border: `1px solid ${alpha('#FFFFFF', 0.1)}`,
+          boxShadow: `0 6px 16px rgba(0, 0, 0, 0.4)`,
         },
       },
     },

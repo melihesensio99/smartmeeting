@@ -158,25 +158,32 @@ public sealed class Meeting : Entity
     {
         if (string.IsNullOrWhiteSpace(userId)) return false;
         if (CanManage(userId)) return true;
-        return CanAccess(userId) && Summary?.ActionItems.Any(action => action.Id == actionItemId && action.AssigneeUserId == userId) == true;
+        return CanAccess(userId) && Summary?.ActionItems.Any(action => action.Id == actionItemId && (action.AssigneeUserIds.Contains(userId!) || action.AssigneeUserId == userId)) == true;
     }
 
-    public void UpdateActionItem(Guid actionItemId, string? assigneeUserId, string? assignee, DateTimeOffset? dueAt, ActionPriority priority)
+    public void UpdateActionItem(Guid actionItemId, IEnumerable<string> assigneeUserIds, IEnumerable<string> assignees, DateTimeOffset? dueAt, ActionPriority priority)
     {
         if (Summary is null) throw new DomainException("Toplantının özeti henüz hazır değil.");
         var actionItem = Summary.ActionItems.SingleOrDefault(x => x.Id == actionItemId);
         if (actionItem is null) throw new DomainException("Aksiyon maddesi bulunamadı.");
-        actionItem.UpdateDetails(assigneeUserId, assignee, dueAt, priority);
+        actionItem.UpdateDetails(assigneeUserIds, assignees, dueAt, priority);
         Touch();
     }
 
-    public ActionItem AddActionItem(string description, string? assigneeUserId, string? assignee, DateTimeOffset? dueAt, ActionPriority priority)
+    public void UpdateActionItem(Guid actionItemId, string? assigneeUserId, string? assignee, DateTimeOffset? dueAt, ActionPriority priority)
+        => UpdateActionItem(actionItemId, assigneeUserId is null ? [] : [assigneeUserId], assignee is null ? [] : [assignee], dueAt, priority);
+
+    public ActionItem AddActionItem(string description, IEnumerable<string> assigneeUserIds, IEnumerable<string> assignees, DateTimeOffset? dueAt, ActionPriority priority)
     {
         if (Summary is null) throw new DomainException("Toplantının özeti henüz hazır değil.");
-        var actionItem = Summary.AddActionItem(description, assignee, assigneeUserId, dueAt, priority);
+        var actionItem = Summary.AddActionItem(description, null, null, dueAt, priority);
+        actionItem.UpdateDetails(assigneeUserIds, assignees, dueAt, priority);
         Touch();
         return actionItem;
     }
+
+    public ActionItem AddActionItem(string description, string? assigneeUserId, string? assignee, DateTimeOffset? dueAt, ActionPriority priority)
+        => AddActionItem(description, assigneeUserId is null ? [] : [assigneeUserId], assignee is null ? [] : [assignee], dueAt, priority);
 
     public void MarkFailed() { Status = MeetingStatus.Failed; Touch(); }
 

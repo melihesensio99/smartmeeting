@@ -32,7 +32,7 @@ public sealed class SmtpEmailService(IOptions<EmailOptions> options) : IEmailSer
         var summary = meeting.Summary!;
         var decisions = string.Join(Environment.NewLine, summary.Decisions.Select(x => $"- {x}"));
         var actions = string.Join(Environment.NewLine, summary.ActionItems.Select(x => $"- {x.Description} | Sorumlu: {x.Assignee ?? "Atanmamış"} | Termin: {(x.DueAt?.ToString("dd.MM.yyyy") ?? "Belirlenmedi")} | Öncelik: {GetPriorityLabel(x.Priority)}"));
-        return $"{meeting.Title}{Environment.NewLine}{Environment.NewLine}Özet:{Environment.NewLine}{summary.Overview}{Environment.NewLine}{Environment.NewLine}Kararlar:{Environment.NewLine}{decisions}{Environment.NewLine}{Environment.NewLine}Aksiyonlar:{Environment.NewLine}{actions}";
+        return $"{meeting.Title}{Environment.NewLine}{Environment.NewLine}Transkript:{Environment.NewLine}{meeting.Transcript ?? "Transkript bulunamadı."}{Environment.NewLine}{Environment.NewLine}Özet:{Environment.NewLine}{summary.Overview}{Environment.NewLine}{Environment.NewLine}Kararlar:{Environment.NewLine}{decisions}{Environment.NewLine}{Environment.NewLine}Aksiyonlar:{Environment.NewLine}{actions}";
     }
 
     private static string GetPriorityLabel(ActionPriority priority) => priority switch

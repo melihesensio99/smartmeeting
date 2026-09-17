@@ -27,12 +27,12 @@ export async function completeActionItem(meetingId: string, actionItemId: string
   return meetingSchema.parse(response.data)
 }
 
-export async function updateActionItem(meetingId: string, actionItemId: string, input: { assigneeUserId: string | null; dueAt: string | null; priority: ActionPriority }): Promise<Meeting> {
+export async function updateActionItem(meetingId: string, actionItemId: string, input: { assigneeUserIds: string[]; dueAt: string | null; priority: ActionPriority }): Promise<Meeting> {
   const response = await client.put<unknown>(`/meetings/${meetingId}/action-items/${actionItemId}`, input)
   return meetingSchema.parse(response.data)
 }
 
-export async function createActionItem(meetingId: string, input: { description: string; assigneeUserId: string | null; dueAt: string | null; priority: ActionPriority }): Promise<Meeting> {
+export async function createActionItem(meetingId: string, input: { description: string; assigneeUserIds: string[]; dueAt: string | null; priority: ActionPriority }): Promise<Meeting> {
   const response = await client.post<unknown>(`/meetings/${meetingId}/action-items`, input)
   return meetingSchema.parse(response.data)
 }

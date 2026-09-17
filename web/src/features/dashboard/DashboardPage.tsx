@@ -21,7 +21,8 @@ export function DashboardPage({ meetings, canCreateMeetings }: { meetings: Meeti
           justifyContent: 'space-between', 
           gap: 2, 
           p: 5, 
-          background: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0) 100%), linear-gradient(120deg, #241640 0%, #3B246B 62%, #6D52A5 100%)', 
+          background: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0) 100%), linear-gradient(120deg, #0F172A 0%, #1E1B4B 60%, #312E81 100%)', 
+          border: '1px solid rgba(99, 102, 241, 0.2)',
           color: 'white', 
           borderRadius: 4, 
           position: 'relative', 
@@ -34,7 +35,7 @@ export function DashboardPage({ meetings, canCreateMeetings }: { meetings: Meeti
             borderRadius: '50%', 
             right: -70, 
             top: -110, 
-            bgcolor: 'rgba(255, 107, 107, 0.22)' 
+            bgcolor: 'rgba(244, 63, 94, 0.18)' 
           },
           '&::before': {
             content: '""',
@@ -44,7 +45,7 @@ export function DashboardPage({ meetings, canCreateMeetings }: { meetings: Meeti
             borderRadius: '50%',
             left: -100,
             bottom: -150,
-            bgcolor: 'rgba(79, 140, 255, 0.15)'
+            bgcolor: 'rgba(99, 102, 241, 0.15)'
           }
         }}
       >

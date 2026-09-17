@@ -117,9 +117,10 @@ export function MeetingForm({ onSubmit, loading }: Props) {
           mt: 1,
           py: 1.5,
           fontSize: '1rem',
-          background: 'linear-gradient(135deg, #3B246B 0%, #6D52A5 100%)',
+          background: 'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)',
+          boxShadow: '0 4px 14px rgba(99, 102, 241, 0.35)',
           '&:hover': {
-            background: 'linear-gradient(135deg, #241640 0%, #3B246B 100%)',
+            background: 'linear-gradient(135deg, #4F46E5 0%, #4338CA 100%)',
           },
         }}
       >

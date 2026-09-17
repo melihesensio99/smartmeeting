@@ -1,28 +1,22 @@
 import { AppBar, Box, Button, Drawer, List, ListItemButton, ListItemText, Stack, Toolbar, Typography } from '@mui/material'
 import { alpha } from '@mui/material/styles'
-import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { navigate, type AppRoute } from '../app/navigation'
 import { logout } from '../lib/api'
 import type { CurrentUser } from '../types/auth'
+import type { Meeting } from '../types/meeting'
 
 const drawerWidth = 260
 
-export function AppShell({ route, currentUser, children }: { route: AppRoute; currentUser?: CurrentUser; children: React.ReactNode }) {
+export function AppShell({ route, currentUser, meetings = [], children }: { route: AppRoute; currentUser?: CurrentUser; meetings?: Meeting[]; children: React.ReactNode }) {
   const queryClient = useQueryClient()
-  const [liveMeetingId, setLiveMeetingId] = useState(() => localStorage.getItem('smartmeeting-live-room'))
-  useEffect(() => {
-    const updateLiveRoom = () => setLiveMeetingId(localStorage.getItem('smartmeeting-live-room'))
-    window.addEventListener('storage', updateLiveRoom)
-    window.addEventListener('smartmeeting-live-room-changed', updateLiveRoom)
-    return () => {
-      window.removeEventListener('storage', updateLiveRoom)
-      window.removeEventListener('smartmeeting-live-room-changed', updateLiveRoom)
-    }
-  }, [])
+  const liveMeetings = meetings.filter((meeting) => String(meeting.status).toLowerCase() !== 'completed' && String(meeting.status) !== '6')
+  const liveItems = liveMeetings.length > 0
+    ? liveMeetings.map((meeting) => ({ label: `Canlı · ${meeting.title}`, path: `/meetings/${meeting.id}`, route: 'meeting-detail' as const, icon: '●', disabled: false }))
+    : [{ label: 'Aktif toplantınız yok', path: '/meetings?empty-live=1', route: 'meetings' as const, icon: '●', disabled: true }]
   const menu = [
     { label: 'Dashboard', path: '/', route: 'dashboard' as const, icon: '▦' },
-    ...(liveMeetingId ? [{ label: 'Canlı toplantı', path: `/meetings/${liveMeetingId}`, route: 'meeting-detail' as const, icon: '●' }] : []),
+    ...liveItems,
     { label: currentUser?.isGlobalManager ? 'Tüm Toplantılar' : 'Toplantılar', path: '/meetings', route: 'meetings' as const, icon: '▣' },
     { label: currentUser?.isGlobalManager ? 'Tüm Aksiyonlar' : 'Aksiyonlarım', path: '/my-actions', route: 'actions' as const, icon: '☑' },
   ]
@@ -127,8 +121,9 @@ export function AppShell({ route, currentUser, children }: { route: AppRoute; cu
           const isSelected = route === item.route;
           return (
             <ListItemButton 
-              key={item.path} 
+              key={`${item.route}-${item.path}-${item.label}`}
               selected={isSelected} 
+              disabled={item.disabled}
               onClick={() => navigate(item.path)} 
               sx={{ 
                 py: 1.2, 

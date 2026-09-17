@@ -8,4 +8,5 @@ public sealed class MistralOptions
     public string TranscriptionModel { get; init; } = "voxtral-mini-latest";
     public string BaseUrl { get; init; } = "https://api.mistral.ai/v1/";
     public bool EnableDiarization { get; init; } = true;
+    public string TranscriptionLanguage { get; init; } = string.Empty;
 }

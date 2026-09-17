@@ -59,11 +59,11 @@ public sealed class MeetingsController(ISender sender) : ControllerBase
 
     [HttpPut("{meetingId:guid}/action-items/{actionItemId:guid}")]
     public async Task<IActionResult> UpdateActionItem(Guid meetingId, Guid actionItemId, UpdateActionItemRequest request, CancellationToken cancellationToken)
-        => ToActionResult(await sender.Send(new UpdateActionItemCommand(meetingId, actionItemId, request.AssigneeUserId, request.DueAt, request.Priority), cancellationToken));
+        => ToActionResult(await sender.Send(new UpdateActionItemCommand(meetingId, actionItemId, request.AssigneeUserIds ?? [], request.DueAt, request.Priority), cancellationToken));
 
     [HttpPost("{meetingId:guid}/action-items")]
     public async Task<IActionResult> CreateActionItem(Guid meetingId, CreateActionItemRequest request, CancellationToken cancellationToken)
-        => ToActionResult(await sender.Send(new CreateActionItemCommand(meetingId, request.Description, request.AssigneeUserId, request.DueAt, request.Priority), cancellationToken));
+        => ToActionResult(await sender.Send(new CreateActionItemCommand(meetingId, request.Description, request.AssigneeUserIds ?? [], request.DueAt, request.Priority), cancellationToken));
 
     [HttpPut("{meetingId:guid}/notes")]
     public async Task<IActionResult> UpdateNotes(Guid meetingId, UpdateNotesRequest request, CancellationToken cancellationToken)

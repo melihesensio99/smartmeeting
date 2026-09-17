@@ -80,7 +80,7 @@ export function useMeetingRoomPresence(meetingId: string | undefined) {
     setError(null)
     let stream: MediaStream
     try {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+      stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1, sampleRate: 48000 }, video: false })
     } catch {
       setError('Mikrofon ve kamera erişimi verilemedi. Tarayıcı izinlerini kontrol edin.')
       setIsConnecting(false)

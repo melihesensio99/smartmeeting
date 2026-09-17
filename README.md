@@ -6,6 +6,20 @@ Takvimden başlayan akış; kayıt, konuşmacılı transkript, Türkçe AI rapor
 
 > Toplantı notu değil, toplantıdan çıkan sonucu yönet.
 
+## 🧰 Teknoloji Yığını
+
+![.NET 8](https://img.shields.io/badge/.NET%208-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
+![React](https://img.shields.io/badge/React-19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)
+![SignalR](https://img.shields.io/badge/SignalR-Real--time-512BD4?style=for-the-badge&logo=.net&logoColor=white)
+![Mistral AI](https://img.shields.io/badge/Mistral%20AI-Voxtral%20%7C%20LLM-000000?style=for-the-badge)
+![Material UI](https://img.shields.io/badge/Material%20UI-9-007FFF?style=for-the-badge&logo=mui&logoColor=white)
+
+Frontend; React, TypeScript, Vite, Material UI ve TanStack Query ile geliştirildi. Backend; .NET 8, Clean Architecture, CQRS/MediatR ve FluentValidation kullanır. PostgreSQL kalıcı veriyi, RabbitMQ uzun süren ses/AI işlemlerini, SignalR ise toplantı odası presence ve gerçek zamanlı olayları yönetir. Ses kaydı Voxtral ile metne çevrilir; Mistral AI özet, karar ve aksiyonları üretir.
+
 ---
 
 ## 🎯 Neden Meeting?
@@ -93,22 +107,63 @@ Toplantıdaki rol ve sorumluluklar açıkça yönetilir:
 
 ## 🖼️ Ekran Galerisi
 
-Gerçek ekran görüntüleri aşağıdaki dosya adlarıyla sonradan eklenebilir:
+Uygulamanın ana akışları gerçek ekran görüntüleriyle aşağıda gösterilmiştir. Görseller [`docs/screenshots`](docs/screenshots) klasöründe tutulur.
 
-| Akış | Görsel |
-|---|---|
-| Dashboard | `docs/screenshots/dashboard.png` |
-| Giriş | `docs/screenshots/login.png` |
-| Toplantı listesi | `docs/screenshots/meetings.png` |
-| Canlı oda | `docs/screenshots/meeting-room.png` |
-| Transkript ve AI raporu | `docs/screenshots/meeting-detail.png` |
-| Aksiyonlarım | `docs/screenshots/my-actions.png` |
+### 🔐 Giriş ve başlangıç ekranları
 
-Örnek:
+![Meeting giriş ekranı](docs/screenshots/login.png)
 
-```markdown
+Kullanıcılar kimlik doğrulama olmadan uygulama sayfalarına erişemez. HttpOnly cookie tabanlı oturum ile yetki bilgisi API tarafından doğrulanır.
+
 ![Meeting dashboard](docs/screenshots/dashboard.png)
-```
+
+Dashboard; kullanıcının dahil olduğu toplantıları, günlük akışı, tamamlanan AI özetlerini ve açık aksiyonlarını tek bakışta sunar.
+
+### 📅 Toplantı oluşturma ve katılımcılar
+
+![Toplantı oluşturma](docs/screenshots/toplantıolusturma.png)
+
+Toplantı oluşturma akışı tarih aralığı, toplantı başlığı ve planlama bilgilerini tek formda toplar.
+
+![Katılımcı ekleme](docs/screenshots/katılımcıekleme.png)
+
+Katılımcılar yalnızca kayıtlı kullanıcılar arasından seçilir; toplu seçim desteklenir ve toplantı yöneticisi yetkileri ayrı yönetilir.
+
+### 🎥 Toplantı odası ve canlı kayıt
+
+![Toplantı odası](docs/screenshots/ToplantiOdasi.png)
+
+Toplantı odası, WebRTC medya akışlarını ve katılımcı presence bilgisini aynı çalışma alanında gösterir. Kamera ve mikrofon kontrolleri oda içinden yönetilir.
+
+![Canlı kayıt ve canlı transkripsiyon](docs/screenshots/CanlıKayitVeCanlıTranskripsiyon.png)
+
+Kayıt yöneticinin kontrolündedir. Ses kaydı tamamlandığında dosya API’ye yüklenir, RabbitMQ kuyruğuna alınır ve Voxtral transkripsiyon worker’ı tarafından işlenir.
+
+### 🤖 AI özeti ve aksiyon yönetimi
+
+![AI özeti ve çıkarılan aksiyonların atanması](docs/screenshots/AiÖzetVeCikardigiAksiyonlarinAtanmasi.PNG)
+
+Mistral AI transkriptten özet, karar ve aksiyonlar çıkarır. Aksiyonlar toplantıya katılan kullanıcılara atanabilir; sorumlu, öncelik ve termin bilgileri düzenlenebilir.
+
+![Atanan aksiyonlar](docs/screenshots/atananAksiyonlar.Png)
+
+Global Manager tüm aksiyonları, sorumlularını ve toplantı ilişkisini görebilir. Atanan kullanıcı kendi aksiyonunu tamamlandı durumuna çekebilir.
+
+### ✅ Toplantı sonu ve e-posta çıktısı
+
+![Toplantı sonu odası](docs/screenshots/ToplantıSonuOdası.png)
+
+Toplantı sonlandırıldığında canlı odaya yeniden giriş kapatılır; toplantı geçmişte tutulur ve transkript/AI sonuçları okunmaya devam eder.
+
+![AI özeti e-postası](docs/screenshots/Aiözetmaili.png)
+
+Hazır transkript, AI özeti, kararlar ve aksiyonlar toplantının kayıtlı e-posta alıcılarına gönderilebilir. Gönderim yetkisi toplantı yöneticisi ve Global Manager ile sınırlıdır.
+
+### 📚 API dokümantasyonu
+
+![Meeting Swagger API dokümantasyonu](docs/screenshots/swagger-api.png)
+
+Swagger UI, authentication, toplantılar, katılımcılar, kayıt/işleme, konuşmacı eşleştirme ve aksiyon endpoint’lerini request/response modelleriyle listeler.
 
 ### 🎬 İki kullanıcıyla canlı oda akışı
 

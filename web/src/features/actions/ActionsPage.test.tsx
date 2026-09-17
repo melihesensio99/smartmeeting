@@ -17,33 +17,34 @@ const meeting: Meeting = {
     overview: 'Özet',
     decisions: [],
     actionItems: [
-      { id: '22222222-2222-2222-2222-222222222222', description: 'Açık aksiyonu tamamla', assignee: 'Melih', assigneeUserId: 'user-1', dueAt: '2026-09-20T20:59:59Z', priority: 'High', completed: false },
-      { id: '33333333-3333-3333-3333-333333333333', description: 'Tamamlanmış aksiyon', assignee: null, assigneeUserId: null, dueAt: null, priority: 'Low', completed: true },
+      { id: '22222222-2222-2222-2222-222222222222', description: 'Açık aksiyonu tamamla', assignee: 'Melih', assigneeUserId: 'user-1', assigneeUserIds: ['user-1'], dueAt: '2026-09-20T20:59:59Z', priority: 'High', completed: false },
+      { id: '33333333-3333-3333-3333-333333333333', description: 'Tamamlanmış aksiyon', assignee: null, assigneeUserId: null, assigneeUserIds: [], dueAt: null, priority: 'Low', completed: true },
     ],
   },
 }
 
 describe('ActionsPage', () => {
   it('aksiyonları öncelik etiketi, termin ve sorumlu bilgisiyle gösterir', () => {
-    render(<ActionsPage meetings={[meeting]} currentUserId="user-1" isGlobalManager onComplete={vi.fn()} />)
+    render(<ActionsPage meetings={[meeting]} currentUserId="user-1" isGlobalManager />)
 
     expect(screen.getByText('Açık aksiyonu tamamla')).toBeInTheDocument()
     expect(screen.getByText('Tamamlanmış aksiyon')).toBeInTheDocument()
     expect(screen.getByText('Yüksek')).toBeInTheDocument()
     expect(screen.getByText('Düşük')).toBeInTheDocument()
-    expect(screen.getByText(/Sorumlu:.*Melih/)).toBeInTheDocument()
+    expect(screen.getByText('Sorumlu')).toBeInTheDocument()
+    expect(screen.getByText('Melih')).toBeInTheDocument()
   })
 
-  it('açık ve tamamlanan filtrelerini uygular, checkbox ile aksiyonu tamamlar', () => {
+  it('açık ve tamamlanan filtrelerini uygular, durum alanını yalnızca gösterir', () => {
     const onComplete = vi.fn()
-    render(<ActionsPage meetings={[meeting]} currentUserId="user-1" isGlobalManager onComplete={onComplete} />)
+    render(<ActionsPage meetings={[meeting]} currentUserId="user-1" isGlobalManager />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Açık' }))
     expect(screen.getByText('Açık aksiyonu tamamla')).toBeInTheDocument()
     expect(screen.queryByText('Tamamlanmış aksiyon')).not.toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('checkbox'))
-    expect(onComplete).toHaveBeenCalledWith(meeting.id, '22222222-2222-2222-2222-222222222222')
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
+    expect(onComplete).not.toHaveBeenCalled()
 
     fireEvent.click(screen.getByRole('button', { name: 'Tamamlanan' }))
     expect(screen.getByText('Tamamlanmış aksiyon')).toBeInTheDocument()

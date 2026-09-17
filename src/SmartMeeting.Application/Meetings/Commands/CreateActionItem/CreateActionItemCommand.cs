@@ -7,14 +7,14 @@ using SmartMeeting.Domain.Meetings;
 
 namespace SmartMeeting.Application.Meetings.Commands.CreateActionItem;
 
-public sealed record CreateActionItemCommand(Guid MeetingId, string Description, string? AssigneeUserId, DateTimeOffset? DueAt, ActionPriority Priority) : IRequest<Result<MeetingResponse>>;
+public sealed record CreateActionItemCommand(Guid MeetingId, string Description, IReadOnlyCollection<string> AssigneeUserIds, DateTimeOffset? DueAt, ActionPriority Priority) : IRequest<Result<MeetingResponse>>;
 
 public sealed class CreateActionItemValidator : AbstractValidator<CreateActionItemCommand>
 {
     public CreateActionItemValidator()
     {
         RuleFor(x => x.Description).NotEmpty().MaximumLength(1000);
-        RuleFor(x => x.AssigneeUserId).MaximumLength(100);
+        RuleForEach(x => x.AssigneeUserIds).NotEmpty().MaximumLength(100);
         RuleFor(x => x.Priority).IsInEnum();
     }
 }
@@ -29,9 +29,15 @@ public sealed class CreateActionItemCommandHandler(IApplicationDbContext db, IId
 
         try
         {
-            var assignee = request.AssigneeUserId is null ? null : await identityService.FindByIdAsync(request.AssigneeUserId, cancellationToken);
-            if (request.AssigneeUserId is not null && assignee is null) return Result<MeetingResponse>.Failure("assignee_not_found", "Aksiyon sorumlusu sistemde kayıtlı değil.");
-            meeting.AddActionItem(request.Description, assignee?.UserId, assignee?.DisplayName, request.DueAt?.ToUniversalTime(), request.Priority);
+            var assignees = new List<(string UserId, string DisplayName)>();
+            foreach (var userId in request.AssigneeUserIds.Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                var assignee = await identityService.FindByIdAsync(userId, cancellationToken);
+                if (assignee is null) return Result<MeetingResponse>.Failure("assignee_not_found", "Aksiyon sorumlularından biri sistemde kayıtlı değil.");
+                if (assignee.UserId != meeting.OrganizerId && !meeting.Participants.Any(x => x.UserId == assignee.UserId)) return Result<MeetingResponse>.Failure("assignee_not_participant", "Aksiyon yalnızca toplantı katılımcılarına atanabilir.");
+                assignees.Add((assignee.UserId, assignee.DisplayName));
+            }
+            meeting.AddActionItem(request.Description, assignees.Select(x => x.UserId).ToList(), assignees.Select(x => x.DisplayName).ToList(), request.DueAt?.ToUniversalTime(), request.Priority);
             await db.SaveChangesAsync(cancellationToken);
             return Result<MeetingResponse>.Success(MeetingResponse.From(meeting));
         }

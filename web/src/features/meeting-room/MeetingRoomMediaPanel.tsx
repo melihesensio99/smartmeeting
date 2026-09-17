@@ -5,20 +5,282 @@ import type { ReactNode } from 'react'
 import { useAudioVisualizer } from '../../hooks/useAudioVisualizer'
 import type { MeetingRoomParticipant } from './useMeetingRoomPresence'
 
-type Props = { localStream: MediaStream | null; remoteStreams: Record<string, MediaStream>; participants: MeetingRoomParticipant[]; isMuted: boolean; isCameraOff: boolean; onToggleMute: () => void; onToggleCamera: () => void | Promise<void> }
+type Props = {
+  localStream: MediaStream | null
+  remoteStreams: Record<string, MediaStream>
+  participants: MeetingRoomParticipant[]
+  isMuted: boolean
+  isCameraOff: boolean
+  onToggleMute: () => void
+  onToggleCamera: () => void | Promise<void>
+}
 
-function VideoTile({ stream, label, muted, controls }: { stream: MediaStream; label: string; muted?: boolean; controls?: ReactNode }) {
+function VideoTile({
+  stream,
+  label,
+  muted,
+  controls,
+}: {
+  stream: MediaStream
+  label: string
+  muted?: boolean
+  controls?: ReactNode
+}) {
   const videoRef = useRef<HTMLVideoElement>(null)
+
   useEffect(() => {
     const videoElement = videoRef.current
     if (videoElement) videoElement.srcObject = stream
-    return () => { if (videoElement) videoElement.srcObject = null }
+    return () => {
+      if (videoElement) videoElement.srcObject = null
+    }
   }, [stream])
-  return <Box sx={{ position: 'relative', width: '100%', maxWidth: 560, aspectRatio: '16 / 9', overflow: 'hidden', borderRadius: 4, bgcolor: 'grey.900', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}><video ref={videoRef} autoPlay playsInline muted={muted} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /><Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '40%', background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)', pointerEvents: 'none' }} /><Chip size="small" label={label} sx={{ position: 'absolute', left: 12, bottom: 12, bgcolor: (theme) => alpha(theme.palette.common.black, 0.7), color: 'common.white', fontWeight: 600, border: '1px solid', borderColor: (theme) => alpha(theme.palette.common.white, 0.1), backdropFilter: 'blur(4px)' }} />{controls}</Box>
+
+  return (
+    <Box
+      sx={{
+        position: 'relative',
+        width: '100%',
+        aspectRatio: '16 / 9',
+        overflow: 'hidden',
+        borderRadius: 3,
+        bgcolor: 'grey.900',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+      }}
+    >
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted={muted}
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+      />
+
+      {/* Gradient overlay */}
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '40%',
+          background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* Name label - truncated to prevent overflow */}
+      <Chip
+        size="small"
+        label={label}
+        sx={{
+          position: 'absolute',
+          left: 8,
+          bottom: 8,
+          maxWidth: controls ? 'calc(100% - 110px)' : 'calc(100% - 16px)',
+          bgcolor: (theme) => alpha(theme.palette.common.black, 0.7),
+          color: 'common.white',
+          fontWeight: 600,
+          fontSize: '0.75rem',
+          border: '1px solid',
+          borderColor: (theme) => alpha(theme.palette.common.white, 0.1),
+          backdropFilter: 'blur(4px)',
+          '& .MuiChip-label': {
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          },
+        }}
+      />
+
+      {/* Controls */}
+      {controls}
+    </Box>
+  )
 }
 
-export function MeetingRoomMediaPanel({ localStream, remoteStreams, participants, isMuted, isCameraOff, onToggleMute, onToggleCamera }: Props) {
+export function MeetingRoomMediaPanel({
+  localStream,
+  remoteStreams,
+  participants,
+  isMuted,
+  isCameraOff,
+  onToggleMute,
+  onToggleCamera,
+}: Props) {
   const remoteEntries = Object.entries(remoteStreams)
   const levels = useAudioVisualizer(localStream)
-  return <Card sx={{ borderRadius: 4, transition: 'box-shadow 0.3s', '&:hover': { boxShadow: (theme) => `0 8px 24px ${alpha(theme.palette.primary.main, 0.12)}` } }}><CardContent sx={{ p: { xs: 2, md: 3 } }}><Stack spacing={3}><Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}><Box><Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main', mb: 0.5 }}>Ekip ve kamera</Typography><Typography variant="body2" color="text.secondary">Toplantıdaki kişileri ve bağlantıları yönetin.</Typography></Box><Chip size="medium" label={`${remoteEntries.length + 1} kişi`} color="primary" variant="outlined" sx={{ fontWeight: 600, borderWidth: 2 }} /></Stack><Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 2 }}>{localStream && <VideoTile stream={localStream} label={isCameraOff ? 'Siz · Kamera kapalı' : 'Siz'} muted controls={<Stack direction="row" spacing={1} sx={{ position: 'absolute', right: 12, bottom: 12, p: 0.75, borderRadius: 3, bgcolor: (theme) => alpha(theme.palette.primary.dark, 0.85), backdropFilter: 'blur(8px)', border: '1px solid', borderColor: (theme) => alpha(theme.palette.common.white, 0.1) }}><Tooltip title={isMuted ? 'Mikrofonu aç' : 'Mikrofonu kapat'}><IconButton aria-label={isMuted ? 'Mikrofonu aç' : 'Mikrofonu kapat'} onClick={onToggleMute} sx={{ color: isMuted ? 'secondary.main' : 'common.white', bgcolor: isMuted ? (theme) => alpha(theme.palette.secondary.main, 0.15) : 'transparent', '&:hover': { bgcolor: (theme) => alpha(theme.palette.common.white, 0.1) } }}><span aria-hidden="true">{isMuted ? '🔇' : '🎙️'}</span></IconButton></Tooltip><Tooltip title={isCameraOff ? 'Kamerayı aç' : 'Kamerayı kapat'}><IconButton aria-label={isCameraOff ? 'Kamerayı aç' : 'Kamerayı kapat'} onClick={() => void onToggleCamera()} sx={{ color: isCameraOff ? 'secondary.main' : 'common.white', bgcolor: isCameraOff ? (theme) => alpha(theme.palette.secondary.main, 0.15) : 'transparent', '&:hover': { bgcolor: (theme) => alpha(theme.palette.common.white, 0.1) } }}><span aria-hidden="true">{isCameraOff ? '📹' : '🎥'}</span></IconButton></Tooltip></Stack>} />}{remoteEntries.map(([userId, stream]) => <VideoTile key={userId} stream={stream} label={participants.find((participant) => participant.userId === userId)?.displayName ?? 'Katılımcı'} />)}</Box><Stack spacing={1.5} sx={{ mt: 1 }}><Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.5 }}>Canlı ses ve frekans dalgası</Typography><Stack direction="row" sx={{ height: 60, alignItems: 'center', justifyContent: 'center', gap: 0.75, px: 2, borderRadius: 3, bgcolor: 'primary.dark', boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }} aria-label="Canlı ses frekans görselleştirmesi">{levels.map((level, index) => <Box key={index} component="span" sx={{ width: 4, height: `${Math.max(6, level * 44)}px`, borderRadius: 2, background: (theme) => `linear-gradient(to top, ${theme.palette.secondary.main}, ${theme.palette.primary.light})`, transition: 'height 80ms ease-out' }} />)}</Stack></Stack>{remoteEntries.length === 0 && <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2, fontStyle: 'italic' }}>Diğer katılımcılar kameralarını açtığında görüntüleri burada görünecek.</Typography>}</Stack></CardContent></Card>
+
+  return (
+    <Card
+      sx={{
+        borderRadius: 4,
+        transition: 'box-shadow 0.3s',
+        '&:hover': {
+          boxShadow: (theme) => `0 8px 24px ${alpha(theme.palette.primary.main, 0.12)}`,
+        },
+      }}
+    >
+      <CardContent sx={{ p: { xs: 2, md: 3 } }}>
+        <Stack spacing={3}>
+          {/* Header */}
+          <Stack
+            direction="row"
+            sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}
+          >
+            <Box>
+              <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main', mb: 0.5 }}>
+                Ekip ve kamera
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Toplantıdaki kişileri ve bağlantıları yönetin.
+              </Typography>
+            </Box>
+            <Chip
+              size="medium"
+              label={`${remoteEntries.length + 1} kişi`}
+              color="primary"
+              variant="outlined"
+              sx={{ fontWeight: 600, borderWidth: 2 }}
+            />
+          </Stack>
+
+          {/* Video Grid */}
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
+              gap: 2,
+            }}
+          >
+            {localStream && (
+              <VideoTile
+                stream={localStream}
+                label={isCameraOff ? 'Siz · Kamera kapalı' : 'Siz'}
+                muted
+                controls={
+                  <Stack
+                    direction="row"
+                    spacing={0.5}
+                    sx={{
+                      position: 'absolute',
+                      right: 8,
+                      bottom: 8,
+                      p: 0.5,
+                      borderRadius: 2,
+                      bgcolor: (theme) => alpha(theme.palette.primary.dark, 0.85),
+                      backdropFilter: 'blur(8px)',
+                      border: '1px solid',
+                      borderColor: (theme) => alpha(theme.palette.common.white, 0.1),
+                    }}
+                  >
+                    <Tooltip title={isMuted ? 'Mikrofonu aç' : 'Mikrofonu kapat'}>
+                      <IconButton
+                        aria-label={isMuted ? 'Mikrofonu aç' : 'Mikrofonu kapat'}
+                        onClick={onToggleMute}
+                        size="small"
+                        sx={{
+                          color: isMuted ? 'secondary.main' : 'common.white',
+                          bgcolor: isMuted
+                            ? (theme) => alpha(theme.palette.secondary.main, 0.15)
+                            : 'transparent',
+                          '&:hover': {
+                            bgcolor: (theme) => alpha(theme.palette.common.white, 0.1),
+                          },
+                        }}
+                      >
+                        <span aria-hidden="true">{isMuted ? '🔇' : '🎙️'}</span>
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title={isCameraOff ? 'Kamerayı aç' : 'Kamerayı kapat'}>
+                      <IconButton
+                        aria-label={isCameraOff ? 'Kamerayı aç' : 'Kamerayı kapat'}
+                        onClick={() => void onToggleCamera()}
+                        size="small"
+                        sx={{
+                          color: isCameraOff ? 'secondary.main' : 'common.white',
+                          bgcolor: isCameraOff
+                            ? (theme) => alpha(theme.palette.secondary.main, 0.15)
+                            : 'transparent',
+                          '&:hover': {
+                            bgcolor: (theme) => alpha(theme.palette.common.white, 0.1),
+                          },
+                        }}
+                      >
+                        <span aria-hidden="true">{isCameraOff ? '📹' : '🎥'}</span>
+                      </IconButton>
+                    </Tooltip>
+                  </Stack>
+                }
+              />
+            )}
+            {remoteEntries.map(([userId, stream]) => (
+              <VideoTile
+                key={userId}
+                stream={stream}
+                label={
+                  participants.find((participant) => participant.userId === userId)?.displayName ??
+                  'Katılımcı'
+                }
+              />
+            ))}
+          </Box>
+
+          {/* Audio Visualizer */}
+          <Stack spacing={1.5} sx={{ mt: 1 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                fontWeight: 700,
+                color: 'text.secondary',
+                textTransform: 'uppercase',
+                letterSpacing: 0.5,
+              }}
+            >
+              Canlı ses ve frekans dalgası
+            </Typography>
+            <Stack
+              direction="row"
+              sx={{
+                height: 60,
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 0.75,
+                px: 2,
+                borderRadius: 3,
+                bgcolor: 'primary.dark',
+                boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)',
+              }}
+              aria-label="Canlı ses frekans görselleştirmesi"
+            >
+              {levels.map((level, index) => (
+                <Box
+                  key={index}
+                  component="span"
+                  sx={{
+                    width: 4,
+                    height: `${Math.max(6, level * 44)}px`,
+                    borderRadius: 2,
+                    background: (theme) =>
+                      `linear-gradient(to top, ${theme.palette.secondary.main}, ${theme.palette.primary.light})`,
+                    transition: 'height 80ms ease-out',
+                  }}
+                />
+              ))}
+            </Stack>
+          </Stack>
+
+          {remoteEntries.length === 0 && (
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ textAlign: 'center', py: 2, fontStyle: 'italic' }}
+            >
+              Diğer katılımcılar kameralarını açtığında görüntüleri burada görünecek.
+            </Typography>
+          )}
+        </Stack>
+      </CardContent>
+    </Card>
+  )
 }
