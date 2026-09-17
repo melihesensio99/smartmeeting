@@ -9,4 +9,6 @@ public sealed class RabbitMqOptions
     public string Username { get; init; } = "smartmeeting";
     public string Password { get; init; } = string.Empty;
     public string QueueName { get; init; } = "smartmeeting.meeting-processing";
+    public bool UseTls { get; init; }
+    public string? TlsServerName { get; init; }
 }

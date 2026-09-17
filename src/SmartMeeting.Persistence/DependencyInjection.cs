@@ -12,7 +12,17 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<MeetingDbContext>(options => options.UseSqlite(configuration.GetConnectionString("Default") ?? "Data Source=smartmeeting.db"));
+        var provider = configuration["Database:Provider"] ?? "Sqlite";
+        var connectionString = configuration.GetConnectionString("Default");
+        services.AddDbContext<MeetingDbContext>(options =>
+        {
+            if (provider.Equals("Postgres", StringComparison.OrdinalIgnoreCase) || provider.Equals("PostgreSQL", StringComparison.OrdinalIgnoreCase))
+                options.UseNpgsql(connectionString ?? throw new InvalidOperationException("PostgreSQL connection string is required."));
+            else if (provider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase))
+                options.UseSqlite(connectionString ?? "Data Source=smartmeeting.db");
+            else
+                throw new InvalidOperationException($"Unsupported database provider: {provider}.");
+        });
         services.AddIdentityCore<ApplicationUser>(options =>
         {
             options.User.RequireUniqueEmail = true;

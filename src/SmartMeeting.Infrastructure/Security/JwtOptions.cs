@@ -11,4 +11,5 @@ public sealed class JwtOptions
     public string? SigningKey { get; init; }
     public string CookieName { get; init; } = "smartmeeting.auth";
     public int LifetimeHours { get; init; } = 8;
+    public bool SecureCookie { get; init; } = true;
 }

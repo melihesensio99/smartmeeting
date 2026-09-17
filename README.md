@@ -49,6 +49,26 @@ dotnet user-secrets set "RabbitMq:Password" "<RABBITMQ_PASSWORD>" --project src/
 
 RabbitMQ kapatılırsa API başlarken değil, ilk kuyruğa yazma veya okuma sırasında bağlantı hatası üretir; bu sayede web uygulamasının ayağa kalkması bağımsız kalır. Üretimde RabbitMQ için ayrı kullanıcı, TLS, erişim politikası ve izleme yapılandırılmalıdır.
 
+## Üretim güvenliği ve çalışma zamanı kontrolleri
+
+Production ortamında API şu güvenlik kurallarını uygular:
+
+- HTTPS yönlendirmesi ve proxy arkasında `X-Forwarded-Proto` desteği etkinleştirilir.
+- Kimlik doğrulama cookie'si HttpOnly ve Secure olarak yazılır.
+- `Cors:Origins` yalnızca HTTPS origin değerlerinden oluşmalıdır.
+- JWT için en az 32 karakterlik imzalama anahtarı, issuer ve audience zorunludur.
+- Data Protection anahtarları `DataProtection:KeysPath` altında kalıcı tutulur. Container kullanımında bu klasör volume ile saklanmalıdır.
+- `/health/live` yalnızca prosesin ayakta olduğunu, `/health/ready` ise veritabanı ve RabbitMQ bağlantılarını kontrol eder.
+
+Production PostgreSQL kullanımı için kaynak dosyaya parola yazmadan provider ve connection string secret olarak tanımlanır:
+
+```powershell
+$env:Database__Provider = "Postgres"
+$env:ConnectionStrings__Default = "Host=postgres;Port=5432;Database=smartmeeting;Username=smartmeeting;Password=<POSTGRES_PASSWORD>"
+```
+
+RabbitMQ TLS kullanımı için `RabbitMq:UseTls=true`, `RabbitMq:Port=5671` ve `RabbitMq:TlsServerName` değerleri secret/config sağlayıcısından verilmelidir. Lokal Compose kurulumu TLS'siz `localhost:5672` bağlantısını kullanır.
+
 ## Toplantı işleme akışı
 
 - `POST /api/meetings`: toplantı oluşturur.

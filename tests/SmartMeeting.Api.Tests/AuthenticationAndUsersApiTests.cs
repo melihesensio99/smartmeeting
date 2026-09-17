@@ -31,13 +31,26 @@ public sealed class AuthenticationAndUsersApiTests(ApiFactory factory) : IClassF
     }
 
     [Fact]
+    public async Task Liveness_and_readiness_endpoints_are_public()
+    {
+        using var client = factory.CreateClient();
+
+        var livenessResponse = await client.GetAsync("/health/live");
+        var readinessResponse = await client.GetAsync("/health/ready");
+
+        Assert.Equal(HttpStatusCode.OK, livenessResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, readinessResponse.StatusCode);
+    }
+
+    [Fact]
     public async Task Register_login_and_search_users_use_http_pipeline()
     {
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = true });
+        var email = $"ayse.integration.{Guid.NewGuid():N}@example.com";
 
         var registerResponse = await client.PostAsJsonAsync("/api/auth/register", new
         {
-            email = "ayse.integration@example.com",
+            email,
             password = "Password123",
             displayName = "Ayşe Integration"
         });
@@ -47,7 +60,7 @@ public sealed class AuthenticationAndUsersApiTests(ApiFactory factory) : IClassF
 
         var loginResponse = await client.PostAsJsonAsync("/api/auth/login", new
         {
-            email = "ayse.integration@example.com",
+            email,
             password = "Password123"
         });
         Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
@@ -62,12 +75,12 @@ public sealed class AuthenticationAndUsersApiTests(ApiFactory factory) : IClassF
         Assert.Equal("Ayşe Integration", currentUserDocument.RootElement.GetProperty("displayName").GetString());
         Assert.False(currentUserDocument.RootElement.GetProperty("isGlobalManager").GetBoolean());
 
-        using var searchRequest = new HttpRequestMessage(HttpMethod.Get, "/api/users?search=Ay%C5%9Fe");
+        using var searchRequest = new HttpRequestMessage(HttpMethod.Get, $"/api/users?search={Uri.EscapeDataString(email)}");
         searchRequest.Headers.Add("X-Test-User", "integration-user");
         var searchResponse = await client.SendAsync(searchRequest);
         Assert.True(searchResponse.IsSuccessStatusCode, $"{searchResponse.StatusCode}: {await searchResponse.Content.ReadAsStringAsync()}");
         var users = await searchResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<UserSearchResponse>>();
-        Assert.Contains(users!, user => user.Email == "ayse.integration@example.com");
+        Assert.Contains(users!, user => user.Email == email);
     }
 
     [Fact]

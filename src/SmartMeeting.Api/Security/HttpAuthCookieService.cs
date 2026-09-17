@@ -4,7 +4,7 @@ using SmartMeeting.Api.Security.Abstractions;
 
 namespace SmartMeeting.Api.Security;
 
-public sealed class HttpAuthCookieService(IHttpContextAccessor httpContextAccessor, IOptions<JwtOptions> options) : IAuthCookieService
+public sealed class HttpAuthCookieService(IHttpContextAccessor httpContextAccessor, IOptions<JwtOptions> options, IWebHostEnvironment environment) : IAuthCookieService
 {
     public void Write(string token, DateTimeOffset expiresAt)
     {
@@ -12,7 +12,7 @@ public sealed class HttpAuthCookieService(IHttpContextAccessor httpContextAccess
         context.Response.Cookies.Append(options.Value.CookieName, token, new CookieOptions
         {
             HttpOnly = true,
-            Secure = context.Request.IsHttps,
+            Secure = options.Value.SecureCookie || !environment.IsDevelopment(),
             SameSite = SameSiteMode.Lax,
             Expires = expiresAt,
             IsEssential = true,
@@ -23,6 +23,6 @@ public sealed class HttpAuthCookieService(IHttpContextAccessor httpContextAccess
     public void Delete()
     {
         var context = httpContextAccessor.HttpContext ?? throw new InvalidOperationException("HTTP context is unavailable.");
-        context.Response.Cookies.Delete(options.Value.CookieName, new CookieOptions { HttpOnly = true, SameSite = SameSiteMode.Lax, Path = "/" });
+        context.Response.Cookies.Delete(options.Value.CookieName, new CookieOptions { HttpOnly = true, Secure = options.Value.SecureCookie || !environment.IsDevelopment(), SameSite = SameSiteMode.Lax, Path = "/" });
     }
 }

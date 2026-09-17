@@ -56,7 +56,7 @@ public sealed class RabbitMqMeetingProcessingQueue(IOptions<RabbitMqOptions> opt
         try
         {
             if (channel is not null && channel.IsOpen) return channel;
-            var factory = new ConnectionFactory { HostName = configuration.Host, Port = configuration.Port, UserName = configuration.Username, Password = configuration.Password };
+            var factory = CreateConnectionFactory();
             connection ??= await factory.CreateConnectionAsync(cancellationToken);
             channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
             await channel.QueueDeclareAsync(configuration.QueueName, true, false, false, null, false, cancellationToken);
@@ -64,6 +64,20 @@ public sealed class RabbitMqMeetingProcessingQueue(IOptions<RabbitMqOptions> opt
             return channel;
         }
         finally { connectionLock.Release(); }
+    }
+
+    private ConnectionFactory CreateConnectionFactory()
+    {
+        var factory = new ConnectionFactory
+        {
+            HostName = configuration.Host,
+            Port = configuration.Port,
+            UserName = configuration.Username,
+            Password = configuration.Password
+        };
+        if (configuration.UseTls)
+            factory.Ssl = new SslOption(configuration.TlsServerName ?? configuration.Host, string.Empty, true);
+        return factory;
     }
 
     public async ValueTask DisposeAsync()
