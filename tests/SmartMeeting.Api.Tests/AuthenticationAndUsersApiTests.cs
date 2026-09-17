@@ -42,6 +42,8 @@ public sealed class AuthenticationAndUsersApiTests(ApiFactory factory) : IClassF
             displayName = "Ayşe Integration"
         });
         Assert.Equal(HttpStatusCode.OK, registerResponse.StatusCode);
+        using var registeredUserDocument = JsonDocument.Parse(await registerResponse.Content.ReadAsStringAsync());
+        var registeredUserId = registeredUserDocument.RootElement.GetProperty("userId").GetString()!;
 
         var loginResponse = await client.PostAsJsonAsync("/api/auth/login", new
         {
@@ -51,6 +53,14 @@ public sealed class AuthenticationAndUsersApiTests(ApiFactory factory) : IClassF
         Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
         var authCookie = loginResponse.Headers.GetValues("Set-Cookie").Single(cookie => cookie.Contains("smartmeeting.auth", StringComparison.Ordinal)).Split(';')[0];
         Assert.Contains("HttpOnly", loginResponse.Headers.GetValues("Set-Cookie").Single(), StringComparison.OrdinalIgnoreCase);
+
+        using var currentUserRequest = new HttpRequestMessage(HttpMethod.Get, "/api/auth/me");
+        currentUserRequest.Headers.Add("X-Test-User", registeredUserId);
+        var currentUserResponse = await client.SendAsync(currentUserRequest);
+        Assert.Equal(HttpStatusCode.OK, currentUserResponse.StatusCode);
+        using var currentUserDocument = JsonDocument.Parse(await currentUserResponse.Content.ReadAsStringAsync());
+        Assert.Equal("Ayşe Integration", currentUserDocument.RootElement.GetProperty("displayName").GetString());
+        Assert.False(currentUserDocument.RootElement.GetProperty("isGlobalManager").GetBoolean());
 
         using var searchRequest = new HttpRequestMessage(HttpMethod.Get, "/api/users?search=Ay%C5%9Fe");
         searchRequest.Headers.Add("X-Test-User", "integration-user");
