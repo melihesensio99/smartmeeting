@@ -66,7 +66,7 @@ export function MeetingDetailPage({ meeting, currentUserId, onComplete, onUpdate
     <Card><CardContent><Typography variant="h5">Toplantı notlarım</Typography><TextField fullWidth multiline minRows={4} value={note} onChange={(event) => setNote(event.target.value)} placeholder="Toplantı sırasında veya sonrasında özel notlarınızı yazın..." sx={{ mt: 2 }} /><Button sx={{ mt: 2 }} variant="outlined" disabled={!note.trim() || savingNotes} onClick={() => onSaveNotes(meeting.id, note)}>{savingNotes ? 'Kaydediliyor…' : 'Notu kaydet'}</Button></CardContent></Card>
     {emailSent && <Alert severity="success">Toplantı özeti katılımcılara e-posta ile gönderildi.</Alert>}
     {emailError && <Alert severity="error">{emailError}</Alert>}
-    <ActionItemEditor action={editingAction} open={editingAction !== null} saving={updatingAction} onClose={() => setEditingAction(null)} onSave={(input) => { if (!editingAction) return; onUpdateAction(meeting.id, editingAction.id, input); setEditingAction(null) }} />
+    <ActionItemEditor key={editingAction?.id ?? 'closed'} action={editingAction} open={editingAction !== null} saving={updatingAction} onClose={() => setEditingAction(null)} onSave={(input) => { if (!editingAction) return; onUpdateAction(meeting.id, editingAction.id, input); setEditingAction(null) }} />
   </Stack>
 }
 

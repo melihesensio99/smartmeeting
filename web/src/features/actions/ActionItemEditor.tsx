@@ -1,5 +1,5 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Stack, TextField, Typography } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { searchUsers } from '../../lib/api'
 import type { ActionItem, ActionPriority, UserResponse } from '../../types/meeting'
@@ -7,18 +7,10 @@ import type { ActionItem, ActionPriority, UserResponse } from '../../types/meeti
 type Props = { action: ActionItem | null; open: boolean; saving: boolean; onClose: () => void; onSave: (input: { assigneeUserId: string | null; dueAt: string | null; priority: ActionPriority }) => void }
 
 export function ActionItemEditor({ action, open, saving, onClose, onSave }: Props) {
-  const [assigneeSearch, setAssigneeSearch] = useState('')
-  const [selectedAssignee, setSelectedAssignee] = useState<UserResponse | null>(null)
-  const [dueAt, setDueAt] = useState('')
-  const [priority, setPriority] = useState<ActionPriority>('Medium')
-
-  useEffect(() => {
-    if (!action) return
-    setAssigneeSearch(action.assignee ?? '')
-    setSelectedAssignee(action.assigneeUserId ? { userId: action.assigneeUserId, displayName: action.assignee ?? '', email: '' } : null)
-    setDueAt(action.dueAt ? action.dueAt.slice(0, 10) : '')
-    setPriority(action.priority)
-  }, [action])
+  const [assigneeSearch, setAssigneeSearch] = useState(action?.assignee ?? '')
+  const [selectedAssignee, setSelectedAssignee] = useState<UserResponse | null>(action?.assigneeUserId ? { userId: action.assigneeUserId, displayName: action.assignee ?? '', email: '' } : null)
+  const [dueAt, setDueAt] = useState(action?.dueAt ? action.dueAt.slice(0, 10) : '')
+  const [priority, setPriority] = useState<ActionPriority>(action?.priority ?? 'Medium')
 
   const users = useQuery({ queryKey: ['action-assignees', assigneeSearch], queryFn: () => searchUsers(assigneeSearch), enabled: open && assigneeSearch.trim().length >= 2 })
 
