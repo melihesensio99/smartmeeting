@@ -1,1 +1,66 @@
-body { margin: 0; background: #f8f7fc; }
+/* ── Global Reset & Enhancements ───────────────────────────── */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: #F8F7FC;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ── Selection ─────────────────────────────────────────────── */
+::selection {
+  background: rgba(59, 36, 107, 0.15);
+  color: #242238;
+}
+
+/* ── Scrollbar (Webkit) ────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(59, 36, 107, 0.18);
+  border-radius: 100px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 36, 107, 0.32);
+}
+
+/* ── Scrollbar (Firefox) ───────────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(59, 36, 107, 0.18) transparent;
+}
+
+/* ── Focus Ring ─────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid rgba(59, 36, 107, 0.4);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Animations ────────────────────────────────────────────── */
+@keyframes sm-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+@keyframes sm-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes sm-slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes sm-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(255, 107, 107, 0.4); }
+  50%      { box-shadow: 0 0 20px rgba(255, 107, 107, 0.7); }
+}
