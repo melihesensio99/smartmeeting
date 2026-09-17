@@ -9,7 +9,7 @@ describe('AppShell', () => {
     render(
       <AppShell
         route="dashboard"
-        currentUser={{ userId: 'manager-1', email: 'manager@example.com', displayName: 'Ana Yönetici', isGlobalManager: true }}
+        currentUser={{ userId: 'manager-1', email: 'manager@example.com', displayName: 'Ana Yönetici', isGlobalManager: true, canCreateMeetings: true }}
       >
         <div>Dashboard içeriği</div>
       </AppShell>,
@@ -25,7 +25,7 @@ describe('AppShell', () => {
     render(
       <AppShell
         route="dashboard"
-        currentUser={{ userId: 'user-1', email: 'user@example.com', displayName: 'Standart Kullanıcı', isGlobalManager: false }}
+        currentUser={{ userId: 'user-1', email: 'user@example.com', displayName: 'Standart Kullanıcı', isGlobalManager: false, canCreateMeetings: false }}
       >
         <div>Dashboard içeriği</div>
       </AppShell>,

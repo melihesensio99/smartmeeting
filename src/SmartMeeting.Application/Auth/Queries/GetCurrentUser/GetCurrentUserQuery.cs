@@ -17,6 +17,6 @@ public sealed class GetCurrentUserQueryHandler(ICurrentUserService currentUser, 
         var user = await identityService.FindByIdAsync(currentUser.UserId, cancellationToken);
         return user is null
             ? Result<CurrentUserResponse>.Failure("user_not_found", "Kullanıcı bulunamadı.")
-            : Result<CurrentUserResponse>.Success(new CurrentUserResponse(user.UserId, user.Email, user.DisplayName, currentUser.IsGlobalManager));
+            : Result<CurrentUserResponse>.Success(new CurrentUserResponse(user.UserId, user.Email, user.DisplayName, currentUser.IsGlobalManager, currentUser.CanCreateMeetings));
     }
 }

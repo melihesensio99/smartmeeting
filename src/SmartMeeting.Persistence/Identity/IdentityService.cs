@@ -34,9 +34,16 @@ public sealed class IdentityService(UserManager<ApplicationUser> userManager, IJ
             .Select(section => section.Value)
             .OfType<string>()
             .ToArray();
-        var roles = globalManagerEmails.Any(configuredEmail => string.Equals(configuredEmail.Trim(), domainUser.Email, StringComparison.OrdinalIgnoreCase))
-            ? new[] { "GlobalManager" }
-            : Array.Empty<string>();
+        var meetingCreatorEmails = configuration.GetSection("Authorization:MeetingCreatorEmails")
+            .GetChildren()
+            .Select(section => section.Value)
+            .OfType<string>()
+            .ToArray();
+        var isGlobalManager = globalManagerEmails.Any(configuredEmail => string.Equals(configuredEmail.Trim(), domainUser.Email, StringComparison.OrdinalIgnoreCase));
+        var isMeetingCreator = meetingCreatorEmails.Any(configuredEmail => string.Equals(configuredEmail.Trim(), domainUser.Email, StringComparison.OrdinalIgnoreCase));
+        var roles = new List<string>();
+        if (isGlobalManager) roles.Add("GlobalManager");
+        if (isGlobalManager || isMeetingCreator) roles.Add("MeetingCreator");
         var token = jwtTokenService.CreateToken(domainUser.Id, domainUser.Email, domainUser.DisplayName, roles);
         return Result<AuthenticatedUser>.Success(new AuthenticatedUser(domainUser.Id, domainUser.Email, domainUser.DisplayName, token.Value, token.ExpiresAt));
     }

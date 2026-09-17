@@ -468,6 +468,7 @@ internal sealed class TestAuthenticationHandler(IOptionsMonitor<AuthenticationSc
             new(ClaimTypes.NameIdentifier, userId.ToString()),
             new(ClaimTypes.Name, "Integration User")
         };
+        claims.Add(new Claim(ClaimTypes.Role, "MeetingCreator"));
         if (Request.Headers.TryGetValue("X-Test-Global-Manager", out var globalManager) && globalManager == "true")
             claims.Add(new Claim(ClaimTypes.Role, "GlobalManager"));
         var identity = new ClaimsIdentity(claims, SchemeName);

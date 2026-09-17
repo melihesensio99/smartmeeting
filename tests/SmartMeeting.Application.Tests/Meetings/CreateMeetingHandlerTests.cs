@@ -126,5 +126,6 @@ public sealed class CreateMeetingCommandHandlerTests
     {
         public string? UserId => userId;
         public bool IsAuthenticated => userId is not null;
+        public bool CanCreateMeetings => IsAuthenticated;
     }
 }
