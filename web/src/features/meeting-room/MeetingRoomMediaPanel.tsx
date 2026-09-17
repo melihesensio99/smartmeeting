@@ -12,7 +12,7 @@ function VideoTile({ stream, label, muted }: { stream: MediaStream; label: strin
     if (videoElement) videoElement.srcObject = stream
     return () => { if (videoElement) videoElement.srcObject = null }
   }, [stream])
-  return <Box sx={{ position: 'relative', minHeight: 150, overflow: 'hidden', borderRadius: 2, bgcolor: 'grey.900' }}><video ref={videoRef} autoPlay playsInline muted={muted} style={{ width: '100%', height: '100%', minHeight: 150, objectFit: 'cover' }} /><Chip size="small" label={label} sx={{ position: 'absolute', left: 8, bottom: 8, bgcolor: 'rgba(0,0,0,.65)', color: 'common.white' }} /></Box>
+  return <Box sx={{ position: 'relative', width: '100%', maxWidth: 560, aspectRatio: '16 / 9', overflow: 'hidden', borderRadius: 2, bgcolor: 'grey.900' }}><video ref={videoRef} autoPlay playsInline muted={muted} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /><Chip size="small" label={label} sx={{ position: 'absolute', left: 8, bottom: 8, bgcolor: 'rgba(0,0,0,.65)', color: 'common.white' }} /></Box>
 }
 
 export function MeetingRoomMediaPanel({ localStream, remoteStreams, participants, isMuted, isCameraOff, onToggleMute, onToggleCamera }: Props) {
