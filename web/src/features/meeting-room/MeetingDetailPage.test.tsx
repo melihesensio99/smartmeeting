@@ -69,8 +69,9 @@ function renderPage(meeting: Meeting, onRetryProcessing = vi.fn(), currentUserId
 describe('MeetingDetailPage işlem durumu', () => {
   it('processing durumunu ilerleme mesajıyla gösterir', () => {
     renderPage(createMeeting(2))
+    fireEvent.click(screen.getByRole('button', { name: /İşlem durumu/ }))
 
-    expect(screen.getByText('İşleniyor')).toBeInTheDocument()
+    expect(screen.getAllByText('İşleniyor')[0]).toBeInTheDocument()
     expect(screen.getByText('Ses dosyası, transkript ve AI özeti hazırlanıyor.')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Yeniden işle' })).not.toBeInTheDocument()
   })
@@ -78,6 +79,7 @@ describe('MeetingDetailPage işlem durumu', () => {
   it('failed durumunda yeniden işleme aksiyonunu tetikler', () => {
     const onRetryProcessing = vi.fn()
     renderPage(createMeeting(4), onRetryProcessing)
+    fireEvent.click(screen.getByRole('button', { name: /İşlem durumu/ }))
 
     fireEvent.click(screen.getByRole('button', { name: 'Yeniden işle' }))
 
@@ -87,7 +89,7 @@ describe('MeetingDetailPage işlem durumu', () => {
   it('toplantı sahibi katılımcı yönetimi ve konuşmacı onay kontrollerini görür', () => {
     const meeting = createMeeting(3, [{ id: '44444444-4444-4444-4444-444444444444', userId: 'participant-1', displayName: 'Ayşe Katılımcı', email: 'ayse@example.com', canManageMeeting: true, speakerLabel: 'Speaker 1', speakerMappingStatus: 'PendingConfirmation', speakerConfidence: 0.8 }])
     renderPage(meeting)
-    fireEvent.click(screen.getByRole('tab', { name: 'Katılımcılar' }))
+    fireEvent.click(screen.getByRole('button', { name: /Katılımcılar/ }))
 
     expect(screen.getByRole('button', { name: 'Katılımcı ekle' })).toBeDisabled()
     expect(screen.getByText('Toplantı yöneticisi')).toBeInTheDocument()
