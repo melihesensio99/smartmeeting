@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -12,6 +13,8 @@ using Microsoft.Extensions.Options;
 using SmartMeeting.Application.Abstractions.Processing;
 using SmartMeeting.Application.Abstractions.Storage;
 using SmartMeeting.Application.Processing.Contracts;
+using SmartMeeting.Domain.Meetings;
+using SmartMeeting.Persistence;
 
 namespace SmartMeeting.Api.Tests;
 
@@ -93,7 +96,7 @@ public sealed class AuthenticationAndUsersApiTests(ApiFactory factory) : IClassF
 
         Assert.Equal(HttpStatusCode.OK, startResponse.StatusCode);
         using var startedDocument = JsonDocument.Parse(await startResponse.Content.ReadAsStringAsync());
-        Assert.Equal(1, startedDocument.RootElement.GetProperty("status").GetInt32());
+        Assert.Equal("Recording", startedDocument.RootElement.GetProperty("status").GetString());
     }
 
     [Fact]
@@ -113,7 +116,7 @@ public sealed class AuthenticationAndUsersApiTests(ApiFactory factory) : IClassF
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
-        Assert.Equal(2, document.RootElement.GetProperty("status").GetInt32());
+        Assert.Equal("Processing", document.RootElement.GetProperty("status").GetString());
         Assert.Equal(meetingId, queue.LastMeetingId);
     }
 
@@ -173,6 +176,50 @@ public sealed class AuthenticationAndUsersApiTests(ApiFactory factory) : IClassF
         using var leaveRequest = new HttpRequestMessage(HttpMethod.Delete, $"/api/meetings/{meetingId}/participants/me");
         leaveRequest.Headers.Add("X-Test-User", participantId);
         Assert.Equal(HttpStatusCode.OK, (await client.SendAsync(leaveRequest)).StatusCode);
+    }
+
+    [Fact]
+    public async Task Meeting_manager_can_create_manual_action_with_due_date_and_priority()
+    {
+        using var client = factory.CreateClient();
+        using var createRequest = new HttpRequestMessage(HttpMethod.Post, "/api/meetings")
+        {
+            Content = JsonContent.Create(new { title = "Manuel aksiyon API testi", startsAt = DateTimeOffset.UtcNow.AddHours(1) })
+        };
+        createRequest.Headers.Add("X-Test-User", "manager-user");
+        var createResponse = await client.SendAsync(createRequest);
+        createResponse.EnsureSuccessStatusCode();
+        using var created = JsonDocument.Parse(await createResponse.Content.ReadAsStringAsync());
+        var meetingId = created.RootElement.GetProperty("id").GetGuid();
+
+        await using (var scope = factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<MeetingDbContext>();
+            var meeting = await db.MeetingSet.SingleAsync(x => x.Id == meetingId);
+            meeting.SetSummary(MeetingSummary.Create("Hazır özet", [], []));
+            await db.SaveChangesAsync();
+        }
+
+        var dueAt = DateTimeOffset.UtcNow.AddDays(3);
+        using var actionRequest = new HttpRequestMessage(HttpMethod.Post, $"/api/meetings/{meetingId}/action-items")
+        {
+            Content = JsonContent.Create(new
+            {
+                description = "Manuel olarak atanan aksiyon",
+                dueAt,
+                priority = "High"
+            })
+        };
+        actionRequest.Headers.Add("X-Test-User", "manager-user");
+
+        var actionResponse = await client.SendAsync(actionRequest);
+
+        Assert.True(actionResponse.StatusCode == HttpStatusCode.OK, $"{actionResponse.StatusCode}: {await actionResponse.Content.ReadAsStringAsync()}");
+        using var actionDocument = JsonDocument.Parse(await actionResponse.Content.ReadAsStringAsync());
+        var action = actionDocument.RootElement.GetProperty("summary").GetProperty("actionItems").EnumerateArray().Single();
+        Assert.Equal("Manuel olarak atanan aksiyon", action.GetProperty("description").GetString());
+        Assert.Equal("High", action.GetProperty("priority").GetString());
+        Assert.Equal(dueAt, action.GetProperty("dueAt").GetDateTimeOffset(), precision: TimeSpan.FromSeconds(1));
     }
 
     private static async Task<Guid> CreateAndStartMeetingAsync(HttpClient client)

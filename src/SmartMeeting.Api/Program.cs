@@ -7,6 +7,7 @@ using SmartMeeting.Api.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using SmartMeeting.Infrastructure.Security;
 using SmartMeeting.Api.Security.Abstractions;
@@ -14,7 +15,7 @@ using SmartMeeting.Persistence.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 var authenticationOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new();
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAuthCookieService, HttpAuthCookieService>();
 builder.Services.AddScoped<ICurrentUserService, HttpCurrentUserService>();
