@@ -74,6 +74,25 @@ public sealed class MeetingTests
     }
 
     [Fact]
+    public void UpdateActionItem_changes_assignee_due_date_and_priority()
+    {
+        var action = new ActionItem("Takip et", "user-2", null);
+        var meeting = Meeting.Create("Planlama", "user-1", DateTimeOffset.UtcNow);
+        meeting.StartRecording();
+        meeting.CompleteRecording("audio.webm");
+        meeting.SetTranscript("transcript");
+        meeting.SetSummary(MeetingSummary.Create("Özet", [], [action]));
+        var dueAt = DateTimeOffset.UtcNow.AddDays(3);
+
+        meeting.UpdateActionItem(action.Id, "user-3", dueAt, ActionPriority.High);
+
+        var updated = meeting.Summary!.ActionItems.Single();
+        Assert.Equal("user-3", updated.Assignee);
+        Assert.Equal(dueAt, updated.DueAt);
+        Assert.Equal(ActionPriority.High, updated.Priority);
+    }
+
+    [Fact]
     public void SetNotes_stores_trimmed_notes()
     {
         var meeting = Meeting.Create("Planlama", "user-1", DateTimeOffset.UtcNow);

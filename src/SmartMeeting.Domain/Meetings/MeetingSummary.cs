@@ -26,4 +26,11 @@ public sealed class ActionItem
     public ActionPriority Priority { get; private set; }
     public bool Completed { get; private set; }
     public void Complete() => Completed = true;
+
+    public void UpdateDetails(string? assignee, DateTimeOffset? dueAt, ActionPriority priority)
+    {
+        Assignee = assignee?.Trim();
+        DueAt = dueAt;
+        Priority = priority;
+    }
 }

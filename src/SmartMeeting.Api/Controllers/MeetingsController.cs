@@ -11,6 +11,7 @@ using SmartMeeting.Application.Meetings.Commands.UpdateMeetingNotes;
 using SmartMeeting.Application.Meetings.Commands.AddParticipant;
 using SmartMeeting.Application.Meetings.Commands.MapSpeaker;
 using SmartMeeting.Application.Meetings.Commands.SendMeetingSummaryEmail;
+using SmartMeeting.Application.Meetings.Commands.UpdateActionItem;
 using SmartMeeting.Application.Meetings.Queries.GetMeeting;
 using SmartMeeting.Api.Contracts.Meetings;
 
@@ -43,6 +44,10 @@ public sealed class MeetingsController(ISender sender) : ControllerBase
     [HttpPost("{meetingId:guid}/action-items/{actionItemId:guid}/complete")]
     public async Task<IActionResult> CompleteActionItem(Guid meetingId, Guid actionItemId, CancellationToken cancellationToken)
         => ToActionResult(await sender.Send(new CompleteActionItemCommand(meetingId, actionItemId), cancellationToken));
+
+    [HttpPut("{meetingId:guid}/action-items/{actionItemId:guid}")]
+    public async Task<IActionResult> UpdateActionItem(Guid meetingId, Guid actionItemId, UpdateActionItemRequest request, CancellationToken cancellationToken)
+        => ToActionResult(await sender.Send(new UpdateActionItemCommand(meetingId, actionItemId, request.Assignee, request.DueAt, request.Priority), cancellationToken));
 
     [HttpPut("{meetingId:guid}/notes")]
     public async Task<IActionResult> UpdateNotes(Guid meetingId, UpdateNotesRequest request, CancellationToken cancellationToken)
