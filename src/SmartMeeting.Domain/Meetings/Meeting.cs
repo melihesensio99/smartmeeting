@@ -97,12 +97,12 @@ public sealed class Meeting : Entity
         Touch();
     }
 
-    public void UpdateActionItem(Guid actionItemId, string? assignee, DateTimeOffset? dueAt, ActionPriority priority)
+    public void UpdateActionItem(Guid actionItemId, string? assigneeUserId, string? assignee, DateTimeOffset? dueAt, ActionPriority priority)
     {
         if (Summary is null) throw new DomainException("Toplantının özeti henüz hazır değil.");
         var actionItem = Summary.ActionItems.SingleOrDefault(x => x.Id == actionItemId);
         if (actionItem is null) throw new DomainException("Aksiyon maddesi bulunamadı.");
-        actionItem.UpdateDetails(assignee, dueAt, priority);
+        actionItem.UpdateDetails(assigneeUserId, assignee, dueAt, priority);
         Touch();
     }
 

@@ -84,10 +84,11 @@ public sealed class MeetingTests
         meeting.SetSummary(MeetingSummary.Create("Özet", [], [action]));
         var dueAt = DateTimeOffset.UtcNow.AddDays(3);
 
-        meeting.UpdateActionItem(action.Id, "user-3", dueAt, ActionPriority.High);
+        meeting.UpdateActionItem(action.Id, "user-3", "User Three", dueAt, ActionPriority.High);
 
         var updated = meeting.Summary!.ActionItems.Single();
-        Assert.Equal("user-3", updated.Assignee);
+        Assert.Equal("user-3", updated.AssigneeUserId);
+        Assert.Equal("User Three", updated.Assignee);
         Assert.Equal(dueAt, updated.DueAt);
         Assert.Equal(ActionPriority.High, updated.Priority);
     }

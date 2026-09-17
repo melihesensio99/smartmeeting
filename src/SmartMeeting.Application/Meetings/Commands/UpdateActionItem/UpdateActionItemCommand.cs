@@ -6,18 +6,18 @@ using SmartMeeting.Domain.Meetings;
 
 namespace SmartMeeting.Application.Meetings.Commands.UpdateActionItem;
 
-public sealed record UpdateActionItemCommand(Guid MeetingId, Guid ActionItemId, string? Assignee, DateTimeOffset? DueAt, ActionPriority Priority) : IRequest<Result<MeetingResponse>>;
+public sealed record UpdateActionItemCommand(Guid MeetingId, Guid ActionItemId, string? AssigneeUserId, DateTimeOffset? DueAt, ActionPriority Priority) : IRequest<Result<MeetingResponse>>;
 
 public sealed class UpdateActionItemValidator : AbstractValidator<UpdateActionItemCommand>
 {
     public UpdateActionItemValidator()
     {
-        RuleFor(x => x.Assignee).MaximumLength(160);
+        RuleFor(x => x.AssigneeUserId).MaximumLength(100);
         RuleFor(x => x.Priority).IsInEnum();
     }
 }
 
-public sealed class UpdateActionItemCommandHandler(IApplicationDbContext db, ICurrentUserService currentUser) : IRequestHandler<UpdateActionItemCommand, Result<MeetingResponse>>
+public sealed class UpdateActionItemCommandHandler(IApplicationDbContext db, IIdentityService identityService, ICurrentUserService currentUser) : IRequestHandler<UpdateActionItemCommand, Result<MeetingResponse>>
 {
     public async Task<Result<MeetingResponse>> Handle(UpdateActionItemCommand request, CancellationToken cancellationToken)
     {
@@ -26,7 +26,9 @@ public sealed class UpdateActionItemCommandHandler(IApplicationDbContext db, ICu
         if (!currentUser.CanAccess(meeting.OrganizerId)) return Result<MeetingResponse>.Failure("meeting_forbidden", "Aksiyon bilgilerini yalnızca toplantı sahibi güncelleyebilir.");
         try
         {
-            meeting.UpdateActionItem(request.ActionItemId, request.Assignee, request.DueAt, request.Priority);
+            var assignee = request.AssigneeUserId is null ? null : await identityService.FindByIdAsync(request.AssigneeUserId, cancellationToken);
+            if (request.AssigneeUserId is not null && assignee is null) return Result<MeetingResponse>.Failure("assignee_not_found", "Aksiyon sorumlusu sistemde kayıtlı değil.");
+            meeting.UpdateActionItem(request.ActionItemId, assignee?.UserId, assignee?.DisplayName, request.DueAt, request.Priority);
             await db.SaveChangesAsync(cancellationToken);
             return Result<MeetingResponse>.Success(MeetingResponse.From(meeting));
         }
