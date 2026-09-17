@@ -83,7 +83,15 @@ Endpoints: `POST /api/auth/register`, `POST /api/auth/login` and `POST /api/auth
 
 Production deployments should set `Database:ApplyMigrations=true` so the Identity and meeting schema migrations are applied at startup. Existing local databases created with `EnsureCreated` should be backed up before switching to migrations.
 
-SMTP e-mail delivery is disabled by default. Configure `Email:Enabled`, `Email:Host`, `Email:Port`, `Email:Username`, `Email:Password` and `Email:FromAddress` through environment variables or user secrets before using `POST /api/meetings/{id}/summary/email`.
+SMTP e-mail delivery is disabled by default. Gmail is preconfigured with `smtp.gmail.com:587` and sender `melihesen123123@gmail.com`. Set the Gmail app password only through User Secrets or an environment variable, never in source control:
+
+```powershell
+dotnet user-secrets set "Email:Enabled" "true" --project src/SmartMeeting.Api
+dotnet user-secrets set "Email:Username" "melihesen123123@gmail.com" --project src/SmartMeeting.Api
+dotnet user-secrets set "Email:Password" "<GMAIL_APP_PASSWORD>" --project src/SmartMeeting.Api
+```
+
+Alternatively use `Email__Password` as an environment variable. Then use `POST /api/meetings/{id}/summary/email`.
 
 ## Katmanlar
 
