@@ -152,6 +152,14 @@ public sealed class Meeting : Entity
         Touch();
     }
 
+    public ActionItem AddActionItem(string description, string? assigneeUserId, string? assignee, DateTimeOffset? dueAt, ActionPriority priority)
+    {
+        if (Summary is null) throw new DomainException("Toplantının özeti henüz hazır değil.");
+        var actionItem = Summary.AddActionItem(description, assignee, assigneeUserId, dueAt, priority);
+        Touch();
+        return actionItem;
+    }
+
     public void MarkFailed() { Status = MeetingStatus.Failed; Touch(); }
 
     public void RetryProcessing()

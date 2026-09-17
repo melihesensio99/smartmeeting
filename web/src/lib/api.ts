@@ -31,6 +31,11 @@ export async function updateActionItem(meetingId: string, actionItemId: string, 
   return meetingSchema.parse(response.data)
 }
 
+export async function createActionItem(meetingId: string, input: { description: string; assigneeUserId: string | null; dueAt: string | null; priority: ActionPriority }): Promise<Meeting> {
+  const response = await client.post<unknown>(`/meetings/${meetingId}/action-items`, input)
+  return meetingSchema.parse(response.data)
+}
+
 export async function updateMeetingNotes(meetingId: string, notes: string): Promise<Meeting> {
   const response = await client.put<unknown>(`/meetings/${meetingId}/notes`, { notes })
   return meetingSchema.parse(response.data)

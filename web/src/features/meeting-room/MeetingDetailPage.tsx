@@ -12,6 +12,7 @@ type Props = {
   currentUserId: string | null
   onComplete: (meetingId: string, actionItemId: string) => void
   onUpdateAction: (meetingId: string, actionItemId: string, input: { assigneeUserId: string | null; dueAt: string | null; priority: ActionPriority }) => void
+  onCreateAction: (meetingId: string, input: { description: string; assigneeUserId: string | null; dueAt: string | null; priority: ActionPriority }) => void
   onSaveNotes: (meetingId: string, notes: string) => void
   onMapSpeaker: (meetingId: string, participantId: string, speakerLabel: string) => void
   onConfirmSpeaker: (meetingId: string, participantId: string) => void
@@ -31,18 +32,20 @@ type Props = {
   rejectingSpeaker: boolean
   sendingEmail: boolean
   updatingAction: boolean
+  creatingAction: boolean
   retryingProcessing: boolean
   emailSent: boolean
   emailError: string | null
 }
 
-export function MeetingDetailPage({ meeting, currentUserId, onComplete, onUpdateAction, onSaveNotes, onMapSpeaker, onConfirmSpeaker, onRejectSpeaker, onAddParticipant, onUpdateParticipantPermission, onRemoveParticipant, onLeaveMeeting, onSendEmail, onRetryProcessing, savingNotes, addingParticipant, updatingParticipantPermission, removingParticipant, leavingMeeting, confirmingSpeaker, rejectingSpeaker, sendingEmail, updatingAction, retryingProcessing, emailSent, emailError }: Props) {
+export function MeetingDetailPage({ meeting, currentUserId, onComplete, onUpdateAction, onCreateAction, onSaveNotes, onMapSpeaker, onConfirmSpeaker, onRejectSpeaker, onAddParticipant, onUpdateParticipantPermission, onRemoveParticipant, onLeaveMeeting, onSendEmail, onRetryProcessing, savingNotes, addingParticipant, updatingParticipantPermission, removingParticipant, leavingMeeting, confirmingSpeaker, rejectingSpeaker, sendingEmail, updatingAction, creatingAction, retryingProcessing, emailSent, emailError }: Props) {
   const [note, setNote] = useState(meeting?.notes ?? '')
   const [speakerLabels, setSpeakerLabels] = useState<Record<string, string>>({})
   const [participantSearch, setParticipantSearch] = useState('')
   const [selectedUser, setSelectedUser] = useState<UserResponse | null>(null)
   const [grantMeetingManagement, setGrantMeetingManagement] = useState(false)
   const [editingAction, setEditingAction] = useState<ActionItem | null>(null)
+  const [creatingActionForm, setCreatingActionForm] = useState(false)
   const users = useQuery({ queryKey: ['users', participantSearch], queryFn: () => searchUsers(participantSearch), enabled: participantSearch.trim().length >= 2 })
   if (!meeting) return <Alert severity="warning">Toplantı bulunamadı. <Button onClick={() => navigate('/meetings')}>Toplantılara dön</Button></Alert>
   const status = String(meeting.status)
@@ -66,7 +69,8 @@ export function MeetingDetailPage({ meeting, currentUserId, onComplete, onUpdate
     <Card><CardContent><Typography variant="h5">Toplantı notlarım</Typography><TextField fullWidth multiline minRows={4} value={note} onChange={(event) => setNote(event.target.value)} placeholder="Toplantı sırasında veya sonrasında özel notlarınızı yazın..." sx={{ mt: 2 }} /><Button sx={{ mt: 2 }} variant="outlined" disabled={!note.trim() || savingNotes} onClick={() => onSaveNotes(meeting.id, note)}>{savingNotes ? 'Kaydediliyor…' : 'Notu kaydet'}</Button></CardContent></Card>
     {emailSent && <Alert severity="success">Toplantı özeti katılımcılara e-posta ile gönderildi.</Alert>}
     {emailError && <Alert severity="error">{emailError}</Alert>}
-    <ActionItemEditor key={editingAction?.id ?? 'closed'} action={editingAction} open={editingAction !== null} saving={updatingAction} onClose={() => setEditingAction(null)} onSave={(input) => { if (!editingAction) return; onUpdateAction(meeting.id, editingAction.id, input); setEditingAction(null) }} />
+    <Card><CardContent><Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', gap: 2 }}><Typography variant="h5">Manuel aksiyon atama</Typography><Button variant="contained" disabled={!meeting.summary} onClick={() => setCreatingActionForm(true)}>Elle aksiyon ata</Button></Stack>{!meeting.summary && <Typography color="text.secondary" sx={{ mt: 1 }}>Manuel aksiyon atamak için AI özetinin hazır olması gerekir.</Typography>}</CardContent></Card>
+    <ActionItemEditor key={creatingActionForm ? 'new' : editingAction?.id ?? 'closed'} action={creatingActionForm ? null : editingAction} open={creatingActionForm || editingAction !== null} saving={creatingActionForm ? creatingAction : updatingAction} includeDescription={creatingActionForm} onClose={() => { setCreatingActionForm(false); setEditingAction(null) }} onSave={(input) => { if (creatingActionForm) { if (!input.description) return; onCreateAction(meeting.id, { description: input.description, assigneeUserId: input.assigneeUserId, dueAt: input.dueAt, priority: input.priority }); setCreatingActionForm(false); return } if (!editingAction) return; onUpdateAction(meeting.id, editingAction.id, { assigneeUserId: input.assigneeUserId, dueAt: input.dueAt, priority: input.priority }); setEditingAction(null) }} />
   </Stack>
 }
 

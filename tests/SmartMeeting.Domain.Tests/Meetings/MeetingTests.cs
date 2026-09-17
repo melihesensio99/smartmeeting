@@ -135,6 +135,23 @@ public sealed class MeetingTests
     }
 
     [Fact]
+    public void Meeting_manager_can_add_manual_action_to_ready_summary()
+    {
+        var meeting = Meeting.Create("Planlama", "user-1", DateTimeOffset.UtcNow);
+        meeting.StartRecording();
+        meeting.CompleteRecording("audio.webm");
+        meeting.SetTranscript("transcript");
+        meeting.SetSummary(MeetingSummary.Create("Özet", [], []));
+
+        var action = meeting.AddActionItem("Raporu hazırla", "user-2", "Ayşe", DateTimeOffset.UtcNow.AddDays(2), ActionPriority.High);
+
+        Assert.Equal("Raporu hazırla", action.Description);
+        Assert.Equal("user-2", action.AssigneeUserId);
+        Assert.Equal(ActionPriority.High, action.Priority);
+        Assert.Single(meeting.Summary!.ActionItems);
+    }
+
+    [Fact]
     public void UpdateActionItem_changes_assignee_due_date_and_priority()
     {
         var action = new ActionItem("Takip et", "user-2", null);
