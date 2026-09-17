@@ -16,6 +16,10 @@ public sealed class MistralSpeechToTextService(HttpClient httpClient, IOptions<M
         using var form = new MultipartFormDataContent();
         form.Add(new StringContent(configuration.TranscriptionModel), "model");
         form.Add(new StringContent(configuration.EnableDiarization ? "true" : "false"), "diarize");
+        if (configuration.EnableDiarization)
+        {
+            form.Add(new StringContent("segment"), "timestamp_granularities[]");
+        }
         var audioContent = new StreamContent(audio);
         audioContent.Headers.ContentType = new MediaTypeHeaderValue(ContentTypeFor(fileName));
         form.Add(audioContent, "file", fileName);

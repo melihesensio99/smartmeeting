@@ -20,6 +20,7 @@ public sealed class MistralSpeechToTextServiceTests
         Assert.Equal("Toplantı metni", result);
         Assert.Contains("voxtral-mini-latest", handler.RequestBody);
         Assert.Contains("name=diarize", handler.RequestBody);
+        Assert.Contains("timestamp_granularities[]", handler.RequestBody);
         Assert.Contains("meeting.webm", handler.RequestBody);
     }
 
