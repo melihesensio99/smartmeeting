@@ -19,3 +19,5 @@ services:
 
 volumes:
   rabbitmq-data:
+    external: true
+    name: ${RABBITMQ_DATA_VOLUME:-smartmeeting-rabbitmq-data}
