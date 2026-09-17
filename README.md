@@ -33,12 +33,18 @@ Ses dosyası STT ve AI özetleme işlemleri RabbitMQ üzerindeki `smartmeeting.m
 Docker üzerinde yerel RabbitMQ başlatmak için proje kökünde `RABBITMQ_PASSWORD` ortam değişkenini tanımlayıp compose servisini başlatın. Compose, RabbitMQ verisini harici `rabbitmq-data` volume'ünde tutar; bu nedenle container yeniden oluşturulsa bile kuyruk verisi korunur:
 
 ```powershell
-$env:RABBITMQ_PASSWORD = "<RABBITMQ_PASSWORD>"
+docker volume create smartmeeting-postgres-data
 docker volume create smartmeeting-rabbitmq-data
-docker compose up -d rabbitmq
+docker compose up -d postgres rabbitmq
 ```
 
-Compose sağlık kontrolü geçene kadar worker kuyruğa bağlanmayı bekler. Daha önce Compose dışında oluşturulmuş bir `smartmeeting-rabbitmq` container'ı varsa aynı adı doğrudan yeniden kullanamaz; veri kaybı olmaması için önce durdurulup `smartmeeting-rabbitmq-legacy` adıyla saklanmalı, ardından Compose servisi başlatılmalıdır. Bu geçiş tamamlandıktan sonra RabbitMQ yalnızca `docker compose up -d rabbitmq` ve `docker compose down` ile yönetilir.
+Compose sağlık kontrolü geçene kadar API ve worker veritabanı/kuyruk bağlantılarını bekler. PostgreSQL `localhost:5432`, RabbitMQ `localhost:5672` üzerinden çalışır. Daha önce Compose dışında oluşturulmuş bir `smartmeeting-rabbitmq` container'ı varsa aynı adı doğrudan yeniden kullanamaz; veri kaybı olmaması için önce durdurulup `smartmeeting-rabbitmq-legacy` adıyla saklanmalı, ardından Compose servisi başlatılmalıdır.
+
+Uygulama artık yalnızca PostgreSQL kullanır. Geliştirme ortamında bağlantı parolası User Secrets'a yazılmalıdır:
+
+```powershell
+dotnet user-secrets set "ConnectionStrings:Default" "Host=localhost;Port=5432;Database=smartmeeting;Username=smartmeeting;Password=<POSTGRES_PASSWORD>" --project src/SmartMeeting.Api
+```
 
 Yönetim paneli `http://localhost:15672`, uygulama bağlantısı ise `localhost:5672` adresindedir. Uygulama ayarları `RabbitMq:Host`, `RabbitMq:Port`, `RabbitMq:Username`, `RabbitMq:Password` ve `RabbitMq:QueueName` alanlarından okunur. Parola kaynak dosyada tutulmamalı; User Secrets veya ortam değişkeni kullanılmalıdır:
 
@@ -79,7 +85,7 @@ RabbitMQ TLS kullanımı için `RabbitMq:UseTls=true`, `RabbitMq:Port=5671` ve `
 - STT adapter’ı Mistral `voxtral-mini-latest`, özetleme adapter’ı Mistral `mistral-medium-latest` kullanır.
 - SignalR hub: `/hubs/meeting-status`; istemci metodu `JoinMeeting`, event adı `meetingStatusChanged`.
 
-Geliştirme ortamında ses dosyaları `data/audio/yyyy/MM/dd` altında tutulur. Üretimde `IAudioStorage` implementasyonu Azure Blob veya S3-compatible object storage ile değiştirilmelidir; dosyanın kendisi SQLite’a yazılmaz.
+Geliştirme ortamında ses dosyaları `data/audio/yyyy/MM/dd` altında tutulur. Üretimde `IAudioStorage` implementasyonu Azure Blob veya S3-compatible object storage ile değiştirilmelidir; dosyanın kendisi PostgreSQL'e yazılmaz.
 
 API varsayılan olarak `http://localhost:5080/api` adresindedir. Frontend için `web/.env.example` dosyasını `.env` olarak kopyalayabilirsiniz.
 
@@ -117,7 +123,7 @@ Alternatively use `Email__Password` as an environment variable. Then use `POST /
 
 - `SmartMeeting.Domain`: rich domain modeli ve domain event sözleşmeleri
 - `SmartMeeting.Application`: MediatR CQRS, FluentValidation ve adapter arayüzleri
-- `SmartMeeting.Persistence`: EF Core SQLite DbContext ve mapping’ler
+- `SmartMeeting.Persistence`: EF Core PostgreSQL DbContext, migration ve mapping’ler
 - `SmartMeeting.Infrastructure`: kuyruk, worker ve STT/özetleme adapter’ları
 - `SmartMeeting.Api`: controller, middleware ve DI composition root
 - `web`: React 19, TypeScript, MUI 9, React Query v5, Zod ve React Hook Form

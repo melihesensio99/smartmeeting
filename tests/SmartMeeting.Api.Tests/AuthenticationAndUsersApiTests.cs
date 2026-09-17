@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -391,7 +392,7 @@ public sealed class AuthenticationAndUsersApiTests(ApiFactory factory) : IClassF
 
 public sealed class ApiFactory : WebApplicationFactory<Program>
 {
-    private readonly string databasePath = Path.Combine(Path.GetTempPath(), $"smartmeeting-api-tests-{Guid.NewGuid():N}.db");
+    private readonly string databaseName = $"smartmeeting-api-tests-{Guid.NewGuid():N}";
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -407,10 +408,12 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
             services.AddSingleton<IMeetingProcessingQueue>(serviceProvider => serviceProvider.GetRequiredService<TestMeetingProcessingQueue>());
             services.AddSingleton<TestAudioStorage>();
             services.AddSingleton<IAudioStorage>(serviceProvider => serviceProvider.GetRequiredService<TestAudioStorage>());
+            services.RemoveAll<DbContextOptions<MeetingDbContext>>();
+            services.AddDbContext<MeetingDbContext>(options => options.UseInMemoryDatabase(databaseName));
         });
         builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
-            ["ConnectionStrings:Default"] = $"Data Source={databasePath}",
+            ["Database:Provider"] = "InMemory",
             ["Authentication:SigningKey"] = "integration-test-signing-key-at-least-32-chars",
             ["Authentication:Enabled"] = "true",
             ["Authentication:RequireAuthentication"] = "true",
@@ -422,14 +425,6 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
         }));
     }
 
-    protected override void Dispose(bool disposing)
-    {
-        base.Dispose(disposing);
-        if (disposing && File.Exists(databasePath))
-        {
-            try { File.Delete(databasePath); } catch (IOException) { }
-        }
-    }
 }
 
 public sealed class TestMeetingProcessingQueue : IMeetingProcessingQueue

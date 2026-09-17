@@ -12,14 +12,12 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
     {
-        var provider = configuration["Database:Provider"] ?? "Sqlite";
+        var provider = configuration["Database:Provider"] ?? "Postgres";
         var connectionString = configuration.GetConnectionString("Default");
         services.AddDbContext<MeetingDbContext>(options =>
         {
             if (provider.Equals("Postgres", StringComparison.OrdinalIgnoreCase) || provider.Equals("PostgreSQL", StringComparison.OrdinalIgnoreCase))
                 options.UseNpgsql(connectionString ?? throw new InvalidOperationException("PostgreSQL connection string is required."));
-            else if (provider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase))
-                options.UseSqlite(connectionString ?? "Data Source=smartmeeting.db");
             else
                 throw new InvalidOperationException($"Unsupported database provider: {provider}.");
         });

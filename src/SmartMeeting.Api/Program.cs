@@ -11,7 +11,6 @@ using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using SmartMeeting.Infrastructure.Security;
 using SmartMeeting.Api.Security.Abstractions;
-using SmartMeeting.Persistence.Identity;
 using SmartMeeting.Api.Health;
 using SmartMeeting.Infrastructure.Processing;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -119,7 +118,6 @@ using (var scope = app.Services.CreateScope())
         await db.Database.MigrateAsync();
     else
         await db.Database.EnsureCreatedAsync();
-    await IdentitySchemaRepair.ApplyAsync(db);
 }
 
 await app.RunAsync();
