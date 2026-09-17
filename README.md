@@ -416,10 +416,6 @@ POST /api/meetings/{meetingId}/action-items/{actionItemId}/complete
 
 Endpoint’lerin tamamı, güncel request/response modelleri ve yetkilendirme gereksinimleri için Swagger UI’daki ilgili işlemi genişletebilirsiniz.
 
-Swagger ekran görüntüsü:
-
-![Meeting Swagger API dokümantasyonu — tüm endpointler](docs/screenshots/swagger-api.png)
-
 Swagger yalnızca Development ortamında etkinleştirilir; production ortamında API dokümantasyonu dışarıya açılmaz.
 
 ## 🔐 Güvenlik ve Veri
