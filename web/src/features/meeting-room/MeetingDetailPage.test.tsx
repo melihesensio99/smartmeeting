@@ -6,7 +6,7 @@ import type { Meeting } from '../../types/meeting'
 
 vi.mock('../../lib/api', () => ({ searchUsers: vi.fn().mockResolvedValue([]), getApiErrorMessage: vi.fn(() => 'Hata') }))
 
-function createMeeting(status: number): Meeting {
+function createMeeting(status: number, participants: Meeting['participants'] = []): Meeting {
   return {
     id: '11111111-1111-1111-1111-111111111111',
     title: 'Durum akışı toplantısı',
@@ -16,18 +16,18 @@ function createMeeting(status: number): Meeting {
     status,
     transcript: null,
     notes: null,
-    participants: [],
+    participants,
     summary: null,
   }
 }
 
-function renderPage(meeting: Meeting, onRetryProcessing = vi.fn()) {
+function renderPage(meeting: Meeting, onRetryProcessing = vi.fn(), currentUserId = 'owner-1') {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={queryClient}>
       <MeetingDetailPage
         meeting={meeting}
-        currentUserId="owner-1"
+        currentUserId={currentUserId}
         onComplete={vi.fn()}
         onUpdateAction={vi.fn()}
         onCreateAction={vi.fn()}
@@ -75,5 +75,24 @@ describe('MeetingDetailPage işlem durumu', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Yeniden işle' }))
 
     expect(onRetryProcessing).toHaveBeenCalledWith('11111111-1111-1111-1111-111111111111')
+  })
+
+  it('toplantı sahibi katılımcı yönetimi ve konuşmacı onay kontrollerini görür', () => {
+    const meeting = createMeeting(3, [{ id: '44444444-4444-4444-4444-444444444444', userId: 'participant-1', displayName: 'Ayşe Katılımcı', email: 'ayse@example.com', canManageMeeting: true, speakerLabel: 'Speaker 1', speakerMappingStatus: 'PendingConfirmation', speakerConfidence: 0.8 }])
+    renderPage(meeting)
+
+    expect(screen.getByRole('button', { name: 'Katılımcı ekle' })).toBeDisabled()
+    expect(screen.getByText('Toplantı yöneticisi')).toBeInTheDocument()
+    expect(screen.getByText('Onay bekliyor · %80')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Onayla' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Reddet' })).toBeInTheDocument()
+  })
+
+  it('normal katılımcı toplantıdan ayrılabilir ancak katılımcı yönetemez', () => {
+    const meeting = createMeeting(3, [{ id: '44444444-4444-4444-4444-444444444444', userId: 'participant-1', displayName: 'Ayşe Katılımcı', email: 'ayse@example.com', canManageMeeting: false, speakerLabel: null, speakerMappingStatus: 'None', speakerConfidence: null }])
+    renderPage(meeting, vi.fn(), 'participant-1')
+
+    expect(screen.getByRole('button', { name: 'Toplantıdan ayrıl' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Katılımcı ekle' })).not.toBeInTheDocument()
   })
 })
