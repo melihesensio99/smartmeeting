@@ -124,6 +124,28 @@ public sealed class AuthenticationAndUsersApiTests(ApiFactory factory) : IClassF
     }
 
     [Fact]
+    public async Task Normal_user_cannot_create_meeting()
+    {
+        using var client = factory.CreateClient();
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/meetings")
+        {
+            Content = JsonContent.Create(new
+            {
+                title = "Yetkisiz toplantı denemesi",
+                startsAt = DateTimeOffset.UtcNow.AddHours(1)
+            })
+        };
+        request.Headers.Add("X-Test-User", "normal-user");
+        request.Headers.Add("X-Test-Normal-User", "true");
+
+        var response = await client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        Assert.Equal("meeting_create_forbidden", document.RootElement.GetProperty("code").GetString());
+    }
+
+    [Fact]
     public async Task Uploading_audio_moves_meeting_to_processing_and_enqueues_message()
     {
         using var client = factory.CreateClient();
@@ -468,7 +490,8 @@ internal sealed class TestAuthenticationHandler(IOptionsMonitor<AuthenticationSc
             new(ClaimTypes.NameIdentifier, userId.ToString()),
             new(ClaimTypes.Name, "Integration User")
         };
-        claims.Add(new Claim(ClaimTypes.Role, "MeetingCreator"));
+        if (!Request.Headers.TryGetValue("X-Test-Normal-User", out var normalUser) || normalUser != "true")
+            claims.Add(new Claim(ClaimTypes.Role, "MeetingCreator"));
         if (Request.Headers.TryGetValue("X-Test-Global-Manager", out var globalManager) && globalManager == "true")
             claims.Add(new Claim(ClaimTypes.Role, "GlobalManager"));
         var identity = new ClaimsIdentity(claims, SchemeName);
