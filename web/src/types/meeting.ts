@@ -1,6 +1,6 @@
 import { z } from 'zod'
 export const actionPrioritySchema = z.enum(['Low', 'Medium', 'High']).or(z.enum(['low', 'medium', 'high']))
-export const actionItemSchema = z.object({ id: z.string().uuid(), description: z.string(), assignee: z.string().nullable(), dueAt: z.string().nullable(), priority: actionPrioritySchema, completed: z.boolean() })
+export const actionItemSchema = z.object({ id: z.string().uuid(), description: z.string(), assignee: z.string().nullable(), assigneeUserId: z.string().nullable(), dueAt: z.string().nullable(), priority: actionPrioritySchema, completed: z.boolean() })
 export type ActionItem = z.infer<typeof actionItemSchema>
 export type ActionPriority = z.infer<typeof actionPrioritySchema>
 export const participantSchema = z.object({ id: z.string().uuid(), userId: z.string(), displayName: z.string(), email: z.string(), speakerLabel: z.string().nullable() })

@@ -10,7 +10,7 @@ import { ActionItemEditor } from '../actions/ActionItemEditor'
 type Props = {
   meeting: Meeting | undefined
   onComplete: (meetingId: string, actionItemId: string) => void
-  onUpdateAction: (meetingId: string, actionItemId: string, input: { assignee: string | null; dueAt: string | null; priority: ActionPriority }) => void
+  onUpdateAction: (meetingId: string, actionItemId: string, input: { assigneeUserId: string | null; dueAt: string | null; priority: ActionPriority }) => void
   onSaveNotes: (meetingId: string, notes: string) => void
   onMapSpeaker: (meetingId: string, participantId: string, speakerLabel: string) => void
   onAddParticipant: (meetingId: string, input: AddParticipantInput) => void
