@@ -1,4 +1,7 @@
 using SmartMeeting.Application.Abstractions;
+using SmartMeeting.Application.Abstractions.Identity;
+using SmartMeeting.Application.Auth.Contracts;
+using SmartMeeting.Application.Common;
 using SmartMeeting.Application.Meetings.Commands.CreateMeeting;
 using SmartMeeting.Domain.Meetings;
 
@@ -40,7 +43,7 @@ public sealed class CreateMeetingCommandHandlerTests
         var context = new FakeApplicationDbContext();
         context.Seed(Meeting.Create("Birinci", "user-1", DateTimeOffset.UtcNow));
         context.Seed(Meeting.Create("İkinci", "user-2", DateTimeOffset.UtcNow.AddHours(1)));
-        var handler = new Application.Meetings.Queries.GetMeetings.GetMeetingsQueryHandler(context, new FakeCurrentUserService());
+        var handler = new Application.Meetings.Queries.GetMeetings.GetMeetingsQueryHandler(context, new FakeCurrentUserService(), new FakeIdentityService(null));
 
         var result = await handler.Handle(new Application.Meetings.Queries.GetMeetings.GetMeetingsQuery("user-1"), CancellationToken.None);
 
@@ -71,6 +74,13 @@ public sealed class CreateMeetingCommandHandlerTests
 
         Assert.False(result.IsSuccess);
         Assert.Equal("meeting_not_found", result.Error!.Code);
+    }
+
+    private sealed class FakeIdentityService(RegisteredUser? user) : IIdentityService
+    {
+        public Task<Result<RegisteredUser>> RegisterAsync(string email, string password, string displayName, CancellationToken cancellationToken) => throw new NotImplementedException();
+        public Task<Result<AuthenticatedUser>> LoginAsync(string email, string password, CancellationToken cancellationToken) => throw new NotImplementedException();
+        public Task<RegisteredUser?> FindByIdAsync(string userId, CancellationToken cancellationToken) => Task.FromResult(user);
     }
 
     [Fact]
