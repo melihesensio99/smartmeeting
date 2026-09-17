@@ -30,15 +30,14 @@ Test kapsamı domain yaşam döngüsü, domain event üretimi, katılımcı idem
 
 Ses dosyası STT ve AI özetleme işlemleri RabbitMQ üzerindeki `smartmeeting.meeting-processing` kuyruğuna bırakılır. Worker mesajı aldıktan sonra işi tamamlar ve başarılı/başarısız sonucu SignalR üzerinden yayınlar. RabbitMQ’da mesaj kalıcılığı ve worker tarafında `prefetch=1` kullanılır.
 
-Docker üzerinde yerel RabbitMQ başlatmak için:
+ Docker üzerinde yerel RabbitMQ başlatmak için proje kökünde `RABBITMQ_PASSWORD` ortam değişkenini tanımlayıp compose servislerini başlatın:
 
 ```powershell
-docker run -d --name smartmeeting-rabbitmq --restart unless-stopped `
-  -p 5672:5672 -p 15672:15672 `
-  -e RABBITMQ_DEFAULT_USER=smartmeeting `
-  -e RABBITMQ_DEFAULT_PASS="<RABBITMQ_PASSWORD>" `
-  rabbitmq:4-management
+$env:RABBITMQ_PASSWORD = "<RABBITMQ_PASSWORD>"
+docker compose up -d rabbitmq
 ```
+
+Compose sağlık kontrolü geçene kadar worker kuyruğa bağlanmayı bekler. Mevcut bir `smartmeeting-rabbitmq` container’ı varsa önce `docker compose up -d rabbitmq` ile aynı container yeniden kullanılabilir veya eski container durdurulabilir.
 
 Yönetim paneli `http://localhost:15672`, uygulama bağlantısı ise `localhost:5672` adresindedir. Uygulama ayarları `RabbitMq:Host`, `RabbitMq:Port`, `RabbitMq:Username`, `RabbitMq:Password` ve `RabbitMq:QueueName` alanlarından okunur. Parola kaynak dosyada tutulmamalı; User Secrets veya ortam değişkeni kullanılmalıdır:
 
