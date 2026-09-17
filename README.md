@@ -307,9 +307,63 @@ Development ortamında API, tüm controller endpoint’lerini ve request/respons
 - Sağlık kontrolü: `http://localhost:5080/health`
 - SignalR hub: `http://localhost:5080/hubs/meeting-status`
 
+### Endpoint kataloğu
+
+#### Kimlik ve kullanıcılar
+
+```text
+POST /api/auth/register
+POST /api/auth/login
+POST /api/auth/logout
+GET  /api/auth/me
+GET  /api/users?search={search}
+```
+
+#### Toplantılar
+
+```text
+GET  /api/meetings
+POST /api/meetings
+GET  /api/meetings/{meetingId}
+PUT  /api/meetings/{meetingId}/notes
+```
+
+#### Kayıt, ses ve işleme
+
+```text
+POST /api/meetings/{meetingId}/recording/start
+POST /api/meetings/{meetingId}/recording/complete
+POST /api/meetings/{meetingId}/audio
+POST /api/meetings/{meetingId}/processing/retry
+POST /api/meetings/{meetingId}/complete
+POST /api/meetings/{meetingId}/summary/email
+```
+
+#### Katılımcılar ve konuşmacı eşleştirme
+
+```text
+POST   /api/meetings/{meetingId}/participants
+DELETE /api/meetings/{meetingId}/participants/me
+DELETE /api/meetings/{meetingId}/participants/{participantId}
+PUT    /api/meetings/{meetingId}/participants/{participantId}/management-permission
+PUT    /api/meetings/{meetingId}/participants/{participantId}/speaker
+POST   /api/meetings/{meetingId}/participants/{participantId}/speaker/confirm
+DELETE /api/meetings/{meetingId}/participants/{participantId}/speaker
+```
+
+#### Aksiyonlar
+
+```text
+POST /api/meetings/{meetingId}/action-items
+PUT  /api/meetings/{meetingId}/action-items/{actionItemId}
+POST /api/meetings/{meetingId}/action-items/{actionItemId}/complete
+```
+
+Endpoint’lerin tamamı, güncel request/response modelleri ve yetkilendirme gereksinimleri için Swagger UI’daki ilgili işlemi genişletebilirsiniz.
+
 Swagger ekran görüntüsü:
 
-![Meeting Swagger API dokümantasyonu](docs/screenshots/swagger.svg)
+![Meeting Swagger API dokümantasyonu — tüm endpointler](docs/screenshots/swagger-api.png)
 
 Swagger yalnızca Development ortamında etkinleştirilir; production ortamında API dokümantasyonu dışarıya açılmaz.
 
