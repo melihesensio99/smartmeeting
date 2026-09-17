@@ -36,10 +36,13 @@ public sealed class Meeting : Entity
     }
 
     public void ChangeTitle(string title) => Title = Require(title, nameof(title), 160);
-    public void AddParticipant(string userId, string displayName, string email)
+    public bool CanAccess(string? userId) => !string.IsNullOrWhiteSpace(userId) && (OrganizerId == userId || _participants.Any(x => x.UserId == userId));
+    public bool CanManage(string? userId) => !string.IsNullOrWhiteSpace(userId) && (OrganizerId == userId || _participants.Any(x => x.UserId == userId && x.CanManageMeeting));
+
+    public void AddParticipant(string userId, string displayName, string email, bool canManageMeeting = false)
     {
         if (_participants.Any(x => x.UserId == userId)) return;
-        _participants.Add(MeetingParticipant.Create(Id, userId, displayName, email));
+        _participants.Add(MeetingParticipant.Create(Id, userId, displayName, email, canManageMeeting));
         Touch();
     }
 

@@ -23,7 +23,7 @@ public sealed class UpdateActionItemCommandHandler(IApplicationDbContext db, IId
     {
         var meeting = await db.GetMeetingAsync(request.MeetingId, cancellationToken);
         if (meeting is null) return Result<MeetingResponse>.Failure("meeting_not_found", "Toplantı bulunamadı.");
-        if (!currentUser.CanAccess(meeting.OrganizerId)) return Result<MeetingResponse>.Failure("meeting_forbidden", "Aksiyon bilgilerini yalnızca toplantı sahibi güncelleyebilir.");
+        if (!meeting.CanManage(currentUser.UserId)) return Result<MeetingResponse>.Failure("meeting_forbidden", "Bu toplantı içi işlemi yapma yetkiniz yok.");
         try
         {
             var assignee = request.AssigneeUserId is null ? null : await identityService.FindByIdAsync(request.AssigneeUserId, cancellationToken);

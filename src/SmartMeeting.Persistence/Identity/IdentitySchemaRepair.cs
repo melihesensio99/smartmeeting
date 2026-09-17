@@ -41,6 +41,7 @@ public static class IdentitySchemaRepair
         {
             ["CreatedAt"] = "TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP",
             ["UpdatedAt"] = "TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP",
+            ["CanManageMeeting"] = "INTEGER NOT NULL DEFAULT 0",
             ["SpeakerLabel"] = "TEXT NULL"
         }, cancellationToken);
     }

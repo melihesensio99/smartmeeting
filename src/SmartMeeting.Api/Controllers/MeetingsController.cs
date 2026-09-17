@@ -55,7 +55,7 @@ public sealed class MeetingsController(ISender sender) : ControllerBase
 
     [HttpPost("{meetingId:guid}/participants")]
     public async Task<IActionResult> AddParticipant(Guid meetingId, AddParticipantRequest request, CancellationToken cancellationToken)
-        => ToActionResult(await sender.Send(new AddParticipantCommand(meetingId, request.UserId, request.DisplayName, request.Email), cancellationToken));
+        => ToActionResult(await sender.Send(new AddParticipantCommand(meetingId, request.UserId, request.DisplayName, request.Email, request.CanManageMeeting), cancellationToken));
 
     [HttpPut("{meetingId:guid}/participants/{participantId:guid}/speaker")]
     public async Task<IActionResult> MapSpeaker(Guid meetingId, Guid participantId, MapSpeakerRequest request, CancellationToken cancellationToken)

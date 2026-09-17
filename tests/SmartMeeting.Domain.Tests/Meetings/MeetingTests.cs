@@ -46,6 +46,19 @@ public sealed class MeetingTests
     }
 
     [Fact]
+    public void Organizer_can_grant_meeting_management_permission_to_participant()
+    {
+        var meeting = Meeting.Create("Sprint planlama", "user-1", DateTimeOffset.UtcNow);
+        meeting.AddParticipant("user-2", "Ayşe", "ayse@example.com", canManageMeeting: true);
+        meeting.AddParticipant("user-3", "Mehmet", "mehmet@example.com");
+
+        Assert.True(meeting.CanManage("user-1"));
+        Assert.True(meeting.CanManage("user-2"));
+        Assert.False(meeting.CanManage("user-3"));
+        Assert.True(meeting.CanAccess("user-3"));
+    }
+
+    [Fact]
     public void Summary_marks_meeting_ready()
     {
         var meeting = Meeting.Create("Sprint planlama", "user-1", DateTimeOffset.UtcNow);

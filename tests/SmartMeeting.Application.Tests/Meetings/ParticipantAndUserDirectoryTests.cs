@@ -57,6 +57,36 @@ public sealed class ParticipantAndUserDirectoryTests
     }
 
     [Fact]
+    public async Task AddParticipant_allows_organizer_to_grant_meeting_management_permission()
+    {
+        var meeting = Meeting.Create("Planlama", "organizer", DateTimeOffset.UtcNow);
+        var context = new TestDbContext(meeting);
+        var identity = new FakeIdentityService(new RegisteredUser("user-2", "ayse@example.com", "Ayşe Yılmaz"));
+        var handler = new AddParticipantCommandHandler(context, identity, new FakeCurrentUserService("organizer"));
+
+        var result = await handler.Handle(new AddParticipantCommand(meeting.Id, "user-2", "Ayşe Yılmaz", "ayse@example.com", true), CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        Assert.True(Assert.Single(meeting.Participants).CanManageMeeting);
+    }
+
+    [Fact]
+    public async Task AddParticipant_rejects_non_organizer_even_when_user_has_meeting_permission()
+    {
+        var meeting = Meeting.Create("Planlama", "organizer", DateTimeOffset.UtcNow);
+        meeting.AddParticipant("user-2", "Ayşe Yılmaz", "ayse@example.com", canManageMeeting: true);
+        var context = new TestDbContext(meeting);
+        var identity = new FakeIdentityService(new RegisteredUser("user-3", "mehmet@example.com", "Mehmet Yılmaz"));
+        var handler = new AddParticipantCommandHandler(context, identity, new FakeCurrentUserService("user-2"));
+
+        var result = await handler.Handle(new AddParticipantCommand(meeting.Id, "user-3", "Mehmet Yılmaz", "mehmet@example.com", true), CancellationToken.None);
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal("meeting_forbidden", result.Error!.Code);
+        Assert.DoesNotContain(meeting.Participants, participant => participant.UserId == "user-3");
+    }
+
+    [Fact]
     public async Task SearchUsers_returns_directory_results()
     {
         var directory = new FakeUserDirectoryService([new UserResponse("user-2", "Ayşe Yılmaz", "ayse@example.com")]);

@@ -18,7 +18,7 @@ public sealed class MapSpeakerCommandHandler(IApplicationDbContext db, ICurrentU
     {
         var meeting = await db.GetMeetingAsync(request.MeetingId, cancellationToken);
         if (meeting is null) return Result<MeetingResponse>.Failure("meeting_not_found", "Toplantı bulunamadı.");
-        if (!currentUser.CanAccess(meeting.OrganizerId)) return Result<MeetingResponse>.Failure("meeting_forbidden", "Bu toplantıya erişim yetkiniz yok.");
+        if (!meeting.CanManage(currentUser.UserId)) return Result<MeetingResponse>.Failure("meeting_forbidden", "Bu toplantı içi işlemi yapma yetkiniz yok.");
         try
         {
             meeting.MapSpeaker(request.ParticipantId, request.SpeakerLabel);

@@ -21,7 +21,7 @@ public sealed class MeetingDbContext(DbContextOptions<MeetingDbContext> options)
     public async Task<IReadOnlyCollection<Meeting>> GetMeetingsAsync(string? organizerId, CancellationToken cancellationToken)
     {
         var query = MeetingSet.AsNoTracking().Include(x => x.Participants).AsQueryable();
-        if (!string.IsNullOrWhiteSpace(organizerId)) query = query.Where(x => x.OrganizerId == organizerId);
+        if (!string.IsNullOrWhiteSpace(organizerId)) query = query.Where(x => x.OrganizerId == organizerId || x.Participants.Any(participant => participant.UserId == organizerId));
         var meetings = await query.ToListAsync(cancellationToken);
         return meetings.OrderByDescending(x => x.StartsAt).ToList();
     }
@@ -52,6 +52,7 @@ public sealed class MeetingDbContext(DbContextOptions<MeetingDbContext> options)
             entity.Property(x => x.UserId).HasMaxLength(100).IsRequired();
             entity.Property(x => x.Email).HasMaxLength(320).IsRequired();
             entity.Property(x => x.DisplayName).HasMaxLength(160).IsRequired();
+            entity.Property(x => x.CanManageMeeting).IsRequired();
             entity.Property(x => x.SpeakerLabel).HasMaxLength(80);
             entity.Ignore(x => x.DomainEvents);
         });
