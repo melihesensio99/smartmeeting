@@ -20,4 +20,6 @@ public sealed class MeetingParticipant : Entity
         => new(Guid.NewGuid(), meetingId, userId.Trim(), displayName.Trim(), email.Trim(), canManageMeeting);
 
     public void AssignSpeakerLabel(string speakerLabel) => SpeakerLabel = string.IsNullOrWhiteSpace(speakerLabel) ? null : speakerLabel.Trim();
+
+    public void SetManagementPermission(bool canManageMeeting) => CanManageMeeting = canManageMeeting;
 }

@@ -13,6 +13,8 @@ using SmartMeeting.Application.Meetings.Commands.MapSpeaker;
 using SmartMeeting.Application.Meetings.Commands.SendMeetingSummaryEmail;
 using SmartMeeting.Application.Meetings.Commands.UpdateActionItem;
 using SmartMeeting.Application.Meetings.Queries.GetMeeting;
+using SmartMeeting.Application.Meetings.Commands.UpdateParticipantPermission;
+using SmartMeeting.Application.Meetings.Commands.RemoveParticipant;
 using SmartMeeting.Api.Contracts.Meetings;
 
 namespace SmartMeeting.Api.Controllers;
@@ -56,6 +58,14 @@ public sealed class MeetingsController(ISender sender) : ControllerBase
     [HttpPost("{meetingId:guid}/participants")]
     public async Task<IActionResult> AddParticipant(Guid meetingId, AddParticipantRequest request, CancellationToken cancellationToken)
         => ToActionResult(await sender.Send(new AddParticipantCommand(meetingId, request.UserId, request.DisplayName, request.Email, request.CanManageMeeting), cancellationToken));
+
+    [HttpPut("{meetingId:guid}/participants/{participantId:guid}/management-permission")]
+    public async Task<IActionResult> UpdateParticipantPermission(Guid meetingId, Guid participantId, UpdateParticipantPermissionRequest request, CancellationToken cancellationToken)
+        => ToActionResult(await sender.Send(new UpdateParticipantPermissionCommand(meetingId, participantId, request.CanManageMeeting), cancellationToken));
+
+    [HttpDelete("{meetingId:guid}/participants/{participantId:guid}")]
+    public async Task<IActionResult> RemoveParticipant(Guid meetingId, Guid participantId, CancellationToken cancellationToken)
+        => ToActionResult(await sender.Send(new RemoveParticipantCommand(meetingId, participantId), cancellationToken));
 
     [HttpPut("{meetingId:guid}/participants/{participantId:guid}/speaker")]
     public async Task<IActionResult> MapSpeaker(Guid meetingId, Guid participantId, MapSpeakerRequest request, CancellationToken cancellationToken)

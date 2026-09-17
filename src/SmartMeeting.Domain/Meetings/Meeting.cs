@@ -46,6 +46,24 @@ public sealed class Meeting : Entity
         Touch();
     }
 
+    public bool SetParticipantManagementPermission(Guid participantId, bool canManageMeeting)
+    {
+        var participant = _participants.SingleOrDefault(x => x.Id == participantId);
+        if (participant is null) return false;
+        participant.SetManagementPermission(canManageMeeting);
+        Touch();
+        return true;
+    }
+
+    public bool RemoveParticipant(Guid participantId)
+    {
+        var participant = _participants.SingleOrDefault(x => x.Id == participantId);
+        if (participant is null) return false;
+        _participants.Remove(participant);
+        Touch();
+        return true;
+    }
+
     public void MapSpeaker(Guid participantId, string speakerLabel)
     {
         var participant = _participants.SingleOrDefault(x => x.Id == participantId);

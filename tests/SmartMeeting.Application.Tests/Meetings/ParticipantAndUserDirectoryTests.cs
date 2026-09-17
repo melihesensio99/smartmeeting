@@ -3,6 +3,8 @@ using SmartMeeting.Application.Abstractions.Persistence;
 using SmartMeeting.Application.Auth.Contracts;
 using SmartMeeting.Application.Common;
 using SmartMeeting.Application.Meetings.Commands.AddParticipant;
+using SmartMeeting.Application.Meetings.Commands.RemoveParticipant;
+using SmartMeeting.Application.Meetings.Commands.UpdateParticipantPermission;
 using SmartMeeting.Application.Users.Queries.SearchUsers;
 using SmartMeeting.Application.Users.Responses;
 using SmartMeeting.Domain.Meetings;
@@ -84,6 +86,25 @@ public sealed class ParticipantAndUserDirectoryTests
         Assert.False(result.IsSuccess);
         Assert.Equal("meeting_forbidden", result.Error!.Code);
         Assert.DoesNotContain(meeting.Participants, participant => participant.UserId == "user-3");
+    }
+
+    [Fact]
+    public async Task Organizer_can_revoke_permission_and_remove_participant()
+    {
+        var meeting = Meeting.Create("Planlama", "organizer", DateTimeOffset.UtcNow);
+        meeting.AddParticipant("user-2", "Ayşe Yılmaz", "ayse@example.com", canManageMeeting: true);
+        var participantId = meeting.Participants.Single().Id;
+        var context = new TestDbContext(meeting);
+        var currentUser = new FakeCurrentUserService("organizer");
+
+        var permissionResult = await new UpdateParticipantPermissionCommandHandler(context, currentUser)
+            .Handle(new UpdateParticipantPermissionCommand(meeting.Id, participantId, false), CancellationToken.None);
+        var removeResult = await new RemoveParticipantCommandHandler(context, currentUser)
+            .Handle(new RemoveParticipantCommand(meeting.Id, participantId), CancellationToken.None);
+
+        Assert.True(permissionResult.IsSuccess);
+        Assert.True(removeResult.IsSuccess);
+        Assert.Empty(meeting.Participants);
     }
 
     [Fact]
