@@ -21,7 +21,7 @@ public sealed class MeetingStatusHub(
             throw new HubException("Geçersiz toplantı kimliği.");
 
         var meeting = await db.GetMeetingAsync(parsedMeetingId, Context.ConnectionAborted);
-        if (meeting is null || !currentUser.CanAccess(meeting))
+        if (meeting is null || meeting.Status == SmartMeeting.Domain.Meetings.MeetingStatus.Completed || !currentUser.CanAccess(meeting))
             throw new HubException("Bu toplantı odasına erişim yetkiniz yok.");
 
         var userId = currentUser.UserId;

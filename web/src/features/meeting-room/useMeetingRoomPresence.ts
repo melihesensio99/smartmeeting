@@ -112,6 +112,9 @@ export function useMeetingRoomPresence(meetingId: string | undefined) {
         await peer.addIceCandidate(signal)
       }
     })
+    connection.on('meetingStatusChanged', ({ status }: { status: string }) => {
+      if (status === 'Completed' || status === '6') void leaveRoom()
+    })
     try {
       await connection.start()
       const snapshot = await connection.invoke<RoomPresenceEvent>('JoinRoom', meetingId)

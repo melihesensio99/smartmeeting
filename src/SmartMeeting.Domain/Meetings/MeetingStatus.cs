@@ -7,5 +7,6 @@ public enum MeetingStatus
     Processing,
     Ready,
     Failed,
-    Cancelled
+    Cancelled,
+    Completed
 }

@@ -18,6 +18,7 @@ using SmartMeeting.Application.Meetings.Queries.GetMeeting;
 using SmartMeeting.Application.Meetings.Commands.UpdateParticipantPermission;
 using SmartMeeting.Application.Meetings.Commands.RemoveParticipant;
 using SmartMeeting.Application.Meetings.Commands.LeaveMeeting;
+using SmartMeeting.Application.Meetings.Commands.CompleteMeeting;
 using SmartMeeting.Application.Meetings.Commands.ConfirmSpeakerMapping;
 using SmartMeeting.Application.Meetings.Commands.RejectSpeakerMapping;
 using SmartMeeting.Api.Contracts.Meetings;
@@ -47,6 +48,10 @@ public sealed class MeetingsController(ISender sender) : ControllerBase
     [HttpPost("{meetingId:guid}/recording/start")]
     public async Task<IActionResult> StartRecording(Guid meetingId, CancellationToken cancellationToken)
         => ToActionResult(await sender.Send(new StartRecordingCommand(meetingId), cancellationToken));
+
+    [HttpPost("{meetingId:guid}/complete")]
+    public async Task<IActionResult> CompleteMeeting(Guid meetingId, CancellationToken cancellationToken)
+        => ToActionResult(await sender.Send(new CompleteMeetingCommand(meetingId), cancellationToken));
 
     [HttpPost("{meetingId:guid}/action-items/{actionItemId:guid}/complete")]
     public async Task<IActionResult> CompleteActionItem(Guid meetingId, Guid actionItemId, CancellationToken cancellationToken)

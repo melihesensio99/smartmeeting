@@ -134,6 +134,17 @@ public sealed class Meeting : Entity
         Touch();
     }
 
+    public void CompleteMeeting()
+    {
+        if (Status is MeetingStatus.Recording or MeetingStatus.Processing)
+            throw new DomainException("Toplantıyı bitirmeden önce aktif kayıt ve işleme sürecini tamamlayın.");
+        if (Status is MeetingStatus.Completed or MeetingStatus.Cancelled)
+            throw new DomainException("Toplantı zaten sonlandırılmış.");
+
+        Status = MeetingStatus.Completed;
+        Touch();
+    }
+
     public void CompleteActionItem(Guid actionItemId)
     {
         if (Summary is null) throw new DomainException("Toplantının özeti henüz hazır değil.");

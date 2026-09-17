@@ -36,6 +36,38 @@ public sealed class MeetingTests
     }
 
     [Fact]
+    public void Organizer_can_complete_scheduled_meeting()
+    {
+        var meeting = Meeting.Create("Kapanış toplantısı", "user-1", DateTimeOffset.UtcNow);
+
+        meeting.CompleteMeeting();
+
+        Assert.Equal(MeetingStatus.Completed, meeting.Status);
+    }
+
+    [Fact]
+    public void Meeting_cannot_be_completed_while_recording_or_processing()
+    {
+        var recordingMeeting = Meeting.Create("Kayıt toplantısı", "user-1", DateTimeOffset.UtcNow);
+        recordingMeeting.StartRecording();
+        Assert.Throws<DomainException>(recordingMeeting.CompleteMeeting);
+
+        var processingMeeting = Meeting.Create("İşleme toplantısı", "user-1", DateTimeOffset.UtcNow);
+        processingMeeting.StartRecording();
+        processingMeeting.CompleteRecording("audio/test.webm");
+        Assert.Throws<DomainException>(processingMeeting.CompleteMeeting);
+    }
+
+    [Fact]
+    public void Completed_meeting_cannot_be_completed_again()
+    {
+        var meeting = Meeting.Create("Tek seferlik toplantı", "user-1", DateTimeOffset.UtcNow);
+        meeting.CompleteMeeting();
+
+        Assert.Throws<DomainException>(meeting.CompleteMeeting);
+    }
+
+    [Fact]
     public void AddParticipant_is_idempotent_for_same_user()
     {
         var meeting = Meeting.Create("Sprint planlama", "user-1", DateTimeOffset.UtcNow);

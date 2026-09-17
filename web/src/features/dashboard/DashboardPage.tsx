@@ -2,7 +2,7 @@ import { Alert, Box, Button, Card, CardContent, Chip, Grid, Stack, Typography } 
 import { navigate } from '../../app/navigation'
 import type { Meeting } from '../../types/meeting'
 
-const statusLabels: Record<string, string> = { '0': 'Taslak', '1': 'Kayıt alınıyor', '2': 'İşleniyor', '3': 'Onaylandı', '4': 'Başarısız', '5': 'İptal' }
+const statusLabels: Record<string, string> = { '0': 'Planlandı', '1': 'Kayıt alınıyor', '2': 'İşleniyor', '3': 'Hazır', '4': 'Başarısız', '5': 'İptal', '6': 'Tamamlandı', Scheduled: 'Planlandı', Recording: 'Kayıt alınıyor', Processing: 'İşleniyor', Ready: 'Hazır', Failed: 'Başarısız', Cancelled: 'İptal', Completed: 'Tamamlandı' }
 const statusColors: Record<string, 'default' | 'success' | 'warning' | 'error' | 'info'> = { '0': 'default', '1': 'warning', '2': 'info', '3': 'success', '4': 'error', '5': 'default' }
 function statusOf(meeting: Meeting): string { return String(meeting.status) }
 

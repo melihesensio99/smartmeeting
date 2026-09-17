@@ -28,7 +28,9 @@ function renderPage(meeting: Meeting, onRetryProcessing = vi.fn(), currentUserId
       <MeetingDetailPage
         meeting={meeting}
         currentUserId={currentUserId}
+        canCompleteMeeting={false}
         onComplete={vi.fn()}
+        onCompleteMeeting={vi.fn()}
         onUpdateAction={vi.fn()}
         onCreateAction={vi.fn()}
         onSaveNotes={vi.fn()}
@@ -36,6 +38,7 @@ function renderPage(meeting: Meeting, onRetryProcessing = vi.fn(), currentUserId
         onAudioReady={vi.fn()}
         recordingUploading={false}
         recordingStarting={false}
+        completingMeeting={false}
         onMapSpeaker={vi.fn()}
         onConfirmSpeaker={vi.fn()}
         onRejectSpeaker={vi.fn()}

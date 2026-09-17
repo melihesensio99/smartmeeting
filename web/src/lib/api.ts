@@ -12,6 +12,7 @@ export function getApiErrorMessage(error: unknown, fallback: string): string {
 export async function getMeetings(): Promise<Meeting[]> { const response = await client.get<unknown>('/meetings'); if (!Array.isArray(response.data)) throw new Error('API toplantı listesi beklenen formatta değil.'); return response.data.map((item: unknown) => meetingSchema.parse(item)) }
 export async function createMeeting(input: CreateMeetingInput): Promise<Meeting> { const response = await client.post<unknown>('/meetings', { ...input, endsAt: input.endsAt || null }); return meetingSchema.parse(response.data) }
 export async function startMeetingRecording(meetingId: string): Promise<Meeting> { const response = await client.post<unknown>(`/meetings/${meetingId}/recording/start`); return meetingSchema.parse(response.data) }
+export async function completeMeeting(meetingId: string): Promise<Meeting> { const response = await client.post<unknown>(`/meetings/${meetingId}/complete`); return meetingSchema.parse(response.data) }
 export async function retryMeetingProcessing(meetingId: string): Promise<Meeting> { const response = await client.post<unknown>(`/meetings/${meetingId}/processing/retry`); return meetingSchema.parse(response.data) }
 
 export async function uploadMeetingAudio(meetingId: string, audio: Blob, fileName = 'meeting.webm'): Promise<Meeting> {
