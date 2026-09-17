@@ -15,6 +15,14 @@ public sealed class MeetingDbContext(DbContextOptions<MeetingDbContext> options)
 
     public void AddMeeting(Meeting meeting) => MeetingSet.Add(meeting);
 
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        foreach (var entry in ChangeTracker.Entries<Meeting>().Where(entry => entry.State == EntityState.Modified))
+            entry.Property(meeting => meeting.Summary).IsModified = true;
+
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
     public Task<Meeting?> GetMeetingAsync(Guid meetingId, CancellationToken cancellationToken)
         => MeetingSet.Include(x => x.Participants).SingleOrDefaultAsync(x => x.Id == meetingId, cancellationToken);
 
