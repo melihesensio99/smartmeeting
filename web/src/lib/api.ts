@@ -55,6 +55,11 @@ export async function removeParticipant(meetingId: string, participantId: string
   return meetingSchema.parse(response.data)
 }
 
+export async function leaveMeeting(meetingId: string): Promise<Meeting> {
+  const response = await client.delete<unknown>(`/meetings/${meetingId}/participants/me`)
+  return meetingSchema.parse(response.data)
+}
+
 export async function searchUsers(search: string): Promise<UserResponse[]> {
   const response = await client.get<unknown>('/users', { params: { search } })
   if (!Array.isArray(response.data)) throw new Error('API kullanıcı listesi beklenen formatta değil.')

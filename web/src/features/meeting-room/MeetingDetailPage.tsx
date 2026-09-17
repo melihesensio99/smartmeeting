@@ -17,16 +17,18 @@ type Props = {
   onAddParticipant: (meetingId: string, input: AddParticipantInput) => void
   onUpdateParticipantPermission: (meetingId: string, participantId: string, canManageMeeting: boolean) => void
   onRemoveParticipant: (meetingId: string, participantId: string) => void
+  onLeaveMeeting: (meetingId: string) => void
   onSendEmail: (meetingId: string) => void
   savingNotes: boolean
   addingParticipant: boolean
   updatingParticipantPermission: boolean
   removingParticipant: boolean
+  leavingMeeting: boolean
   sendingEmail: boolean
   updatingAction: boolean
 }
 
-export function MeetingDetailPage({ meeting, currentUserId, onComplete, onUpdateAction, onSaveNotes, onMapSpeaker, onAddParticipant, onUpdateParticipantPermission, onRemoveParticipant, onSendEmail, savingNotes, addingParticipant, updatingParticipantPermission, removingParticipant, sendingEmail, updatingAction }: Props) {
+export function MeetingDetailPage({ meeting, currentUserId, onComplete, onUpdateAction, onSaveNotes, onMapSpeaker, onAddParticipant, onUpdateParticipantPermission, onRemoveParticipant, onLeaveMeeting, onSendEmail, savingNotes, addingParticipant, updatingParticipantPermission, removingParticipant, leavingMeeting, sendingEmail, updatingAction }: Props) {
   const [note, setNote] = useState(meeting?.notes ?? '')
   const [speakerLabels, setSpeakerLabels] = useState<Record<string, string>>({})
   const [participantSearch, setParticipantSearch] = useState('')
@@ -47,7 +49,7 @@ export function MeetingDetailPage({ meeting, currentUserId, onComplete, onUpdate
   const currentStatus = statusInfo[status] ?? { label: status, color: 'default' as const, message: 'Toplantı durumu güncelleniyor.', progress: 0 }
   const isOrganizer = currentUserId !== null && currentUserId === meeting.organizerId
   return <Stack spacing={3}>
-    <Button sx={{ alignSelf: 'flex-start' }} onClick={() => navigate('/meetings')}>← Toplantılara dön</Button>
+    <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}><Button sx={{ alignSelf: 'flex-start' }} onClick={() => navigate('/meetings')}>← Toplantılara dön</Button>{!isOrganizer && <Button color="error" variant="outlined" disabled={leavingMeeting} onClick={() => { if (window.confirm('Bu toplantıdan ayrılmak istediğinizden emin misiniz?')) onLeaveMeeting(meeting.id) }}>{leavingMeeting ? 'Ayrılıyor…' : 'Toplantıdan ayrıl'}</Button>}</Stack>
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ justifyContent: 'space-between', gap: 2 }}><Box><Typography variant="h3">{meeting.title}</Typography><Typography color="text.secondary">{new Date(meeting.startsAt).toLocaleString('tr-TR')} · Düzenleyen: {meeting.organizerId}</Typography></Box><Button variant="contained" onClick={() => navigate('/')}>Yeni kayıt başlat</Button></Stack>
     <Card><CardContent><Stack spacing={1.5}><Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', gap: 2 }}><Typography variant="h5">Toplantı işlem durumu</Typography><Chip label={currentStatus.label} color={currentStatus.color} /></Stack><Typography color="text.secondary">{currentStatus.message}</Typography><LinearProgress variant="determinate" value={currentStatus.progress} color={currentStatus.color === 'default' ? 'primary' : currentStatus.color} /></Stack></CardContent></Card>
     <Card><CardContent><Typography variant="h5">Konuşmacılı transkript</Typography><Typography sx={{ mt: 2, whiteSpace: 'pre-wrap', lineHeight: 1.8 }}>{meeting.transcript ?? 'Transkript henüz hazır değil. Ses kaydı tamamlandığında burada görünecek.'}</Typography></CardContent></Card>
