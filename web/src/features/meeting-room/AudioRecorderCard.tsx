@@ -2,6 +2,7 @@ import { Alert, Box, Button, Card, CardContent, FormControl, InputLabel, MenuIte
 import { useState } from 'react'
 import { useAudioRecorder } from '../../hooks/useAudioRecorder'
 import { useAudioVisualizer } from '../../hooks/useAudioVisualizer'
+import { navigate } from '../../app/navigation'
 import type { Meeting } from '../../types/meeting'
 
 type Props = { meetings: Meeting[]; selectedMeetingId: string; onMeetingChange: (meetingId: string) => void; onRecordingStart: (meetingId: string) => Promise<void>; onAudioReady: (audio: Blob) => void; onSaveNotes: (meetingId: string, notes: string) => void; uploading: boolean; starting: boolean; savingNotes: boolean }
@@ -28,9 +29,9 @@ export function AudioRecorderCard({ meetings, selectedMeetingId, onMeetingChange
   }
   const duration = [Math.floor(recorder.elapsedSeconds / 3600), Math.floor((recorder.elapsedSeconds % 3600) / 60), recorder.elapsedSeconds % 60].map((value) => value.toString().padStart(2, '0')).join(':')
   return <Card sx={{ height: '100%' }}><CardContent><Stack spacing={2}>
-    <Typography variant="h6">Canlı toplantı odası</Typography>
+    <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', gap: 1 }}><Typography variant="h6">Sesli toplantı kaydı</Typography>{selectedMeeting && <Button size="small" variant="outlined" onClick={() => navigate(`/meetings/${selectedMeeting.id}`)}>Canlı odayı aç</Button>}</Stack>
     <FormControl fullWidth disabled={recorder.state === 'recording' || uploading}><InputLabel id="meeting-select-label">Toplantı</InputLabel><Select labelId="meeting-select-label" label="Toplantı" value={selectedMeetingId} onChange={(event) => handleMeetingChange(event.target.value)}><MenuItem value=""><em>Toplantı seçin</em></MenuItem>{meetings.filter((meeting) => ['0', 'Scheduled'].includes(String(meeting.status)) || meeting.id === selectedMeetingId).map((meeting) => <MenuItem key={meeting.id} value={meeting.id}>{meeting.title}</MenuItem>)}</Select></FormControl>
-    <Typography color="text.secondary">Kayıt tamamlandığında ses dosyası storage’a yüklenir ve Voxtral transkripsiyonu başlar.</Typography>
+    <Typography color="text.secondary">Bu kart yalnızca toplantı sesini kaydeder. Katılımcı presence ve görüşme için toplantı detayından canlı odayı açın.</Typography>
     {selectedMeeting && <Stack spacing={1}><TextField fullWidth multiline minRows={3} label="Canlı toplantı notları" value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Toplantı sırasında önemli kararları veya bağlamı yazın..." disabled={uploading} /><Button variant="outlined" onClick={() => onSaveNotes(selectedMeeting.id, notes)} disabled={!notes.trim() || savingNotes}>{savingNotes ? 'Not kaydediliyor…' : 'Notları kaydet'}</Button><Typography variant="caption" color="text.secondary">Bu notlar STT tamamlandıktan sonra AI özetine bağlam olarak dahil edilir.</Typography></Stack>}
     {!selectedMeeting && <Alert severity="info">Kayıt başlatmak için planlanmış bir toplantı seçin.</Alert>}
     {recorder.state === 'recording' && <Alert severity="warning">Kayıt devam ediyor</Alert>}
