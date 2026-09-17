@@ -54,6 +54,8 @@ public sealed class MeetingDbContext(DbContextOptions<MeetingDbContext> options)
             entity.Property(x => x.DisplayName).HasMaxLength(160).IsRequired();
             entity.Property(x => x.CanManageMeeting).IsRequired();
             entity.Property(x => x.SpeakerLabel).HasMaxLength(80);
+            entity.Property(x => x.SpeakerMappingStatus).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(x => x.SpeakerConfidence);
             entity.Ignore(x => x.DomainEvents);
         });
 

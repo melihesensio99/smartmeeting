@@ -16,6 +16,8 @@ using SmartMeeting.Application.Meetings.Queries.GetMeeting;
 using SmartMeeting.Application.Meetings.Commands.UpdateParticipantPermission;
 using SmartMeeting.Application.Meetings.Commands.RemoveParticipant;
 using SmartMeeting.Application.Meetings.Commands.LeaveMeeting;
+using SmartMeeting.Application.Meetings.Commands.ConfirmSpeakerMapping;
+using SmartMeeting.Application.Meetings.Commands.RejectSpeakerMapping;
 using SmartMeeting.Api.Contracts.Meetings;
 
 namespace SmartMeeting.Api.Controllers;
@@ -75,6 +77,14 @@ public sealed class MeetingsController(ISender sender) : ControllerBase
     [HttpPut("{meetingId:guid}/participants/{participantId:guid}/speaker")]
     public async Task<IActionResult> MapSpeaker(Guid meetingId, Guid participantId, MapSpeakerRequest request, CancellationToken cancellationToken)
         => ToActionResult(await sender.Send(new MapSpeakerCommand(meetingId, participantId, request.SpeakerLabel), cancellationToken));
+
+    [HttpPost("{meetingId:guid}/participants/{participantId:guid}/speaker/confirm")]
+    public async Task<IActionResult> ConfirmSpeakerMapping(Guid meetingId, Guid participantId, CancellationToken cancellationToken)
+        => ToActionResult(await sender.Send(new ConfirmSpeakerMappingCommand(meetingId, participantId), cancellationToken));
+
+    [HttpDelete("{meetingId:guid}/participants/{participantId:guid}/speaker")]
+    public async Task<IActionResult> RejectSpeakerMapping(Guid meetingId, Guid participantId, CancellationToken cancellationToken)
+        => ToActionResult(await sender.Send(new RejectSpeakerMappingCommand(meetingId, participantId), cancellationToken));
 
     [HttpPost("{meetingId:guid}/summary/email")]
     public async Task<IActionResult> SendSummaryEmail(Guid meetingId, CancellationToken cancellationToken)

@@ -73,11 +73,27 @@ public sealed class Meeting : Entity
         return true;
     }
 
-    public void MapSpeaker(Guid participantId, string speakerLabel)
+    public void SuggestSpeakerMapping(Guid participantId, string speakerLabel, decimal confidence = 0.5m)
     {
         var participant = _participants.SingleOrDefault(x => x.Id == participantId);
         if (participant is null) throw new DomainException("Katılımcı bulunamadı.");
-        participant.AssignSpeakerLabel(speakerLabel);
+        participant.SuggestSpeakerLabel(speakerLabel, confidence);
+        Touch();
+    }
+
+    public void ConfirmSpeakerMapping(Guid participantId)
+    {
+        var participant = _participants.SingleOrDefault(x => x.Id == participantId);
+        if (participant is null) throw new DomainException("Katılımcı bulunamadı.");
+        participant.ConfirmSpeakerLabel();
+        Touch();
+    }
+
+    public void RejectSpeakerMapping(Guid participantId)
+    {
+        var participant = _participants.SingleOrDefault(x => x.Id == participantId);
+        if (participant is null) throw new DomainException("Katılımcı bulunamadı.");
+        participant.RejectSpeakerLabel();
         Touch();
     }
 

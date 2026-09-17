@@ -142,14 +142,25 @@ public sealed class MeetingTests
     }
 
     [Fact]
-    public void MapSpeaker_assigns_label_to_participant()
+    public void Speaker_mapping_requires_confirmation()
     {
         var meeting = Meeting.Create("Planlama", "user-1", DateTimeOffset.UtcNow);
         meeting.AddParticipant("user-2", "Ayşe", "ayse@example.com");
         var participant = meeting.Participants.Single();
 
-        meeting.MapSpeaker(participant.Id, "Speaker 1");
+        meeting.SuggestSpeakerMapping(participant.Id, "Speaker 1", 0.54m);
 
         Assert.Equal("Speaker 1", participant.SpeakerLabel);
+        Assert.Equal(SpeakerMappingStatus.PendingConfirmation, participant.SpeakerMappingStatus);
+        Assert.Equal(0.54m, participant.SpeakerConfidence);
+
+        meeting.ConfirmSpeakerMapping(participant.Id);
+
+        Assert.Equal(SpeakerMappingStatus.Confirmed, participant.SpeakerMappingStatus);
+
+        meeting.RejectSpeakerMapping(participant.Id);
+
+        Assert.Equal(SpeakerMappingStatus.None, participant.SpeakerMappingStatus);
+        Assert.Null(participant.SpeakerLabel);
     }
 }

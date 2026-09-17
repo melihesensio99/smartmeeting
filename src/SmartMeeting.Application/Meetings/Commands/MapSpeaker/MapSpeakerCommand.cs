@@ -21,7 +21,7 @@ public sealed class MapSpeakerCommandHandler(IApplicationDbContext db, ICurrentU
         if (!meeting.CanManage(currentUser.UserId)) return Result<MeetingResponse>.Failure("meeting_forbidden", "Bu toplantı içi işlemi yapma yetkiniz yok.");
         try
         {
-            meeting.MapSpeaker(request.ParticipantId, request.SpeakerLabel);
+            meeting.SuggestSpeakerMapping(request.ParticipantId, request.SpeakerLabel);
             await db.SaveChangesAsync(cancellationToken);
             return Result<MeetingResponse>.Success(MeetingResponse.From(meeting));
         }
