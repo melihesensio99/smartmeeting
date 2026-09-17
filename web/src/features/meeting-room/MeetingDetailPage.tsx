@@ -97,7 +97,6 @@ export function MeetingDetailPage({ meeting, currentUserId, canCompleteMeeting, 
           {[
             { key: 'status' as const, label: 'İşlem durumu', value: currentStatus.label },
             { key: 'transcript' as const, label: 'Transkript', value: meeting.transcript ? 'Hazır' : 'Henüz hazır değil' },
-            { key: 'participants' as const, label: 'Katılımcılar', value: `${meeting.participants.length} kişi` },
             { key: 'summary' as const, label: 'Özet & aksiyonlar', value: meeting.summary ? `${meeting.summary.actionItems.length} aksiyon` : 'Hazırlanıyor' },
           ].map((panel) => <Card key={panel.key} sx={{ flex: '1 1 210px', minWidth: 190, border: activePanel === panel.key ? 2 : 1, borderColor: activePanel === panel.key ? 'primary.main' : 'divider' }}><CardActionArea onClick={() => { setActivePanel(panel.key); setPanelOpen(true) }}><CardContent><Typography variant="subtitle2" color="text.secondary">{panel.label}</Typography><Typography variant="h6" sx={{ mt: 1 }}>{panel.value}</Typography><Typography variant="caption" color="primary">Açmak için tıkla →</Typography></CardContent></CardActionArea></Card>)}
         </Stack>
