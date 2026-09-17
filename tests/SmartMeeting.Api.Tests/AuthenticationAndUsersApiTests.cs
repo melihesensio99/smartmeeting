@@ -222,6 +222,71 @@ public sealed class AuthenticationAndUsersApiTests(ApiFactory factory) : IClassF
         Assert.Equal(dueAt, action.GetProperty("dueAt").GetDateTimeOffset(), precision: TimeSpan.FromSeconds(1));
     }
 
+    [Fact]
+    public async Task Delegated_manager_can_create_action_but_revoked_participant_cannot()
+    {
+        using var client = factory.CreateClient();
+        var participantEmail = $"action-manager-{Guid.NewGuid():N}@example.com";
+        var registerResponse = await client.PostAsJsonAsync("/api/auth/register", new
+        {
+            email = participantEmail,
+            password = "Password123",
+            displayName = "Aksiyon Yöneticisi"
+        });
+        registerResponse.EnsureSuccessStatusCode();
+        using var registered = JsonDocument.Parse(await registerResponse.Content.ReadAsStringAsync());
+        var participantId = registered.RootElement.GetProperty("userId").GetString()!;
+
+        using var createRequest = new HttpRequestMessage(HttpMethod.Post, "/api/meetings")
+        {
+            Content = JsonContent.Create(new { title = "Aksiyon yetki testi", startsAt = DateTimeOffset.UtcNow.AddHours(1) })
+        };
+        createRequest.Headers.Add("X-Test-User", "action-owner");
+        var createResponse = await client.SendAsync(createRequest);
+        createResponse.EnsureSuccessStatusCode();
+        using var created = JsonDocument.Parse(await createResponse.Content.ReadAsStringAsync());
+        var meetingId = created.RootElement.GetProperty("id").GetGuid();
+
+        using var addRequest = new HttpRequestMessage(HttpMethod.Post, $"/api/meetings/{meetingId}/participants")
+        {
+            Content = JsonContent.Create(new { userId = participantId, displayName = "Aksiyon Yöneticisi", email = participantEmail, canManageMeeting = true })
+        };
+        addRequest.Headers.Add("X-Test-User", "action-owner");
+        var addResponse = await client.SendAsync(addRequest);
+        addResponse.EnsureSuccessStatusCode();
+        using var added = JsonDocument.Parse(await addResponse.Content.ReadAsStringAsync());
+        var participantRecordId = added.RootElement.GetProperty("participants").EnumerateArray().Single().GetProperty("id").GetGuid();
+
+        await using (var scope = factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<MeetingDbContext>();
+            var meeting = await db.MeetingSet.SingleAsync(x => x.Id == meetingId);
+            meeting.SetSummary(MeetingSummary.Create("Yetki testi özeti", [], []));
+            await db.SaveChangesAsync();
+        }
+
+        using var delegatedAction = new HttpRequestMessage(HttpMethod.Post, $"/api/meetings/{meetingId}/action-items")
+        {
+            Content = JsonContent.Create(new { description = "Yetkili katılımcı aksiyonu", priority = "Medium" })
+        };
+        delegatedAction.Headers.Add("X-Test-User", participantId);
+        Assert.Equal(HttpStatusCode.OK, (await client.SendAsync(delegatedAction)).StatusCode);
+
+        using var revokeRequest = new HttpRequestMessage(HttpMethod.Put, $"/api/meetings/{meetingId}/participants/{participantRecordId}/management-permission")
+        {
+            Content = JsonContent.Create(new { canManageMeeting = false })
+        };
+        revokeRequest.Headers.Add("X-Test-User", "action-owner");
+        Assert.Equal(HttpStatusCode.OK, (await client.SendAsync(revokeRequest)).StatusCode);
+
+        using var revokedAction = new HttpRequestMessage(HttpMethod.Post, $"/api/meetings/{meetingId}/action-items")
+        {
+            Content = JsonContent.Create(new { description = "Yetkisiz aksiyon", priority = "Low" })
+        };
+        revokedAction.Headers.Add("X-Test-User", participantId);
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.SendAsync(revokedAction)).StatusCode);
+    }
+
     private static async Task<Guid> CreateAndStartMeetingAsync(HttpClient client)
     {
         using var createRequest = new HttpRequestMessage(HttpMethod.Post, "/api/meetings")
