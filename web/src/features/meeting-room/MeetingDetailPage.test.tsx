@@ -87,6 +87,7 @@ describe('MeetingDetailPage işlem durumu', () => {
   it('toplantı sahibi katılımcı yönetimi ve konuşmacı onay kontrollerini görür', () => {
     const meeting = createMeeting(3, [{ id: '44444444-4444-4444-4444-444444444444', userId: 'participant-1', displayName: 'Ayşe Katılımcı', email: 'ayse@example.com', canManageMeeting: true, speakerLabel: 'Speaker 1', speakerMappingStatus: 'PendingConfirmation', speakerConfidence: 0.8 }])
     renderPage(meeting)
+    fireEvent.click(screen.getByRole('tab', { name: 'Katılımcılar' }))
 
     expect(screen.getByRole('button', { name: 'Katılımcı ekle' })).toBeDisabled()
     expect(screen.getByText('Toplantı yöneticisi')).toBeInTheDocument()
