@@ -110,6 +110,22 @@ Gerçek ekran görüntüleri aşağıdaki dosya adlarıyla sonradan eklenebilir:
 ![Meeting dashboard](docs/screenshots/dashboard.png)
 ```
 
+### 🎬 İki kullanıcıyla canlı oda akışı
+
+Yerel demo akışı şu sırayla ilerler:
+
+1. 👤 Toplantı oluşturucu toplantıyı oluşturur.
+2. ➕ Toplantı sahibi kayıtlı kullanıcıyı toplantıya ekler.
+3. 🚪 Her iki kullanıcı toplantı detayından **Odaya gir** seçeneğini kullanır.
+4. 🟢 Aktif katılımcılar SignalR ile anlık olarak birbirini görür.
+5. 🎙️ Odaya girişte kamera kapalıdır; mikrofon bağlantısı kurulur.
+6. 📹 Kullanıcı isterse **Kamerayı aç** düğmesiyle görüntülü görüşmeye geçer.
+7. 🔇 Mikrofon/kamera kontrolleri ve **Odadan çık** akışı odanın içinden yönetilir.
+
+WebRTC medya akışı katılımcılar arasında doğrudan taşınır; SignalR yalnızca oda presence bilgisi ve WebRTC sinyalleşmesi için kullanılır. Tarayıcı izinleri verilmeden kamera açılmaz.
+
+Akışı manuel doğrulama adımları için [`docs/demo/meeting-room-flow.md`](docs/demo/meeting-room-flow.md) dosyasına bakabilirsiniz.
+
 ---
 
 ## 🧱 Mimari Yaklaşım

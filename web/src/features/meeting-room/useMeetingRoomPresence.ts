@@ -23,7 +23,7 @@ export function useMeetingRoomPresence(meetingId: string | undefined) {
   const [isInRoom, setIsInRoom] = useState(false)
   const [isConnecting, setIsConnecting] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
-  const [isCameraOff, setIsCameraOff] = useState(false)
+  const [isCameraOff, setIsCameraOff] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const connectionRef = useRef<HubConnection | null>(null)
   const peersRef = useRef<Record<string, RTCPeerConnection>>({})
@@ -80,7 +80,7 @@ export function useMeetingRoomPresence(meetingId: string | undefined) {
     setError(null)
     let stream: MediaStream
     try {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
     } catch {
       setError('Mikrofon ve kamera erişimi verilemedi. Tarayıcı izinlerini kontrol edin.')
       setIsConnecting(false)
@@ -131,7 +131,21 @@ export function useMeetingRoomPresence(meetingId: string | undefined) {
     setIsMuted(nextMuted)
   }, [isMuted])
 
-  const toggleCamera = useCallback(() => {
+  const toggleCamera = useCallback(async () => {
+    if (!localStreamRef.current?.getVideoTracks().length) {
+      try {
+        const cameraStream = await navigator.mediaDevices.getUserMedia({ video: true })
+        const [cameraTrack] = cameraStream.getVideoTracks()
+        if (!cameraTrack || !localStreamRef.current) return
+        localStreamRef.current.addTrack(cameraTrack)
+        Object.values(peersRef.current).forEach((peer) => peer.addTrack(cameraTrack, localStreamRef.current as MediaStream))
+        setLocalStream(new MediaStream(localStreamRef.current.getTracks()))
+        setIsCameraOff(false)
+      } catch {
+        setError('Kamera erişimi verilemedi. Kamera kapalı şekilde devam edebilirsiniz.')
+      }
+      return
+    }
     const nextCameraOff = !isCameraOff
     localStreamRef.current?.getVideoTracks().forEach((track) => { track.enabled = !nextCameraOff })
     setIsCameraOff(nextCameraOff)
