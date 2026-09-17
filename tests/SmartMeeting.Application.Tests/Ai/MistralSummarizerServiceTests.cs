@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Microsoft.Extensions.Options;
 using SmartMeeting.Domain.Meetings;
 using SmartMeeting.Infrastructure.Ai;
@@ -23,6 +24,18 @@ public sealed class MistralSummarizerServiceTests
         Assert.Equal(ActionPriority.Medium, summary.ActionItems.Single().Priority);
         Assert.Equal("Bearer", handler.AuthorizationScheme);
         Assert.Contains("json_schema", handler.RequestBody);
+
+        using var requestDocument = JsonDocument.Parse(handler.RequestBody);
+        var systemPrompt = requestDocument.RootElement
+            .GetProperty("messages")[0]
+            .GetProperty("content")
+            .GetString();
+
+        Assert.NotNull(systemPrompt);
+        Assert.Contains("Türkiye Türkçesinin güncel yazım, noktalama", systemPrompt);
+        Assert.Contains("tam bir yönetici toplantı raporu", systemPrompt);
+        Assert.Contains("hiçbir bilgi, karar, tarih, kişi, sorumlu, risk veya sonuç uydurma", systemPrompt);
+        Assert.Contains("Yalnızca istenen JSON şemasına uygun tek bir nesne döndür", systemPrompt);
     }
 
     private sealed class StubHandler : HttpMessageHandler
