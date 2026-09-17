@@ -21,7 +21,7 @@ export function App() {
   const route = routeFromPath(path)
   const currentUser = useCurrentUser(route !== 'login' && route !== 'register')
   const { meetings, create, startRecording, upload, retryProcessing, completeAction, updateAction, createAction, updateNotes, mapSpeaker, confirmSpeaker, rejectSpeaker, addParticipant, updateParticipantPermission, removeParticipant, leaveMeeting, sendEmail } = useMeetings()
-  useMeetingStatus((meetings.data ?? []).map((meeting) => meeting.id))
+  useMeetingStatus((meetings.data ?? []).map((meeting) => meeting.id), route !== 'login' && route !== 'register' && currentUser.isSuccess)
   const [open, setOpen] = useState(false)
   const [selectedMeetingId, setSelectedMeetingId] = useState('')
   if (route === 'login') return <LoginPage />
