@@ -1,5 +1,5 @@
 import { Alert, Box, Button, Card, CardActionArea, CardContent, Checkbox, Chip, Dialog, DialogContent, DialogTitle, Divider, FormControlLabel, LinearProgress, MenuItem, Select, Stack, Switch, TextField, Typography } from '@mui/material'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { navigate } from '../../app/navigation'
 import { getApiErrorMessage, searchUsers } from '../../lib/api'
@@ -60,6 +60,13 @@ export function MeetingDetailPage({ meeting, currentUserId, canCompleteMeeting, 
   const users = useQuery({ queryKey: ['users', participantSearch], queryFn: () => searchUsers(participantSearch), enabled: participantSearch.trim().length >= 2 })
   const roomPresence = useMeetingRoomPresence(meeting?.id)
   const effectiveSelectedUser = selectedUser ?? (users.data?.length === 1 ? users.data[0] : null)
+  const meetingId = meeting?.id
+  useEffect(() => {
+    if (!meetingId) return
+    if (roomPresence.isInRoom) localStorage.setItem('smartmeeting-live-room', meetingId)
+    else if (localStorage.getItem('smartmeeting-live-room') === meetingId) localStorage.removeItem('smartmeeting-live-room')
+    window.dispatchEvent(new Event('smartmeeting-live-room-changed'))
+  }, [meetingId, roomPresence.isInRoom])
   if (!meeting) return <Alert severity="warning">Toplantı bulunamadı. <Button onClick={() => navigate('/meetings')}>Toplantılara dön</Button></Alert>
   const status = String(meeting.status)
   const statusInfo: Record<string, { label: string; color: 'default' | 'warning' | 'info' | 'success' | 'error'; message: string; progress: number }> = {
@@ -78,7 +85,7 @@ export function MeetingDetailPage({ meeting, currentUserId, canCompleteMeeting, 
   const isCompleted = statusKey === '6'
   return <Stack spacing={3}>
     <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}><Button sx={{ alignSelf: 'flex-start' }} onClick={() => navigate('/meetings')}>← Toplantılara dön</Button>{!isOrganizer && <Button color="error" variant="outlined" disabled={leavingMeeting} onClick={() => { if (window.confirm('Bu toplantıdan ayrılmak istediğinizden emin misiniz?')) onLeaveMeeting(meeting.id) }}>{leavingMeeting ? 'Ayrılıyor…' : 'Toplantıdan ayrıl'}</Button>}</Stack>
-    <Stack direction={{ xs: 'column', md: 'row' }} sx={{ justifyContent: 'space-between', gap: 2 }}><Box><Typography variant="h3">{meeting.title}</Typography><Typography color="text.secondary">{new Date(meeting.startsAt).toLocaleString('tr-TR')} · Düzenleyen: {meeting.organizerId}</Typography></Box>{!isCompleted && <Button variant="contained" onClick={() => document.getElementById('meeting-recording')?.scrollIntoView({ behavior: 'smooth' })}>Kayıt paneline git</Button>}</Stack>
+    <Stack direction={{ xs: 'column', md: 'row' }} sx={{ justifyContent: 'space-between', gap: 2 }}><Box><Typography variant="h3">{meeting.title}</Typography><Typography color="text.secondary">{new Date(meeting.startsAt).toLocaleString('tr-TR')} · Düzenleyen: {meeting.organizerId}</Typography></Box></Stack>
     <Stack direction={{ xs: 'column', lg: 'row' }} spacing={2} sx={{ alignItems: 'stretch' }}>
       <Stack spacing={2} sx={{ flex: 1, minWidth: 0 }}>
         <Card sx={{ border: '1px solid', borderColor: roomPresence.isInRoom ? 'success.main' : 'divider' }}><CardContent><Stack spacing={2}>{roomPresence.isInRoom && <Alert severity="success">● Şu an bu toplantının canlı odasındasınız.</Alert>}{isCompleted && <Alert severity="info">Bu toplantı tamamlandı. Canlı odaya yeniden katılım kapalı.</Alert>}<Stack direction={{ xs: 'column', sm: 'row' }} sx={{ justifyContent: 'space-between', alignItems: { sm: 'center' }, gap: 2 }}><Box><Typography variant="h5">Canlı toplantı odası</Typography><Typography color="text.secondary">Odaya girdiğinizde katılımcıları gerçek zamanlı görebilir, odadan çıktığınızda toplantı günün listesinde kalır.</Typography></Box><Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}><Button variant={roomPresence.isInRoom ? 'outlined' : 'contained'} color={roomPresence.isInRoom ? 'error' : 'primary'} disabled={roomPresence.isConnecting || isCompleted} onClick={() => void (roomPresence.isInRoom ? roomPresence.leaveRoom() : roomPresence.enterRoom())}>{roomPresence.isConnecting ? 'Bağlanıyor…' : roomPresence.isInRoom ? 'Odadan çık' : 'Odaya gir'}</Button>{isRoomManager && !isCompleted && <Button color="error" variant="contained" disabled={completingMeeting || statusKey === '1' || statusKey === '2'} onClick={() => { if (window.confirm('Toplantıyı bitirmek istediğinizden emin misiniz? Bu işlemden sonra odaya tekrar girilemez.')) onCompleteMeeting(meeting.id) }}>{completingMeeting ? 'Bitiriliyor…' : 'Toplantıyı bitir'}</Button>}</Stack></Stack>{roomPresence.error && <Alert severity="error">{roomPresence.error}</Alert>}{roomPresence.isInRoom ? <><Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap' }}><Chip color="success" label={`${roomPresence.participants.length} kişi şu an odada`} />{roomPresence.participants.map((participant) => <Chip key={participant.userId} variant="outlined" label={`${participant.displayName}${participant.isOrganizer ? ' · Yönetici' : ''}`} />)}</Stack><Typography variant="caption" color="text.secondary">Katılımcıların giriş ve çıkışları bu alanda anlık güncellenir.</Typography></> : <Typography variant="body2" color="text.secondary">{isCompleted ? 'Toplantı tamamlandı.' : 'Henüz odaya girmediniz. Odaya girdiğinizde diğer aktif katılımcılar görünür.'}</Typography>}</Stack></CardContent></Card>

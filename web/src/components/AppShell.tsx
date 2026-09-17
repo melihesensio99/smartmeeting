@@ -1,4 +1,5 @@
 import { AppBar, Box, Button, Divider, Drawer, List, ListItemButton, ListItemText, Stack, Toolbar, Typography } from '@mui/material'
+import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { navigate, type AppRoute } from '../app/navigation'
 import { logout } from '../lib/api'
@@ -8,8 +9,19 @@ const drawerWidth = 250
 
 export function AppShell({ route, currentUser, children }: { route: AppRoute; currentUser?: CurrentUser; children: React.ReactNode }) {
   const queryClient = useQueryClient()
+  const [liveMeetingId, setLiveMeetingId] = useState(() => localStorage.getItem('smartmeeting-live-room'))
+  useEffect(() => {
+    const updateLiveRoom = () => setLiveMeetingId(localStorage.getItem('smartmeeting-live-room'))
+    window.addEventListener('storage', updateLiveRoom)
+    window.addEventListener('smartmeeting-live-room-changed', updateLiveRoom)
+    return () => {
+      window.removeEventListener('storage', updateLiveRoom)
+      window.removeEventListener('smartmeeting-live-room-changed', updateLiveRoom)
+    }
+  }, [])
   const menu = [
     { label: 'Dashboard', path: '/', route: 'dashboard' as const, icon: '▦' },
+    ...(liveMeetingId ? [{ label: 'Canlı toplantı', path: `/meetings/${liveMeetingId}`, route: 'meeting-detail' as const, icon: '●' }] : []),
     { label: currentUser?.isGlobalManager ? 'Tüm Toplantılar' : 'Toplantılar', path: '/meetings', route: 'meetings' as const, icon: '▣' },
     { label: currentUser?.isGlobalManager ? 'Tüm Aksiyonlar' : 'Aksiyonlarım', path: '/my-actions', route: 'actions' as const, icon: '☑' },
   ]
