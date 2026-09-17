@@ -6,6 +6,7 @@ using SmartMeeting.Application.Meetings.Queries.GetMeetings;
 using SmartMeeting.Application.Meetings.Commands.StartRecording;
 using SmartMeeting.Application.Meetings.Commands.CompleteRecording;
 using SmartMeeting.Application.Meetings.Commands.UploadMeetingAudio;
+using SmartMeeting.Application.Meetings.Commands.RetryMeetingProcessing;
 using SmartMeeting.Application.Meetings.Commands.CompleteActionItem;
 using SmartMeeting.Application.Meetings.Commands.UpdateMeetingNotes;
 using SmartMeeting.Application.Meetings.Commands.AddParticipant;
@@ -93,6 +94,10 @@ public sealed class MeetingsController(ISender sender) : ControllerBase
     [HttpPost("{meetingId:guid}/recording/complete")]
     public async Task<IActionResult> CompleteRecording(Guid meetingId, CompleteRecordingRequest request, CancellationToken cancellationToken)
         => ToActionResult(await sender.Send(new CompleteRecordingCommand(meetingId, request.AudioFilePath), cancellationToken));
+
+    [HttpPost("{meetingId:guid}/processing/retry")]
+    public async Task<IActionResult> RetryProcessing(Guid meetingId, CancellationToken cancellationToken)
+        => ToActionResult(await sender.Send(new RetryMeetingProcessingCommand(meetingId), cancellationToken));
 
     [HttpPost("{meetingId:guid}/audio")]
     [RequestSizeLimit(524_288_000)]

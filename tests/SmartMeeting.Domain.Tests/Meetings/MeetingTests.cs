@@ -97,6 +97,29 @@ public sealed class MeetingTests
     }
 
     [Fact]
+    public void Failed_meeting_can_retry_processing_with_existing_audio()
+    {
+        var meeting = Meeting.Create("Retry testi", "user-1", DateTimeOffset.UtcNow);
+        meeting.StartRecording();
+        meeting.CompleteRecording("audio/retry.m4a");
+        meeting.MarkFailed();
+
+        meeting.RetryProcessing();
+
+        Assert.Equal(MeetingStatus.Processing, meeting.Status);
+        Assert.Equal("audio/retry.m4a", meeting.AudioFilePath);
+        Assert.Equal(2, meeting.DomainEvents.Count);
+    }
+
+    [Fact]
+    public void Scheduled_meeting_cannot_retry_processing()
+    {
+        var meeting = Meeting.Create("Retry testi", "user-1", DateTimeOffset.UtcNow);
+
+        Assert.Throws<DomainException>(() => meeting.RetryProcessing());
+    }
+
+    [Fact]
     public void CompleteActionItem_marks_matching_action_item_completed()
     {
         var action = new ActionItem("Takip et", "user-2", null);

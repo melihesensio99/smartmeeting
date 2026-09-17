@@ -154,6 +154,15 @@ public sealed class Meeting : Entity
 
     public void MarkFailed() { Status = MeetingStatus.Failed; Touch(); }
 
+    public void RetryProcessing()
+    {
+        EnsureStatus(MeetingStatus.Failed);
+        if (string.IsNullOrWhiteSpace(AudioFilePath)) throw new DomainException("Yeniden işlenecek ses dosyası bulunamadı.");
+        Status = MeetingStatus.Processing;
+        AddDomainEvent(new MeetingProcessingRequested(Id, DateTimeOffset.UtcNow));
+        Touch();
+    }
+
     private void EnsureStatus(MeetingStatus expected)
     {
         if (Status != expected) throw new DomainException($"Toplantı durumu {expected} olmalıdır.");
