@@ -76,7 +76,7 @@ app.UseCors();
 if (authenticationOptions.Enabled)
     app.UseAuthentication();
 app.UseAuthorization();
-app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "smartmeeting-api" }));
+app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "smartmeeting-api" })).AllowAnonymous();
 app.MapControllers();
 app.MapHub<MeetingStatusHub>("/hubs/meeting-status");
 

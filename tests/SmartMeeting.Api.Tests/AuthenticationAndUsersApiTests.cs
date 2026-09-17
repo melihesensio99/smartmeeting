@@ -18,6 +18,16 @@ namespace SmartMeeting.Api.Tests;
 public sealed class AuthenticationAndUsersApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
 {
     [Fact]
+    public async Task Health_endpoint_is_public_for_orchestrators()
+    {
+        using var client = factory.CreateClient();
+
+        var response = await client.GetAsync("/health");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Register_login_and_search_users_use_http_pipeline()
     {
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = true });
