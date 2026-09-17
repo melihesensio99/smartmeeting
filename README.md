@@ -40,31 +40,54 @@ Scheduled → Recording → Processing → Ready
 
 ## 🧰 Ürün Modülleri
 
-### Dashboard
+### 📊 Dashboard
 
-Günün programını, toplam toplantıları, hazır AI raporlarını ve açık aksiyonları tek bakışta sunar. Toplantı detayına geçiş ve yeni kayıt başlatma akışı doğrudan dashboard’dan erişilebilir.
+Günün toplantılarını ve ekip önceliklerini tek bakışta gör:
 
-### Canlı toplantı odası
+- 📅 Günlük toplantı akışı ve saat bilgileri
+- 📈 Toplam toplantı, hazır rapor ve açık aksiyon istatistikleri
+- 🔎 Toplantı detayına hızlı geçiş
+- 🎙️ Dashboard’dan yeni kayıt başlatma
 
-Kayıt başlamadan önce toplantı seçilir ve yetki kontrol edilir. Kayıt sırasında süre ve ses seviyesi izlenir; kişisel notlar toplantı bağlamına eklenebilir.
+### 🎙️ Canlı toplantı odası
 
-### Transkript ve rapor
+Toplantı sırasında ihtiyaç duyulan temel araçlar aynı ekranda:
 
-Voxtral ses kaydını konuşmacı segmentleriyle birlikte işler. Mistral structured output kullanarak aşağıdaki çıktıları üretir:
+- ✅ Kayıt öncesi toplantı ve yetki kontrolü
+- ⏱️ Gerçek zamanlı kayıt süresi sayacı
+- 🌊 Ses frekanslarını gösteren canlı dalga formu
+- 📝 Kişisel toplantı notları
+- 📤 Kayıt bitince otomatik işleme kuyruğuna gönderim
 
-- Yönetici özeti
-- Öne çıkan görüşmeler
-- Alınan kararlar
-- Açık konular ve riskler
-- Sorumlu, öncelik ve termin içeren aksiyonlar
+### 📝 Transkript ve AI raporu
 
-### Aksiyonlarım
+Voxtral ses kaydını konuşmacı segmentleriyle işler; Mistral ise yapılandırılmış bir toplantı raporu üretir:
 
-AI tarafından çıkarılan veya yöneticinin elle eklediği görevler aynı panelde listelenir. Kullanıcılar kendilerine atanan işleri toplantı sonrasında da tamamlayabilir.
+- 🤖 Yönetici özeti
+- 💬 Öne çıkan görüşmeler
+- ✅ Alınan kararlar
+- ⚠️ Açık konular ve riskler
+- 🎯 Sorumlu, öncelik ve termin içeren aksiyonlar
 
-### Ekip erişimi
+### ✅ Aksiyonlarım
 
-Kayıtlı kullanıcılar toplantıya davet edilir. Toplantı oluşturucusu katılımcılara toplantı içi yönetim izni verebilir. Global Manager tüm toplantıları ve aksiyonları görebilir.
+Toplantıdan çıkan işleri görünür ve takip edilebilir hale getirir:
+
+- 🧠 AI tarafından çıkarılan aksiyonlar
+- ✍️ Yöneticinin elle eklediği görevler
+- 👤 Sorumlu kullanıcı bilgisi
+- 🚦 Düşük, orta ve yüksek öncelik rozetleri
+- 📆 Termin tarihi
+- ☑️ Toplantı sonrasında da tamamlanabilen görevler
+
+### 👥 Ekip erişimi
+
+Toplantıdaki rol ve sorumluluklar açıkça yönetilir:
+
+- 🔐 Yalnızca kayıtlı kullanıcıları davet etme
+- 🛡️ Katılımcıya toplantı içi yönetim izni verme
+- 🚪 Katılımcının kendi toplantı katılımını sonlandırabilmesi
+- 👑 Global Manager için tüm toplantı ve aksiyon görünümü
 
 ---
 
