@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { meetingSchema, userResponseSchema, type ActionPriority, type AddParticipantInput, type CreateMeetingInput, type Meeting, type UserResponse } from '../types/meeting'
-import { authResponseSchema, type AuthResponse } from '../types/auth'
+import { authResponseSchema, currentUserSchema, type AuthResponse, type CurrentUser } from '../types/auth'
 const client = axios.create({ baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:5080/api', withCredentials: true })
 export function getApiErrorMessage(error: unknown, fallback: string): string {
   if (axios.isAxiosError(error)) {
@@ -94,3 +94,4 @@ export async function register(email: string, password: string, displayName: str
 }
 
 export async function logout(): Promise<void> { await client.post('/auth/logout') }
+export async function getCurrentUser(): Promise<CurrentUser> { const response = await client.get<unknown>('/auth/me'); return currentUserSchema.parse(response.data) }
