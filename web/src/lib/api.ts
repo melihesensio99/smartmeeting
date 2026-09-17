@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { meetingSchema, userResponseSchema, type AddParticipantInput, type CreateMeetingInput, type Meeting, type UserResponse } from '../types/meeting'
+import { meetingSchema, userResponseSchema, type ActionPriority, type AddParticipantInput, type CreateMeetingInput, type Meeting, type UserResponse } from '../types/meeting'
 import { authResponseSchema, type AuthResponse } from '../types/auth'
 const client = axios.create({ baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:5080/api', withCredentials: true })
 export function getApiErrorMessage(error: unknown, fallback: string): string {
@@ -22,6 +22,11 @@ export async function uploadMeetingAudio(meetingId: string, audio: Blob, fileNam
 
 export async function completeActionItem(meetingId: string, actionItemId: string): Promise<Meeting> {
   const response = await client.post<unknown>(`/meetings/${meetingId}/action-items/${actionItemId}/complete`)
+  return meetingSchema.parse(response.data)
+}
+
+export async function updateActionItem(meetingId: string, actionItemId: string, input: { assignee: string | null; dueAt: string | null; priority: ActionPriority }): Promise<Meeting> {
+  const response = await client.put<unknown>(`/meetings/${meetingId}/action-items/${actionItemId}`, input)
   return meetingSchema.parse(response.data)
 }
 
