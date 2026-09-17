@@ -47,6 +47,7 @@ public sealed class MeetingDbContext(DbContextOptions<MeetingDbContext> options)
         {
             entity.ToTable("meeting_participants");
             entity.HasKey(x => x.Id);
+            entity.Property(x => x.Id).ValueGeneratedNever();
             entity.HasIndex(x => new { x.MeetingId, x.UserId }).IsUnique();
             entity.Property(x => x.UserId).HasMaxLength(100).IsRequired();
             entity.Property(x => x.Email).HasMaxLength(320).IsRequired();

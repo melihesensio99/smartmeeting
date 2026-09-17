@@ -39,6 +39,8 @@ public static class IdentitySchemaRepair
         }, cancellationToken);
         await EnsureColumnsAsync(db, "meeting_participants", new Dictionary<string, string>
         {
+            ["CreatedAt"] = "TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP",
+            ["UpdatedAt"] = "TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP",
             ["SpeakerLabel"] = "TEXT NULL"
         }, cancellationToken);
     }
