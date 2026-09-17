@@ -12,7 +12,7 @@ public sealed class CompleteActionItemCommandHandler(IApplicationDbContext db, I
     {
         var meeting = await db.GetMeetingAsync(request.MeetingId, cancellationToken);
         if (meeting is null) return Result<MeetingResponse>.Failure("meeting_not_found", "Toplantı bulunamadı.");
-        if (!meeting.CanManage(currentUser.UserId)) return Result<MeetingResponse>.Failure("meeting_forbidden", "Bu toplantı içi işlemi yapma yetkiniz yok.");
+        if (!meeting.CanCompleteAction(request.ActionItemId, currentUser.UserId)) return Result<MeetingResponse>.Failure("meeting_forbidden", "Bu aksiyonu tamamlama yetkiniz yok.");
         try
         {
             meeting.CompleteActionItem(request.ActionItemId);

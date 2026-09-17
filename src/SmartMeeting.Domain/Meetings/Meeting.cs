@@ -143,6 +143,13 @@ public sealed class Meeting : Entity
         Touch();
     }
 
+    public bool CanCompleteAction(Guid actionItemId, string? userId)
+    {
+        if (string.IsNullOrWhiteSpace(userId)) return false;
+        if (CanManage(userId)) return true;
+        return CanAccess(userId) && Summary?.ActionItems.Any(action => action.Id == actionItemId && action.AssigneeUserId == userId) == true;
+    }
+
     public void UpdateActionItem(Guid actionItemId, string? assigneeUserId, string? assignee, DateTimeOffset? dueAt, ActionPriority priority)
     {
         if (Summary is null) throw new DomainException("Toplantının özeti henüz hazır değil.");

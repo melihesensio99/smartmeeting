@@ -267,10 +267,17 @@ public sealed class AuthenticationAndUsersApiTests(ApiFactory factory) : IClassF
 
         using var delegatedAction = new HttpRequestMessage(HttpMethod.Post, $"/api/meetings/{meetingId}/action-items")
         {
-            Content = JsonContent.Create(new { description = "Yetkili katılımcı aksiyonu", priority = "Medium" })
+            Content = JsonContent.Create(new { description = "Yetkili katılımcı aksiyonu", assigneeUserId = participantId, priority = "Medium" })
         };
         delegatedAction.Headers.Add("X-Test-User", participantId);
-        Assert.Equal(HttpStatusCode.OK, (await client.SendAsync(delegatedAction)).StatusCode);
+        var delegatedActionResponse = await client.SendAsync(delegatedAction);
+        Assert.Equal(HttpStatusCode.OK, delegatedActionResponse.StatusCode);
+        using var delegatedActionDocument = JsonDocument.Parse(await delegatedActionResponse.Content.ReadAsStringAsync());
+        var actionItemId = delegatedActionDocument.RootElement.GetProperty("summary").GetProperty("actionItems").EnumerateArray().Single().GetProperty("id").GetGuid();
+
+        using var completeRequest = new HttpRequestMessage(HttpMethod.Post, $"/api/meetings/{meetingId}/action-items/{actionItemId}/complete");
+        completeRequest.Headers.Add("X-Test-User", participantId);
+        Assert.Equal(HttpStatusCode.OK, (await client.SendAsync(completeRequest)).StatusCode);
 
         using var revokeRequest = new HttpRequestMessage(HttpMethod.Put, $"/api/meetings/{meetingId}/participants/{participantRecordId}/management-permission")
         {

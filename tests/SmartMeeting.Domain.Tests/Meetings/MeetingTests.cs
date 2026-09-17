@@ -127,6 +127,7 @@ public sealed class MeetingTests
         meeting.StartRecording();
         meeting.CompleteRecording("audio.webm");
         meeting.SetTranscript("transcript");
+        meeting.AddParticipant("user-2", "Ayşe", "ayse@example.com");
         meeting.SetSummary(MeetingSummary.Create("Özet", [], [action]));
 
         meeting.CompleteActionItem(action.Id);
@@ -149,6 +150,25 @@ public sealed class MeetingTests
         Assert.Equal("user-2", action.AssigneeUserId);
         Assert.Equal(ActionPriority.High, action.Priority);
         Assert.Single(meeting.Summary!.ActionItems);
+    }
+
+    [Fact]
+    public void Assigned_user_can_complete_own_action_but_unassigned_user_cannot()
+    {
+        var action = new ActionItem("Raporu hazırla", "Ayşe", null, assigneeUserId: "user-2");
+        var meeting = Meeting.Create("Planlama", "user-1", DateTimeOffset.UtcNow);
+        meeting.StartRecording();
+        meeting.CompleteRecording("audio.webm");
+        meeting.SetTranscript("transcript");
+        meeting.AddParticipant("user-2", "Ayşe", "ayse@example.com");
+        meeting.SetSummary(MeetingSummary.Create("Özet", [], [action]));
+
+        Assert.True(meeting.CanCompleteAction(action.Id, "user-2"));
+        Assert.False(meeting.CanCompleteAction(action.Id, "user-3"));
+
+        meeting.CompleteActionItem(action.Id);
+
+        Assert.True(action.Completed);
     }
 
     [Fact]
