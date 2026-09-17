@@ -45,6 +45,16 @@ export async function addParticipant(meetingId: string, input: AddParticipantInp
   return meetingSchema.parse(response.data)
 }
 
+export async function updateParticipantPermission(meetingId: string, participantId: string, canManageMeeting: boolean): Promise<Meeting> {
+  const response = await client.put<unknown>(`/meetings/${meetingId}/participants/${participantId}/management-permission`, { canManageMeeting })
+  return meetingSchema.parse(response.data)
+}
+
+export async function removeParticipant(meetingId: string, participantId: string): Promise<Meeting> {
+  const response = await client.delete<unknown>(`/meetings/${meetingId}/participants/${participantId}`)
+  return meetingSchema.parse(response.data)
+}
+
 export async function searchUsers(search: string): Promise<UserResponse[]> {
   const response = await client.get<unknown>('/users', { params: { search } })
   if (!Array.isArray(response.data)) throw new Error('API kullanıcı listesi beklenen formatta değil.')
