@@ -25,7 +25,7 @@ public sealed class CreateMeetingCommandHandler(IApplicationDbContext db, ICurre
             return Result<MeetingResponse>.Failure("authentication_required", "Toplantı oluşturmak için giriş yapmalısınız.");
         if (!currentUser.CanCreateMeetings)
             return Result<MeetingResponse>.Failure("meeting_create_forbidden", "Toplantı oluşturma yetkiniz yok.");
-        var meeting = Meeting.Create(request.Title, currentUser.UserId, request.StartsAt, request.EndsAt);
+        var meeting = Meeting.Create(request.Title, currentUser.UserId, request.StartsAt.ToUniversalTime(), request.EndsAt?.ToUniversalTime());
         db.AddMeeting(meeting);
         await db.SaveChangesAsync(cancellationToken);
         return Result<MeetingResponse>.Success(MeetingResponse.From(meeting));

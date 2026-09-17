@@ -28,7 +28,7 @@ public sealed class UpdateActionItemCommandHandler(IApplicationDbContext db, IId
         {
             var assignee = request.AssigneeUserId is null ? null : await identityService.FindByIdAsync(request.AssigneeUserId, cancellationToken);
             if (request.AssigneeUserId is not null && assignee is null) return Result<MeetingResponse>.Failure("assignee_not_found", "Aksiyon sorumlusu sistemde kayıtlı değil.");
-            meeting.UpdateActionItem(request.ActionItemId, assignee?.UserId, assignee?.DisplayName, request.DueAt, request.Priority);
+            meeting.UpdateActionItem(request.ActionItemId, assignee?.UserId, assignee?.DisplayName, request.DueAt?.ToUniversalTime(), request.Priority);
             await db.SaveChangesAsync(cancellationToken);
             return Result<MeetingResponse>.Success(MeetingResponse.From(meeting));
         }
