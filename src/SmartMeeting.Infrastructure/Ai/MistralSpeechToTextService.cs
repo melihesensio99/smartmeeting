@@ -22,7 +22,11 @@ public sealed class MistralSpeechToTextService(HttpClient httpClient, IOptions<M
         request.Content = form;
         using var response = await httpClient.SendAsync(request, cancellationToken);
         var body = await response.Content.ReadAsStringAsync(cancellationToken);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var safeBody = body.Length > 1000 ? body[..1000] : body;
+            throw new InvalidOperationException($"Mistral STT çağrısı başarısız oldu ({(int)response.StatusCode}): {safeBody}");
+        }
         using var document = JsonDocument.Parse(body);
         var root = document.RootElement;
         var text = root.GetProperty("text").GetString() ?? throw new InvalidOperationException("Mistral boş transkript döndürdü.");

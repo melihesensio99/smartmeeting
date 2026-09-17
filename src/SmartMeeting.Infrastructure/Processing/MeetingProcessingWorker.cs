@@ -24,6 +24,14 @@ public sealed class MeetingProcessingWorker(
             catch (Exception exception)
             {
                 logger.LogError(exception, "Toplantı işlenemedi: {MeetingId}", message.MeetingId);
+                try
+                {
+                    await MarkFailedAsync(message.MeetingId, stoppingToken);
+                }
+                catch (Exception statusException)
+                {
+                    logger.LogError(statusException, "Toplantı başarısız duruma kaydedilemedi: {MeetingId}", message.MeetingId);
+                }
                 await queue.CompleteAsync(message, false, stoppingToken);
                 await PublishAsync(message.MeetingId, "Failed", stoppingToken);
             }
@@ -47,6 +55,16 @@ public sealed class MeetingProcessingWorker(
         meeting.SetSummary(summary);
         await db.SaveChangesAsync(cancellationToken);
         await PublishAsync(meetingId, "Ready", cancellationToken);
+    }
+
+    private async Task MarkFailedAsync(Guid meetingId, CancellationToken cancellationToken)
+    {
+        using var scope = scopeFactory.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
+        var meeting = await db.GetMeetingAsync(meetingId, cancellationToken);
+        if (meeting is null) return;
+        meeting.MarkFailed();
+        await db.SaveChangesAsync(cancellationToken);
     }
 
     private async Task PublishAsync(Guid meetingId, string status, CancellationToken cancellationToken)

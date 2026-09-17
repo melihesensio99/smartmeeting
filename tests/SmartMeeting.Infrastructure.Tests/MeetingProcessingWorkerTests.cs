@@ -51,6 +51,7 @@ public sealed class MeetingProcessingWorkerTests
         await worker.StopAsync(CancellationToken.None);
 
         Assert.Contains("Failed", publisher.Statuses);
+        Assert.Equal(MeetingStatus.Failed, meeting.Status);
         Assert.Contains(queue.Completed, message => message.Receipt == "receipt-2");
     }
 
