@@ -25,7 +25,7 @@ const meeting: Meeting = {
 
 describe('ActionsPage', () => {
   it('aksiyonları öncelik etiketi, termin ve sorumlu bilgisiyle gösterir', () => {
-    render(<ActionsPage meetings={[meeting]} onComplete={vi.fn()} />)
+    render(<ActionsPage meetings={[meeting]} currentUserId="user-1" isGlobalManager onComplete={vi.fn()} />)
 
     expect(screen.getByText('Açık aksiyonu tamamla')).toBeInTheDocument()
     expect(screen.getByText('Tamamlanmış aksiyon')).toBeInTheDocument()
@@ -36,7 +36,7 @@ describe('ActionsPage', () => {
 
   it('açık ve tamamlanan filtrelerini uygular, checkbox ile aksiyonu tamamlar', () => {
     const onComplete = vi.fn()
-    render(<ActionsPage meetings={[meeting]} onComplete={onComplete} />)
+    render(<ActionsPage meetings={[meeting]} currentUserId="user-1" isGlobalManager onComplete={onComplete} />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Açık' }))
     expect(screen.getByText('Açık aksiyonu tamamla')).toBeInTheDocument()

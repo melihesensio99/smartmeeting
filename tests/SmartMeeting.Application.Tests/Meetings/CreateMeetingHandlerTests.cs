@@ -38,18 +38,22 @@ public sealed class CreateMeetingCommandHandlerTests
     }
 
     [Fact]
-    public async Task GetMeetings_returns_only_requested_organizer()
+    public async Task GetMeetings_returns_meetings_for_organizer_or_participant()
     {
         var context = new FakeApplicationDbContext();
         context.Seed(Meeting.Create("Birinci", "user-1", DateTimeOffset.UtcNow));
-        context.Seed(Meeting.Create("İkinci", "user-2", DateTimeOffset.UtcNow.AddHours(1)));
+        var invitedMeeting = Meeting.Create("İkinci", "user-2", DateTimeOffset.UtcNow.AddHours(1));
+        invitedMeeting.AddParticipant("user-1", "User One", "user1@example.com");
+        context.Seed(invitedMeeting);
+        context.Seed(Meeting.Create("Üçüncü", "user-3", DateTimeOffset.UtcNow.AddHours(2)));
         var handler = new Application.Meetings.Queries.GetMeetings.GetMeetingsQueryHandler(context, new FakeCurrentUserService(), new FakeIdentityService(null));
 
         var result = await handler.Handle(new Application.Meetings.Queries.GetMeetings.GetMeetingsQuery("user-1"), CancellationToken.None);
 
         Assert.True(result.IsSuccess);
-        Assert.Single(result.Value!);
-        Assert.Equal("Birinci", result.Value!.Single().Title);
+        Assert.Equal(2, result.Value!.Count);
+        Assert.Contains(result.Value, meeting => meeting.Title == "Birinci");
+        Assert.Contains(result.Value, meeting => meeting.Title == "İkinci");
     }
 
     [Fact]
@@ -126,7 +130,7 @@ public sealed class CreateMeetingCommandHandlerTests
             => Task.FromResult(_meetings.SingleOrDefault(x => x.Id == meetingId));
         public Task<IReadOnlyCollection<Meeting>> GetMeetingsAsync(string? organizerId, CancellationToken cancellationToken)
         {
-            IReadOnlyCollection<Meeting> result = _meetings.Where(x => string.IsNullOrWhiteSpace(organizerId) || x.OrganizerId == organizerId).ToList();
+            IReadOnlyCollection<Meeting> result = _meetings.Where(x => string.IsNullOrWhiteSpace(organizerId) || x.OrganizerId == organizerId || x.Participants.Any(participant => participant.UserId == organizerId)).ToList();
             return Task.FromResult(result);
         }
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken) => Task.FromResult(1);

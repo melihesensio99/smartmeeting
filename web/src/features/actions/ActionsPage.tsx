@@ -4,9 +4,9 @@ import type { Meeting } from '../../types/meeting'
 
 const actionGrid = { gridTemplateColumns: '56px minmax(260px, 3fr) minmax(180px, 2fr) minmax(110px, 1fr) 96px' }
 
-export function ActionsPage({ meetings, onComplete }: { meetings: Meeting[]; onComplete: (meetingId: string, actionItemId: string) => void }) {
+export function ActionsPage({ meetings, currentUserId, isGlobalManager, onComplete }: { meetings: Meeting[]; currentUserId: string | null; isGlobalManager: boolean; onComplete: (meetingId: string, actionItemId: string) => void }) {
   const [filter, setFilter] = useState<'all' | 'open' | 'done'>('all')
-  const actions = useMemo(() => meetings.flatMap((meeting) => (meeting.summary?.actionItems ?? []).map((action) => ({ ...action, meeting }))).filter((item) => filter === 'all' || (filter === 'done' ? item.completed : !item.completed)), [meetings, filter])
+  const actions = useMemo(() => meetings.flatMap((meeting) => (meeting.summary?.actionItems ?? []).map((action) => ({ ...action, meeting }))).filter((item) => isGlobalManager || item.assigneeUserId === currentUserId).filter((item) => filter === 'all' || (filter === 'done' ? item.completed : !item.completed)), [meetings, currentUserId, filter, isGlobalManager])
 
   return <Stack spacing={3}>
     <Stack direction={{ xs: 'column', md: 'row' }} sx={{ justifyContent: 'space-between', gap: 2 }}><BoxTitle /><Stack direction="row" spacing={1}><Chip label="Tümü" onClick={() => setFilter('all')} color={filter === 'all' ? 'primary' : 'default'} /><Chip label="Açık" onClick={() => setFilter('open')} color={filter === 'open' ? 'warning' : 'default'} /><Chip label="Tamamlanan" onClick={() => setFilter('done')} color={filter === 'done' ? 'success' : 'default'} /></Stack></Stack>
