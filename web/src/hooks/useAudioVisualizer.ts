@@ -1,15 +1,13 @@
 import { useEffect, useState } from 'react'
 
 const BAR_COUNT = 32
+const IDLE_LEVELS = Array.from({ length: BAR_COUNT }, () => 0.08)
 
 export function useAudioVisualizer(stream: MediaStream | null): number[] {
-  const [levels, setLevels] = useState<number[]>(() => Array.from({ length: BAR_COUNT }, () => 0.08))
+  const [levels, setLevels] = useState<number[]>(IDLE_LEVELS)
 
   useEffect(() => {
-    if (!stream) {
-      setLevels(Array.from({ length: BAR_COUNT }, () => 0.08))
-      return
-    }
+    if (!stream) return
 
     const audioContext = new AudioContext()
     const analyser = audioContext.createAnalyser()
@@ -36,5 +34,5 @@ export function useAudioVisualizer(stream: MediaStream | null): number[] {
     return () => { window.cancelAnimationFrame(animationFrame); source.disconnect(); analyser.disconnect(); void audioContext.close() }
   }, [stream])
 
-  return levels
+  return stream ? levels : IDLE_LEVELS
 }
