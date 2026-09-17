@@ -282,32 +282,20 @@ npm run build
 
 Testler domain kurallarını, CQRS handler’larını, validation akışını, kimlik ve yetki kontrollerini, RabbitMQ worker’ını, Mistral sözleşmelerini, SMTP akışını, API entegrasyonlarını ve React bileşenlerini kapsar.
 
-## 📡 API ve Gerçek Zamanlı Kanal
+## 📡 Swagger API Dokümantasyonu
 
-```text
-POST /api/auth/register
-POST /api/auth/login
-POST /api/auth/logout
-GET  /api/auth/me
+Development ortamında API, tüm controller endpoint’lerini ve request/response sözleşmelerini Swagger UI üzerinden sunar.
 
-GET  /api/meetings
-POST /api/meetings
-GET  /api/meetings/{meetingId}
+- Swagger UI: `http://localhost:5080/swagger`
+- OpenAPI JSON: `http://localhost:5080/swagger/v1/swagger.json`
+- Sağlık kontrolü: `http://localhost:5080/health`
+- SignalR hub: `http://localhost:5080/hubs/meeting-status`
 
-POST /api/meetings/{meetingId}/recording/start
-POST /api/meetings/{meetingId}/audio
-POST /api/meetings/{meetingId}/processing/retry
+Swagger ekran görüntüsü:
 
-POST /api/meetings/{meetingId}/participants
-PUT  /api/meetings/{meetingId}/participants/{participantId}/management-permission
-DELETE /api/meetings/{meetingId}/participants/me
+![Meeting Swagger API dokümantasyonu](docs/screenshots/swagger.svg)
 
-POST /api/meetings/{meetingId}/action-items
-PUT  /api/meetings/{meetingId}/action-items/{actionItemId}
-POST /api/meetings/{meetingId}/action-items/{actionItemId}/complete
-```
-
-SignalR hub: `/hubs/meeting-status`
+Swagger yalnızca Development ortamında etkinleştirilir; production ortamında API dokümantasyonu dışarıya açılmaz.
 
 ## 🔐 Güvenlik ve Veri
 

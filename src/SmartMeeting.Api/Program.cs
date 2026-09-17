@@ -32,6 +32,11 @@ if (isProductionEnvironment && authenticationOptions.Enabled)
         throw new InvalidOperationException("Production ortamında Authentication:Issuer ve Authentication:Audience zorunludur.");
 }
 builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
+}
 builder.Services.AddHttpContextAccessor();
 builder.Services.Configure<ForwardedHeadersOptions>(options => options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto);
 var dataProtectionPath = builder.Configuration["DataProtection:KeysPath"] ?? Path.Combine(builder.Environment.ContentRootPath, "data", "keys");
@@ -100,6 +105,11 @@ var app = builder.Build();
 app.UseForwardedHeaders();
 if (isProductionEnvironment && !isTestEnvironment)
     app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(options => options.DocumentTitle = "Meeting API Documentation");
+}
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseCors();
 if (authenticationOptions.Enabled)
