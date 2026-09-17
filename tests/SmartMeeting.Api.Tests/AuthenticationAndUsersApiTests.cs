@@ -294,6 +294,56 @@ public sealed class AuthenticationAndUsersApiTests(ApiFactory factory) : IClassF
         Assert.Equal(HttpStatusCode.BadRequest, (await client.SendAsync(revokedAction)).StatusCode);
     }
 
+    [Fact]
+    public async Task Global_manager_can_see_all_meetings_and_manage_another_users_meeting()
+    {
+        using var client = factory.CreateClient();
+        var firstTitle = $"Global yönetici toplantısı 1 {Guid.NewGuid():N}";
+        var secondTitle = $"Global yönetici toplantısı 2 {Guid.NewGuid():N}";
+        var firstMeetingId = await CreateMeetingAsync(client, "meeting-owner-1", firstTitle);
+        await CreateMeetingAsync(client, "meeting-owner-2", secondTitle);
+
+        await using (var scope = factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<MeetingDbContext>();
+            var meeting = await db.MeetingSet.SingleAsync(x => x.Id == firstMeetingId);
+            meeting.SetSummary(MeetingSummary.Create("Global yönetici özeti", [], []));
+            await db.SaveChangesAsync();
+        }
+
+        using var listRequest = new HttpRequestMessage(HttpMethod.Get, "/api/meetings");
+        listRequest.Headers.Add("X-Test-User", "global-manager");
+        listRequest.Headers.Add("X-Test-Global-Manager", "true");
+        var listResponse = await client.SendAsync(listRequest);
+        Assert.Equal(HttpStatusCode.OK, listResponse.StatusCode);
+        using var listDocument = JsonDocument.Parse(await listResponse.Content.ReadAsStringAsync());
+        var titles = listDocument.RootElement.EnumerateArray().Select(item => item.GetProperty("title").GetString()).ToArray();
+        Assert.Contains(firstTitle, titles);
+        Assert.Contains(secondTitle, titles);
+
+        using var actionRequest = new HttpRequestMessage(HttpMethod.Post, $"/api/meetings/{firstMeetingId}/action-items")
+        {
+            Content = JsonContent.Create(new { description = "Global yönetici aksiyonu", priority = "High" })
+        };
+        actionRequest.Headers.Add("X-Test-User", "global-manager");
+        actionRequest.Headers.Add("X-Test-Global-Manager", "true");
+        var actionResponse = await client.SendAsync(actionRequest);
+        Assert.Equal(HttpStatusCode.OK, actionResponse.StatusCode);
+    }
+
+    private static async Task<Guid> CreateMeetingAsync(HttpClient client, string userId, string title)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/meetings")
+        {
+            Content = JsonContent.Create(new { title, startsAt = DateTimeOffset.UtcNow.AddHours(1) })
+        };
+        request.Headers.Add("X-Test-User", userId);
+        var response = await client.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+        using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        return document.RootElement.GetProperty("id").GetGuid();
+    }
+
     private static async Task<Guid> CreateAndStartMeetingAsync(HttpClient client)
     {
         using var createRequest = new HttpRequestMessage(HttpMethod.Post, "/api/meetings")
@@ -395,7 +445,13 @@ internal sealed class TestAuthenticationHandler(IOptionsMonitor<AuthenticationSc
         if (!Request.Headers.TryGetValue("X-Test-User", out var userId) || string.IsNullOrWhiteSpace(userId))
             return Task.FromResult(AuthenticateResult.NoResult());
 
-        var claims = new[] { new Claim(ClaimTypes.NameIdentifier, userId.ToString()), new Claim(ClaimTypes.Name, "Integration User") };
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, userId.ToString()),
+            new(ClaimTypes.Name, "Integration User")
+        };
+        if (Request.Headers.TryGetValue("X-Test-Global-Manager", out var globalManager) && globalManager == "true")
+            claims.Add(new Claim(ClaimTypes.Role, "GlobalManager"));
         var identity = new ClaimsIdentity(claims, SchemeName);
         return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(identity), SchemeName)));
     }
