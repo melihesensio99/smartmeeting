@@ -10,6 +10,7 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using SmartMeeting.Infrastructure.Security;
 using SmartMeeting.Api.Security.Abstractions;
+using SmartMeeting.Persistence.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 var authenticationOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new();
@@ -86,6 +87,7 @@ using (var scope = app.Services.CreateScope())
         await db.Database.MigrateAsync();
     else
         await db.Database.EnsureCreatedAsync();
+    await IdentitySchemaRepair.ApplyAsync(db);
 }
 
 await app.RunAsync();
