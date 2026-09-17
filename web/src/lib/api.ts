@@ -40,6 +40,16 @@ export async function mapSpeaker(meetingId: string, participantId: string, speak
   return meetingSchema.parse(response.data)
 }
 
+export async function confirmSpeakerMapping(meetingId: string, participantId: string): Promise<Meeting> {
+  const response = await client.post<unknown>(`/meetings/${meetingId}/participants/${participantId}/speaker/confirm`)
+  return meetingSchema.parse(response.data)
+}
+
+export async function rejectSpeakerMapping(meetingId: string, participantId: string): Promise<Meeting> {
+  const response = await client.delete<unknown>(`/meetings/${meetingId}/participants/${participantId}/speaker`)
+  return meetingSchema.parse(response.data)
+}
+
 export async function addParticipant(meetingId: string, input: AddParticipantInput): Promise<Meeting> {
   const response = await client.post<unknown>(`/meetings/${meetingId}/participants`, input)
   return meetingSchema.parse(response.data)
