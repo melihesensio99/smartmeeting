@@ -1,4 +1,201 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { addParticipant, completeActionItem, completeMeeting, confirmSpeakerMapping, createActionItem, createMeeting, getMeetings, leaveMeeting, mapSpeaker, rejectSpeakerMapping, removeParticipant, retryMeetingProcessing, sendSummaryEmail, startMeetingRecording, updateActionItem, updateMeetingNotes, updateParticipantPermission, uploadMeetingAudio } from '../../lib/api'
-import type { ActionPriority, AddParticipantInput, CreateMeetingInput } from '../../types/meeting'
-export function useMeetings(enabled = true) { const queryClient = useQueryClient(); const userId = localStorage.getItem('smartmeeting-user-id') ?? 'anonymous'; const meetings = useQuery({ queryKey: ['meetings', userId], queryFn: getMeetings, enabled }); const invalidate = () => queryClient.invalidateQueries({ queryKey: ['meetings'] }); const create = useMutation({ mutationFn: (input: CreateMeetingInput) => createMeeting(input), onSuccess: invalidate }); const startRecording = useMutation({ mutationFn: (meetingId: string) => startMeetingRecording(meetingId), onSuccess: invalidate }); const complete = useMutation({ mutationFn: (meetingId: string) => completeMeeting(meetingId), onSuccess: invalidate }); const upload = useMutation({ mutationFn: ({ meetingId, audio }: { meetingId: string; audio: Blob }) => uploadMeetingAudio(meetingId, audio), onSuccess: invalidate }); const retryProcessing = useMutation({ mutationFn: (meetingId: string) => retryMeetingProcessing(meetingId), onSuccess: invalidate }); const completeAction = useMutation({ mutationFn: ({ meetingId, actionItemId }: { meetingId: string; actionItemId: string }) => completeActionItem(meetingId, actionItemId), onSuccess: invalidate }); const updateAction = useMutation({ mutationFn: ({ meetingId, actionItemId, assigneeUserIds, dueAt, priority }: { meetingId: string; actionItemId: string; assigneeUserIds: string[]; dueAt: string | null; priority: ActionPriority }) => updateActionItem(meetingId, actionItemId, { assigneeUserIds, dueAt, priority }), onSuccess: invalidate }); const createAction = useMutation({ mutationFn: ({ meetingId, input }: { meetingId: string; input: { description: string; assigneeUserIds: string[]; dueAt: string | null; priority: ActionPriority } }) => createActionItem(meetingId, input), onSuccess: invalidate }); const updateNotes = useMutation({ mutationFn: ({ meetingId, notes }: { meetingId: string; notes: string }) => updateMeetingNotes(meetingId, notes), onSuccess: invalidate }); const mapSpeakerMutation = useMutation({ mutationFn: ({ meetingId, participantId, speakerLabel }: { meetingId: string; participantId: string; speakerLabel: string }) => mapSpeaker(meetingId, participantId, speakerLabel), onSuccess: invalidate }); const confirmSpeakerMutation = useMutation({ mutationFn: ({ meetingId, participantId }: { meetingId: string; participantId: string }) => confirmSpeakerMapping(meetingId, participantId), onSuccess: invalidate }); const rejectSpeakerMutation = useMutation({ mutationFn: ({ meetingId, participantId }: { meetingId: string; participantId: string }) => rejectSpeakerMapping(meetingId, participantId), onSuccess: invalidate }); const addParticipantMutation = useMutation({ mutationFn: ({ meetingId, input }: { meetingId: string; input: AddParticipantInput }) => addParticipant(meetingId, input), onSuccess: invalidate }); const updateParticipantPermissionMutation = useMutation({ mutationFn: ({ meetingId, participantId, canManageMeeting }: { meetingId: string; participantId: string; canManageMeeting: boolean }) => updateParticipantPermission(meetingId, participantId, canManageMeeting), onSuccess: invalidate }); const removeParticipantMutation = useMutation({ mutationFn: ({ meetingId, participantId }: { meetingId: string; participantId: string }) => removeParticipant(meetingId, participantId), onSuccess: invalidate }); const leaveMeetingMutation = useMutation({ mutationFn: (meetingId: string) => leaveMeeting(meetingId), onSuccess: invalidate }); const sendEmail = useMutation({ mutationFn: (meetingId: string) => sendSummaryEmail(meetingId) }); return { meetings, create, startRecording, complete, upload, retryProcessing, completeAction, updateAction, createAction, updateNotes, mapSpeaker: mapSpeakerMutation, confirmSpeaker: confirmSpeakerMutation, rejectSpeaker: rejectSpeakerMutation, addParticipant: addParticipantMutation, updateParticipantPermission: updateParticipantPermissionMutation, removeParticipant: removeParticipantMutation, leaveMeeting: leaveMeetingMutation, sendEmail } }
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  addParticipant,
+  completeActionItem,
+  completeMeeting,
+  confirmSpeakerMapping,
+  createActionItem,
+  createMeeting,
+  getMeetings,
+  leaveMeeting,
+  mapSpeaker,
+  rejectSpeakerMapping,
+  removeParticipant,
+  retryMeetingProcessing,
+  sendSummaryEmail,
+  startMeetingRecording,
+  updateActionItem,
+  updateMeetingNotes,
+  updateParticipantPermission,
+  uploadMeetingAudio,
+} from "../../lib/api";
+import type {
+  ActionPriority,
+  AddParticipantInput,
+  CreateMeetingInput,
+} from "../../types/meeting";
+export function useMeetings(enabled = true) {
+  const queryClient = useQueryClient();
+  const userId = localStorage.getItem("smartmeeting-user-id") ?? "anonymous";
+  const meetings = useQuery({
+    queryKey: ["meetings", userId],
+    queryFn: getMeetings,
+    enabled,
+  });
+  const invalidate = () =>
+    queryClient.invalidateQueries({ queryKey: ["meetings"] });
+  const create = useMutation({
+    mutationFn: (input: CreateMeetingInput) => createMeeting(input),
+    onSuccess: invalidate,
+  });
+  const startRecording = useMutation({
+    mutationFn: (meetingId: string) => startMeetingRecording(meetingId),
+    onSuccess: invalidate,
+  });
+  const complete = useMutation({
+    mutationFn: (meetingId: string) => completeMeeting(meetingId),
+    onSuccess: invalidate,
+  });
+  const upload = useMutation({
+    mutationFn: ({ meetingId, audio }: { meetingId: string; audio: Blob }) =>
+      uploadMeetingAudio(meetingId, audio),
+    onSuccess: invalidate,
+  });
+  const retryProcessing = useMutation({
+    mutationFn: (meetingId: string) => retryMeetingProcessing(meetingId),
+    onSuccess: invalidate,
+  });
+  const completeAction = useMutation({
+    mutationFn: ({
+      meetingId,
+      actionItemId,
+    }: {
+      meetingId: string;
+      actionItemId: string;
+    }) => completeActionItem(meetingId, actionItemId),
+    onSuccess: invalidate,
+  });
+  const updateAction = useMutation({
+    mutationFn: ({
+      meetingId,
+      actionItemId,
+      assigneeUserIds,
+      dueAt,
+      priority,
+    }: {
+      meetingId: string;
+      actionItemId: string;
+      assigneeUserIds: string[];
+      dueAt: string | null;
+      priority: ActionPriority;
+    }) =>
+      updateActionItem(meetingId, actionItemId, {
+        assigneeUserIds,
+        dueAt,
+        priority,
+      }),
+    onSuccess: invalidate,
+  });
+  const createAction = useMutation({
+    mutationFn: ({
+      meetingId,
+      input,
+    }: {
+      meetingId: string;
+      input: {
+        description: string;
+        assigneeUserIds: string[];
+        dueAt: string | null;
+        priority: ActionPriority;
+      };
+    }) => createActionItem(meetingId, input),
+    onSuccess: invalidate,
+  });
+  const updateNotes = useMutation({
+    mutationFn: ({ meetingId, notes }: { meetingId: string; notes: string }) =>
+      updateMeetingNotes(meetingId, notes),
+    onSuccess: invalidate,
+  });
+  const mapSpeakerMutation = useMutation({
+    mutationFn: ({
+      meetingId,
+      participantId,
+      speakerLabel,
+    }: {
+      meetingId: string;
+      participantId: string;
+      speakerLabel: string;
+    }) => mapSpeaker(meetingId, participantId, speakerLabel),
+    onSuccess: invalidate,
+  });
+  const confirmSpeakerMutation = useMutation({
+    mutationFn: ({
+      meetingId,
+      participantId,
+    }: {
+      meetingId: string;
+      participantId: string;
+    }) => confirmSpeakerMapping(meetingId, participantId),
+    onSuccess: invalidate,
+  });
+  const rejectSpeakerMutation = useMutation({
+    mutationFn: ({
+      meetingId,
+      participantId,
+    }: {
+      meetingId: string;
+      participantId: string;
+    }) => rejectSpeakerMapping(meetingId, participantId),
+    onSuccess: invalidate,
+  });
+  const addParticipantMutation = useMutation({
+    mutationFn: ({
+      meetingId,
+      input,
+    }: {
+      meetingId: string;
+      input: AddParticipantInput;
+    }) => addParticipant(meetingId, input),
+    onSuccess: invalidate,
+  });
+  const updateParticipantPermissionMutation = useMutation({
+    mutationFn: ({
+      meetingId,
+      participantId,
+      canManageMeeting,
+    }: {
+      meetingId: string;
+      participantId: string;
+      canManageMeeting: boolean;
+    }) =>
+      updateParticipantPermission(meetingId, participantId, canManageMeeting),
+    onSuccess: invalidate,
+  });
+  const removeParticipantMutation = useMutation({
+    mutationFn: ({
+      meetingId,
+      participantId,
+    }: {
+      meetingId: string;
+      participantId: string;
+    }) => removeParticipant(meetingId, participantId),
+    onSuccess: invalidate,
+  });
+  const leaveMeetingMutation = useMutation({
+    mutationFn: (meetingId: string) => leaveMeeting(meetingId),
+    onSuccess: invalidate,
+  });
+  const sendEmail = useMutation({
+    mutationFn: (meetingId: string) => sendSummaryEmail(meetingId),
+  });
+  return {
+    meetings,
+    create,
+    startRecording,
+    complete,
+    upload,
+    retryProcessing,
+    completeAction,
+    updateAction,
+    createAction,
+    updateNotes,
+    mapSpeaker: mapSpeakerMutation,
+    confirmSpeaker: confirmSpeakerMutation,
+    rejectSpeaker: rejectSpeakerMutation,
+    addParticipant: addParticipantMutation,
+    updateParticipantPermission: updateParticipantPermissionMutation,
+    removeParticipant: removeParticipantMutation,
+    leaveMeeting: leaveMeetingMutation,
+    sendEmail,
+  };
+}

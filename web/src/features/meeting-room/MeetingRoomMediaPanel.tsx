@@ -1,19 +1,28 @@
-import { Box, Card, CardContent, Chip, IconButton, Stack, Tooltip, Typography } from '@mui/material'
-import { alpha } from '@mui/material/styles'
-import { useEffect, useRef } from 'react'
-import type { ReactNode } from 'react'
-import { useAudioVisualizer } from '../../hooks/useAudioVisualizer'
-import type { MeetingRoomParticipant } from './useMeetingRoomPresence'
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  IconButton,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import { alpha } from "@mui/material/styles";
+import { useEffect, useRef } from "react";
+import type { ReactNode } from "react";
+import { useAudioVisualizer } from "../../hooks/useAudioVisualizer";
+import type { MeetingRoomParticipant } from "./useMeetingRoomPresence";
 
 type Props = {
-  localStream: MediaStream | null
-  remoteStreams: Record<string, MediaStream>
-  participants: MeetingRoomParticipant[]
-  isMuted: boolean
-  isCameraOff: boolean
-  onToggleMute: () => void
-  onToggleCamera: () => void | Promise<void>
-}
+  localStream: MediaStream | null;
+  remoteStreams: Record<string, MediaStream>;
+  participants: MeetingRoomParticipant[];
+  isMuted: boolean;
+  isCameraOff: boolean;
+  onToggleMute: () => void;
+  onToggleCamera: () => void | Promise<void>;
+};
 
 function VideoTile({
   stream,
@@ -21,31 +30,31 @@ function VideoTile({
   muted,
   controls,
 }: {
-  stream: MediaStream
-  label: string
-  muted?: boolean
-  controls?: ReactNode
+  stream: MediaStream;
+  label: string;
+  muted?: boolean;
+  controls?: ReactNode;
 }) {
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    const videoElement = videoRef.current
-    if (videoElement) videoElement.srcObject = stream
+    const videoElement = videoRef.current;
+    if (videoElement) videoElement.srcObject = stream;
     return () => {
-      if (videoElement) videoElement.srcObject = null
-    }
-  }, [stream])
+      if (videoElement) videoElement.srcObject = null;
+    };
+  }, [stream]);
 
   return (
     <Box
       sx={{
-        position: 'relative',
-        width: '100%',
-        aspectRatio: '16 / 9',
-        overflow: 'hidden',
+        position: "relative",
+        width: "100%",
+        aspectRatio: "16 / 9",
+        overflow: "hidden",
         borderRadius: 3,
-        bgcolor: 'grey.900',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+        bgcolor: "grey.900",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
       }}
     >
       <video
@@ -53,19 +62,20 @@ function VideoTile({
         autoPlay
         playsInline
         muted={muted}
-        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        style={{ width: "100%", height: "100%", objectFit: "cover" }}
       />
 
       {/* Gradient overlay */}
       <Box
         sx={{
-          position: 'absolute',
+          position: "absolute",
           bottom: 0,
           left: 0,
           right: 0,
-          height: '40%',
-          background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)',
-          pointerEvents: 'none',
+          height: "40%",
+          background:
+            "linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)",
+          pointerEvents: "none",
         }}
       />
 
@@ -74,21 +84,21 @@ function VideoTile({
         size="small"
         label={label}
         sx={{
-          position: 'absolute',
+          position: "absolute",
           left: 8,
           bottom: 8,
-          maxWidth: controls ? 'calc(100% - 110px)' : 'calc(100% - 16px)',
+          maxWidth: controls ? "calc(100% - 110px)" : "calc(100% - 16px)",
           bgcolor: (theme) => alpha(theme.palette.common.black, 0.7),
-          color: 'common.white',
+          color: "common.white",
           fontWeight: 600,
-          fontSize: '0.75rem',
-          border: '1px solid',
+          fontSize: "0.75rem",
+          border: "1px solid",
           borderColor: (theme) => alpha(theme.palette.common.white, 0.1),
-          backdropFilter: 'blur(4px)',
-          '& .MuiChip-label': {
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
+          backdropFilter: "blur(4px)",
+          "& .MuiChip-label": {
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
           },
         }}
       />
@@ -96,7 +106,7 @@ function VideoTile({
       {/* Controls */}
       {controls}
     </Box>
-  )
+  );
 }
 
 export function MeetingRoomMediaPanel({
@@ -108,16 +118,17 @@ export function MeetingRoomMediaPanel({
   onToggleMute,
   onToggleCamera,
 }: Props) {
-  const remoteEntries = Object.entries(remoteStreams)
-  const levels = useAudioVisualizer(localStream)
+  const remoteEntries = Object.entries(remoteStreams);
+  const levels = useAudioVisualizer(localStream);
 
   return (
     <Card
       sx={{
         borderRadius: 4,
-        transition: 'box-shadow 0.3s',
-        '&:hover': {
-          boxShadow: (theme) => `0 8px 24px ${alpha(theme.palette.primary.main, 0.12)}`,
+        transition: "box-shadow 0.3s",
+        "&:hover": {
+          boxShadow: (theme) =>
+            `0 8px 24px ${alpha(theme.palette.primary.main, 0.12)}`,
         },
       }}
     >
@@ -126,10 +137,17 @@ export function MeetingRoomMediaPanel({
           {/* Header */}
           <Stack
             direction="row"
-            sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}
+            sx={{
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              mb: 1,
+            }}
           >
             <Box>
-              <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main', mb: 0.5 }}>
+              <Typography
+                variant="h5"
+                sx={{ fontWeight: 700, color: "primary.main", mb: 0.5 }}
+              >
                 Ekip ve kamera
               </Typography>
               <Typography variant="body2" color="text.secondary">
@@ -148,66 +166,84 @@ export function MeetingRoomMediaPanel({
           {/* Video Grid */}
           <Box
             sx={{
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" },
               gap: 2,
             }}
           >
             {localStream && (
               <VideoTile
                 stream={localStream}
-                label={isCameraOff ? 'Siz · Kamera kapalı' : 'Siz'}
+                label={isCameraOff ? "Siz · Kamera kapalı" : "Siz"}
                 muted
                 controls={
                   <Stack
                     direction="row"
                     spacing={0.5}
                     sx={{
-                      position: 'absolute',
+                      position: "absolute",
                       right: 8,
                       bottom: 8,
                       p: 0.5,
                       borderRadius: 2,
-                      bgcolor: (theme) => alpha(theme.palette.primary.dark, 0.85),
-                      backdropFilter: 'blur(8px)',
-                      border: '1px solid',
-                      borderColor: (theme) => alpha(theme.palette.common.white, 0.1),
+                      bgcolor: (theme) =>
+                        alpha(theme.palette.primary.dark, 0.85),
+                      backdropFilter: "blur(8px)",
+                      border: "1px solid",
+                      borderColor: (theme) =>
+                        alpha(theme.palette.common.white, 0.1),
                     }}
                   >
-                    <Tooltip title={isMuted ? 'Mikrofonu aç' : 'Mikrofonu kapat'}>
+                    <Tooltip
+                      title={isMuted ? "Mikrofonu aç" : "Mikrofonu kapat"}
+                    >
                       <IconButton
-                        aria-label={isMuted ? 'Mikrofonu aç' : 'Mikrofonu kapat'}
+                        aria-label={
+                          isMuted ? "Mikrofonu aç" : "Mikrofonu kapat"
+                        }
                         onClick={onToggleMute}
                         size="small"
                         sx={{
-                          color: isMuted ? 'secondary.main' : 'common.white',
+                          color: isMuted ? "secondary.main" : "common.white",
                           bgcolor: isMuted
-                            ? (theme) => alpha(theme.palette.secondary.main, 0.15)
-                            : 'transparent',
-                          '&:hover': {
-                            bgcolor: (theme) => alpha(theme.palette.common.white, 0.1),
+                            ? (theme) =>
+                                alpha(theme.palette.secondary.main, 0.15)
+                            : "transparent",
+                          "&:hover": {
+                            bgcolor: (theme) =>
+                              alpha(theme.palette.common.white, 0.1),
                           },
                         }}
                       >
-                        <span aria-hidden="true">{isMuted ? '🔇' : '🎙️'}</span>
+                        <span aria-hidden="true">{isMuted ? "🔇" : "🎙️"}</span>
                       </IconButton>
                     </Tooltip>
-                    <Tooltip title={isCameraOff ? 'Kamerayı aç' : 'Kamerayı kapat'}>
+                    <Tooltip
+                      title={isCameraOff ? "Kamerayı aç" : "Kamerayı kapat"}
+                    >
                       <IconButton
-                        aria-label={isCameraOff ? 'Kamerayı aç' : 'Kamerayı kapat'}
+                        aria-label={
+                          isCameraOff ? "Kamerayı aç" : "Kamerayı kapat"
+                        }
                         onClick={() => void onToggleCamera()}
                         size="small"
                         sx={{
-                          color: isCameraOff ? 'secondary.main' : 'common.white',
+                          color: isCameraOff
+                            ? "secondary.main"
+                            : "common.white",
                           bgcolor: isCameraOff
-                            ? (theme) => alpha(theme.palette.secondary.main, 0.15)
-                            : 'transparent',
-                          '&:hover': {
-                            bgcolor: (theme) => alpha(theme.palette.common.white, 0.1),
+                            ? (theme) =>
+                                alpha(theme.palette.secondary.main, 0.15)
+                            : "transparent",
+                          "&:hover": {
+                            bgcolor: (theme) =>
+                              alpha(theme.palette.common.white, 0.1),
                           },
                         }}
                       >
-                        <span aria-hidden="true">{isCameraOff ? '📹' : '🎥'}</span>
+                        <span aria-hidden="true">
+                          {isCameraOff ? "📹" : "🎥"}
+                        </span>
                       </IconButton>
                     </Tooltip>
                   </Stack>
@@ -219,8 +255,9 @@ export function MeetingRoomMediaPanel({
                 key={userId}
                 stream={stream}
                 label={
-                  participants.find((participant) => participant.userId === userId)?.displayName ??
-                  'Katılımcı'
+                  participants.find(
+                    (participant) => participant.userId === userId,
+                  )?.displayName ?? "Katılımcı"
                 }
               />
             ))}
@@ -232,8 +269,8 @@ export function MeetingRoomMediaPanel({
               variant="caption"
               sx={{
                 fontWeight: 700,
-                color: 'text.secondary',
-                textTransform: 'uppercase',
+                color: "text.secondary",
+                textTransform: "uppercase",
                 letterSpacing: 0.5,
               }}
             >
@@ -243,13 +280,13 @@ export function MeetingRoomMediaPanel({
               direction="row"
               sx={{
                 height: 60,
-                alignItems: 'center',
-                justifyContent: 'center',
+                alignItems: "center",
+                justifyContent: "center",
                 gap: 0.75,
                 px: 2,
                 borderRadius: 3,
-                bgcolor: 'primary.dark',
-                boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)',
+                bgcolor: "primary.dark",
+                boxShadow: "inset 0 2px 8px rgba(0,0,0,0.2)",
               }}
               aria-label="Canlı ses frekans görselleştirmesi"
             >
@@ -263,7 +300,7 @@ export function MeetingRoomMediaPanel({
                     borderRadius: 2,
                     background: (theme) =>
                       `linear-gradient(to top, ${theme.palette.secondary.main}, ${theme.palette.primary.light})`,
-                    transition: 'height 80ms ease-out',
+                    transition: "height 80ms ease-out",
                   }}
                 />
               ))}
@@ -274,13 +311,14 @@ export function MeetingRoomMediaPanel({
             <Typography
               variant="body2"
               color="text.secondary"
-              sx={{ textAlign: 'center', py: 2, fontStyle: 'italic' }}
+              sx={{ textAlign: "center", py: 2, fontStyle: "italic" }}
             >
-              Diğer katılımcılar kameralarını açtığında görüntüleri burada görünecek.
+              Diğer katılımcılar kameralarını açtığında görüntüleri burada
+              görünecek.
             </Typography>
           )}
         </Stack>
       </CardContent>
     </Card>
-  )
+  );
 }

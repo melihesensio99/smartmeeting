@@ -6,8 +6,8 @@ html {
 
 body {
   margin: 0;
-  background: #0B0F19;
-  color: #F9FAFB;
+  background: #0b0f19;
+  color: #f9fafb;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -16,7 +16,7 @@ body {
 /* ── Selection ─────────────────────────────────────────────── */
 ::selection {
   background: rgba(99, 102, 241, 0.35);
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
 /* ── Scrollbar (Webkit) ────────────────────────────────────── */
@@ -25,7 +25,7 @@ body {
   height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: #0B0F19;
+  background: #0b0f19;
 }
 ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.15);
@@ -43,25 +43,47 @@ body {
 
 /* ── Focus Ring ─────────────────────────────────────────────── */
 :focus-visible {
-  outline: 2px solid #6366F1;
+  outline: 2px solid #6366f1;
   outline-offset: 2px;
   border-radius: 4px;
 }
 
 /* ── Animations ────────────────────────────────────────────── */
 @keyframes sm-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 @keyframes sm-fade-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @keyframes sm-slide-up {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @keyframes sm-glow {
-  0%, 100% { box-shadow: 0 0 8px rgba(244, 63, 94, 0.4); }
-  50%      { box-shadow: 0 0 20px rgba(244, 63, 94, 0.7); }
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(244, 63, 94, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(244, 63, 94, 0.7);
+  }
 }

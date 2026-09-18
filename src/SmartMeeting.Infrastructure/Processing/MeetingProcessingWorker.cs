@@ -50,6 +50,7 @@ public sealed class MeetingProcessingWorker(
         var audioPath = meeting.AudioFilePath ?? throw new DomainException("Ses dosyası yolu bulunamadı.");
         await using var audio = await audioStorage.OpenReadAsync(audioPath, cancellationToken);
         var transcript = await speechToText.TranscribeAsync(audio, Path.GetFileName(audioPath), cancellationToken);
+        transcript = SpeakerLabelResolver.Resolve(transcript, meeting.Participants);
         meeting.SetTranscript(transcript);
         var summary = await summarizer.SummarizeAsync(transcript, meeting.Notes, cancellationToken);
         meeting.SetSummary(summary);
