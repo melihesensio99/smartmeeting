@@ -16,6 +16,7 @@ using SmartMeeting.Infrastructure.Processing;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using SmartMeeting.Persistence.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 var authenticationOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new();
@@ -128,6 +129,9 @@ using (var scope = app.Services.CreateScope())
         await db.Database.MigrateAsync();
     else
         await db.Database.EnsureCreatedAsync();
+
+    if (app.Environment.IsDevelopment())
+        await DevelopmentDataSeeder.SeedAsync(scope.ServiceProvider);
 }
 
 await app.RunAsync();

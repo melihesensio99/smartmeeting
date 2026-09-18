@@ -319,6 +319,17 @@ npm run dev
 - Frontend: `http://localhost:5173`
 - Sağlık: `/health`, `/health/live`, `/health/ready`
 
+### Development demo hesapları
+
+API `Development` ortamında ilk kez açıldığında aşağıdaki demo hesapları otomatik olarak oluşturur. Seed işlemi idempotent’tir; uygulama her yeniden başlatıldığında mevcut hesaplar tekrar oluşturulmaz.
+
+| Kullanıcı | E-posta | Şifre | Yetki |
+|---|---|---|---|
+| Melih | `melih.demo@example.com` | `Demo1234!` | Global Manager |
+| Ada | `ada.demo@example.com` | `Demo1234!` | Normal kullanıcı |
+
+Bu hesaplar yalnızca local `Development` ortamında seed edilir. Production ortamında otomatik demo hesabı oluşturulmaz. Demo hesaplarıyla giriş yaptıktan sonra Melih toplantı oluşturabilir ve Ada’yı katılımcı olarak ekleyebilir.
+
 ---
 
 ## 📬 E-posta Çıkışı
